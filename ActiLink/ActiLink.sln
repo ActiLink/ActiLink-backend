@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActiLink", "ActiLink\ActiLink.csproj", "{AC0E9BE3-97CF-466B-971D-14E36DC064D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActiLink.UnitTests", "ActiLink.UnitTests\ActiLink.UnitTests.csproj", "{31CB0037-BF94-4E5B-9FEB-BD22387B4265}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC0E9BE3-97CF-466B-971D-14E36DC064D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC0E9BE3-97CF-466B-971D-14E36DC064D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC0E9BE3-97CF-466B-971D-14E36DC064D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC0E9BE3-97CF-466B-971D-14E36DC064D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31CB0037-BF94-4E5B-9FEB-BD22387B4265}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31CB0037-BF94-4E5B-9FEB-BD22387B4265}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31CB0037-BF94-4E5B-9FEB-BD22387B4265}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31CB0037-BF94-4E5B-9FEB-BD22387B4265}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4C9FEBA1-7B35-492C-B3E1-6FE0D032C749}
+	EndGlobalSection
+EndGlobal
