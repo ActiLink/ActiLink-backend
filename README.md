@@ -3,7 +3,8 @@
 Backend aplikacji **ActiLink** odpowiada za obsługę użytkowników, wydarzeń oraz interakcje pomiędzy uczestnikami.
 
 ## 🎯 Cel projektu
-Zapewnienie **interfejsów API RESTful**, które zasilają aplikację frontendową. Obsługa użytkowników, wydarzeń oraz interakcji między nimi poprzez zarządzanie autoryzacją, organizacją aktywności i komunikacją.
+Zapewnienie **interfejsów API RESTful**, które zasilają aplikację frontendową - https://github.com/ActiLink/ActiLink-frontend.git.
+Obsługa użytkowników, wydarzeń oraz interakcji między nimi poprzez zarządzanie autoryzacją, organizacją aktywności i komunikacją.
 
 ## 🚀 Kluczowe funkcjonalności
 - **Rejestracja i logowanie** – obsługa użytkowników
@@ -12,10 +13,4 @@ Zapewnienie **interfejsów API RESTful**, które zasilają aplikację frontendow
 - **Obsługa znajomych** – zarządzanie relacjami użytkowników.
 
 ## 🛠 Technologie i narzędzia
-- **ASP.NET Core 8** – framework backendowy.
-
-## 📦 Instalacja i uruchomienie
-1. **Sklonuj repozytorium:**
-   ```sh
-   git clone https://github.com/ActiLink/actilink-backend.git
-   cd actilink-backend
+- **ASP.NET Core 9** – framework backendowy.
