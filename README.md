@@ -43,15 +43,15 @@ Aby uruchomić backend lokalnie, wykonaj następujące kroki:
    ```  
    Backend powinien być teraz uruchomiony i dostępny pod odpowiednimi portami.  
 
-### 5. **Zatrzymanie działającego kontenera:**  
-   ```bash
-   docker stop actilink-container
-   ```  
-
-### 6. **Uruchomienie istniejącego kontenera:**  
+### 5. **Uruchomienie istniejącego kontenera:**  
    ```bash
    docker start actilink-container
   ```
+
+### 6. **Zatrzymanie działającego kontenera:**  
+   ```bash
+   docker stop actilink-container
+   ```  
 
 ## 🧹 Czyszczenie  
 Aby usunąć istniejący kontener i zwolnić zasoby, użyj:  
