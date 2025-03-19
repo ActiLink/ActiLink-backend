@@ -1,0 +1,9 @@
+services:
+  actilink:
+    image: ${DOCKER_REGISTRY-}actilink
+    build:
+      context: .
+      dockerfile: ActiLink/Dockerfile
+    ports:
+    - "8080:8080"
+    - "8081:8081"  
