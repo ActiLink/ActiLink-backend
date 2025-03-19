@@ -1,5 +1,14 @@
 services:
+  actilink-db:
+    container_name: actilink-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+    - "8002:1433"
+    environment:
+    - ACCEPT_EULA=Y 
+    - SA_PASSWORD=${MSSQL_SA_PASSWORD}
   actilink:
+    container_name: actilink
     image: ${DOCKER_REGISTRY-}actilink
     build:
       context: .
@@ -7,3 +16,11 @@ services:
     ports:
     - "8080:8080"
     - "8081:8081"  
+    depends_on:
+    - actilink-db
+    environment:
+    - DB_HOST=actilink-db
+    - DB_NAME=ActiLink
+    - DB_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+
+  
