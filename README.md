@@ -92,7 +92,7 @@ Aby uruchomić backend lokalnie, wykonaj następujące kroki:
    docker rmi mcr.microsoft.com/mssql/server:2022-latest
 ```  
 ### 5. **Dostęp do bazy danych w SQL Server Management Studio**  
-Aby zalogować się poprawnie, należy podać login: `sa`, hasło: to które zostało ustawione wcześniej i pamiętać o zaznaczeniu **Trust server certificate**.  
+Aby zalogować się poprawnie, należy podać parametry tak jak na zdjęciu. login: `sa`, hasło: to które zostało ustawione wcześniej i pamiętać o zaznaczeniu **Trust server certificate**.  
    
    ![image](https://github.com/user-attachments/assets/772b4346-8159-47b0-a5b7-a8edf3d09f37)
 
