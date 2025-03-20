@@ -44,7 +44,6 @@ Aby uruchomić backend lokalnie, wykonaj następujące kroki:
      ```  
    - **Linux:**  
      ```bash
-     chmod +x set-password.sh
      ./set-password.sh Twoje_haslo123
      ```  
    **Uwaga!** Aby baza danych połączyła się poprawnie, hasło musi mieć przynajmniej 8 znaków i zawierać przynajmniej 3 z poniższych kategorii:  
