@@ -67,9 +67,14 @@ Aby uruchomić backend lokalnie, wykonaj następujące kroki:
    ```  
 ### 4. **Obsługa Dockera**  
 #### **Budowanie i uruchomienie kontenera:**  
+Zbuildować i uruchomić można w konsoli:
 ```bash
    docker-compose up -d
-```  
+```
+lub w Visual Studio:
+
+![image](https://github.com/user-attachments/assets/7a4a67d6-94c1-4a3d-89fc-5a28112bb50e)
+
 
 #### **Zatrzymanie kontenera bez usuwania:**  
 ```bash
