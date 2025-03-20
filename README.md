@@ -14,6 +14,10 @@ Zapewnienie **interfejsów API RESTful**, które zasilają aplikację frontendow
 - **ASP.NET Core 9.0** – framework backendowy
 
 ## 🔗 API  
+Po uruchomieniu aplikacji API będzie dostępne pod następującymi adresami:  
+- [https://localhost:5289/swagger](https://localhost:5289/swagger)  
+- [http://localhost:7062/swagger](http://localhost:7062/swagger)
+
 W obecnej wersji dostępny jest jeden endpoint:  
 - `GET /WeatherForecast` – zwraca przykładową prognozę pogody 
 
@@ -31,38 +35,77 @@ Aby uruchomić backend lokalnie, wykonaj następujące kroki:
    - [.NET SDK 9.0](https://dotnet.microsoft.com/en-us/download)  
    - [Docker](https://www.docker.com/get-started)  
 
-### 3. **Zbuduj obraz Dockera:**  
+### 3. **Uruchomienie kontenera za pomocą `docker-compose`:**  
+1. Przejdź do katalogu, w którym znajdują się pliki `ActiLink.sln` i `docker-compose.yml`.  
+2. Ustaw hasło do bazy danych jako zmienną środowiskową Dockera:  
+   - **Windows:**  
+     ```bash
+     .\set-password.bat Twoje_haslo123
+     ```  
+   - **Linux:**  
+     ```bash
+     ./set-password.sh Twoje_haslo123
+     ```  
+   **Uwaga!** Aby baza danych połączyła się poprawnie, hasło musi mieć przynajmniej 8 znaków i zawierać przynajmniej 3 z poniższych kategorii:  
+   - małe litery  
+   - wielkie litery  
+   - cyfry  
+   - znaki specjalne
+   
+   Hasło można zmieniać tym samym skryptem, podając nowe hasło jako argument, np.:  
    ```bash
-   docker build -t actilink:latest -f ActiLink/Dockerfile .
+   .\set-password.bat Nowe_haslo123
    ```  
-   Spowoduje to utworzenie obrazu backendu gotowego do uruchomienia w kontenerze Docker.  
-
-### 4. **Uruchom nowy kontener:**  
+   Jeśli skrypt nie zadziała poprawnie, można ręcznie edytować (jeśli trzeba to też utworzyć) plik `.env`  
    ```bash
-   docker run -d -p 8080:8080 -p 8081:8081 --name actilink-container actilink
+   notepad .env
    ```  
-   Backend powinien być teraz uruchomiony i dostępny pod odpowiednimi portami.  
-
-### 5. **Uruchomienie istniejącego kontenera:**  
-   ```bash
-   docker start actilink-container
-  ```
-
-### 6. **Zatrzymanie działającego kontenera:**  
-   ```bash
-   docker stop actilink-container
+   i dodać:  
+   ```env
+   MSSQL_SA_PASSWORD=Twoje_haslo123
    ```  
+### 4. **Obsługa Dockera**  
+#### **Budowanie i uruchomienie kontenera:**  
+Zbudować i uruchomić można w konsoli:
+```bash
+docker-compose up -d
+```
+lub w Visual Studio (należy pamiętać o wyłączeniu poprzedniego kontenera):
 
-## 🧹 Czyszczenie  
-Aby usunąć istniejący kontener i zwolnić zasoby, użyj:  
-   ```bash
-   docker rm -f actilink-container
-   ```  
+![image](https://github.com/user-attachments/assets/7a4a67d6-94c1-4a3d-89fc-5a28112bb50e)
 
-Aby usunąć obraz Dockera:  
-   ```bash
-   docker rmi actilink:latest
-   ```
+
+#### **Zatrzymanie kontenera bez usuwania:**  
+```bash
+docker-compose stop
+```  
+
+#### **Ponowne uruchomienie istniejącego kontenera:**  
+```bash
+docker-compose start
+```  
+
+#### **Usunięcie istniejącego kontenera:**  
+```bash
+docker-compose down
+```  
+
+#### **Usunięcie obrazów Dockera:**  
+```bash
+docker rmi actilink:latest
+docker rmi mcr.microsoft.com/mssql/server:2022-latest
+```
+#### **Usunięcie zawartości bazy danych**
+Dane w bazie powinny przetrwać usunięcie kontenera. oraz ponowną kompilację. Aby usunąć zawartość bazy danych należy zamknąć kontener z dodatkową flagą:
+```bash
+docker-compose down -v
+```
+lub w Docker GUI w usunąć `actilink_db_data` z zakładki Volumes.
+### 5. **Dostęp do bazy danych w SQL Server Management Studio**  
+Aby zalogować się poprawnie, należy podać parametry tak jak na zdjęciu. login: `sa`, hasło: to które zostało ustawione wcześniej i pamiętać o zaznaczeniu **Trust server certificate**.  
+   
+   ![image](https://github.com/user-attachments/assets/772b4346-8159-47b0-a5b7-a8edf3d09f37)
+
 
 ## ❓ Rozwiązywanie problemów  
 Jeśli napotkasz problemy z uruchomieniem backendu, upewnij się, że jesteś w folderze z plikiem .sln oraz że Docker jest włączony przed uruchomieniem kontenera.
