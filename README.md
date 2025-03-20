@@ -15,8 +15,8 @@ Zapewnienie **interfejsów API RESTful**, które zasilają aplikację frontendow
 
 ## 🔗 API  
 Po uruchomieniu aplikacji API będzie dostępne pod następującymi adresami:  
-- [https://localhost:8081/swagger](https://localhost:8081/swagger)  
-- [http://localhost:8080/swagger](http://localhost:8080/swagger)
+- [https://localhost:5289/swagger](https://localhost:5289/swagger)  
+- [http://localhost:7062/swagger](http://localhost:7062/swagger)
 
 W obecnej wersji dostępny jest jeden endpoint:  
 - `GET /WeatherForecast` – zwraca przykładową prognozę pogody 
