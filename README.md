@@ -69,7 +69,7 @@ Aby uruchomić backend lokalnie, wykonaj następujące kroki:
 #### **Budowanie i uruchomienie kontenera:**  
 Zbuildować i uruchomić można w konsoli:
 ```bash
-   docker-compose up -d
+docker-compose up -d
 ```
 lub w Visual Studio:
 
@@ -78,24 +78,30 @@ lub w Visual Studio:
 
 #### **Zatrzymanie kontenera bez usuwania:**  
 ```bash
-   docker-compose stop
+docker-compose stop
 ```  
 
 #### **Ponowne uruchomienie istniejącego kontenera:**  
 ```bash
-   docker-compose start
+docker-compose start
 ```  
 
 #### **Usunięcie istniejącego kontenera:**  
 ```bash
-   docker-compose down
+docker-compose down
 ```  
 
 #### **Usunięcie obrazów Dockera:**  
 ```bash
-   docker rmi actilink:latest
-   docker rmi mcr.microsoft.com/mssql/server:2022-latest
-```  
+docker rmi actilink:latest
+docker rmi mcr.microsoft.com/mssql/server:2022-latest
+```
+#### **Usunięcie zawartości bazy danych**
+Dane w bazie powinny przetrwać usunięcie kontenera. oraz ponowną kompilację. Aby usunąć zawartość bazy danych należy zamknąć kontener z dodatkową flagą:
+```bash
+docker-compose down -v
+```
+lub w Docker GUI w usunąć `actilink_db_data` z zakładki Volumes
 ### 5. **Dostęp do bazy danych w SQL Server Management Studio**  
 Aby zalogować się poprawnie, należy podać parametry tak jak na zdjęciu. login: `sa`, hasło: to które zostało ustawione wcześniej i pamiętać o zaznaczeniu **Trust server certificate**.  
    
