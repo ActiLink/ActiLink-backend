@@ -3,13 +3,15 @@ services:
     container_name: actilink-db
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
-    - "8002:1433"
+    - "8002:1433" # default mssql server port
     environment:
     - ACCEPT_EULA=Y 
     - SA_PASSWORD=${MSSQL_SA_PASSWORD}
+    volumes:
+    - db_data:/var/opt/mssql # database lives as long as the image is not deleted
   actilink:
     container_name: actilink
-    image: ${DOCKER_REGISTRY-}actilink
+    image: actilink
     build:
       context: .
       dockerfile: ActiLink/Dockerfile
@@ -20,7 +22,9 @@ services:
     - actilink-db
     environment:
     - DB_HOST=actilink-db
-    - DB_NAME=ActiLink
+    - DB_NAME=ActiLink # may need to change this in the future
     - DB_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+volumes:
+  db_data:
 
   
