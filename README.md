@@ -67,7 +67,7 @@ Aby uruchomić backend lokalnie, wykonaj następujące kroki:
    ```  
 ### 4. **Obsługa Dockera**  
 #### **Budowanie i uruchomienie kontenera:**  
-Zbuildować i uruchomić można w konsoli:
+Zbudować i uruchomić można w konsoli:
 ```bash
 docker-compose up -d
 ```
@@ -101,7 +101,7 @@ Dane w bazie powinny przetrwać usunięcie kontenera. oraz ponowną kompilację.
 ```bash
 docker-compose down -v
 ```
-lub w Docker GUI w usunąć `actilink_db_data` z zakładki Volumes
+lub w Docker GUI w usunąć `actilink_db_data` z zakładki Volumes.
 ### 5. **Dostęp do bazy danych w SQL Server Management Studio**  
 Aby zalogować się poprawnie, należy podać parametry tak jak na zdjęciu. login: `sa`, hasło: to które zostało ustawione wcześniej i pamiętać o zaznaczeniu **Trust server certificate**.  
    
