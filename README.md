@@ -71,7 +71,7 @@ Zbudować i uruchomić można w konsoli:
 ```bash
 docker-compose up -d
 ```
-lub w Visual Studio:
+lub w Visual Studio (należy pamiętać o wyłączeniu poprzedniego kontenera):
 
 ![image](https://github.com/user-attachments/assets/7a4a67d6-94c1-4a3d-89fc-5a28112bb50e)
 
