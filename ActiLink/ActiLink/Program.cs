@@ -1,6 +1,7 @@
 using ActiLink.Repositories;
 using ActiLink;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 public class Program
 {
@@ -10,8 +11,9 @@ public class Program
 
 
         // Db Context
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Services.AddDbContext<WeatherContext>(options =>
+            options.UseInMemoryDatabase("InMemoryDb"));
+
 
         // Repositories and UoW
         builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -29,6 +31,42 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         var app = builder.Build();
+
+        // Inicjalizacja danych w bazie
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            var context = services.GetRequiredService<WeatherContext>();
+
+            if (!context.WeatherForecasts.Any())
+            {
+                context.WeatherForecasts.AddRange(new List<WeatherForecast>
+                {
+                    new WeatherForecast
+                    {
+                        Id = 1,
+                        Date = DateOnly.FromDateTime(DateTime.Now),
+                        TemperatureC = 25,
+                        Summary = "Sunny"
+                    },
+                    new WeatherForecast
+                    {
+                        Id = 2,
+                        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
+                        TemperatureC = 18,
+                        Summary = "Cloudy"
+                    },
+                    new WeatherForecast
+                    {
+                        Id = 3,
+                        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(2)),
+                        TemperatureC = 15,
+                        Summary = "Rainy"
+                    }
+                });
+                context.SaveChanges();
+            }
+        }
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

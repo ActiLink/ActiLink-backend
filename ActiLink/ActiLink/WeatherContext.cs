@@ -2,9 +2,9 @@
 
 namespace ActiLink
 {
-    public class AppDbContext : DbContext
+    public class WeatherContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public WeatherContext(DbContextOptions<WeatherContext> options) : base(options) { }
 
         public DbSet<WeatherForecast> WeatherForecasts { get; set; }
     }

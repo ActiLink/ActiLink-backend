@@ -3,10 +3,10 @@ namespace ActiLink.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly AppDbContext _context;
+        private readonly WeatherContext _context;
         private IRepository<WeatherForecast>? _weatherForecastRepository;
 
-        public UnitOfWork(AppDbContext context)
+        public UnitOfWork(WeatherContext context)
         {
             _context = context;
         }

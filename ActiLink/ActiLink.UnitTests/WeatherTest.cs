@@ -13,9 +13,9 @@ namespace ActiLink.UnitTests
     [TestClass]
     public class WeatherForecastControllerTests
     {
-        private Mock<IUnitOfWork> _mockUnitOfWork;
-        private Mock<ILogger<WeatherForecastController>> _mockLogger;
-        private WeatherForecastController _controller;
+        private Mock<IUnitOfWork> _mockUnitOfWork = null!;
+        private Mock<ILogger<WeatherForecastController>> _mockLogger = null!;
+        private WeatherForecastController _controller = null!;
 
         [TestInitialize]
         public void Setup()
