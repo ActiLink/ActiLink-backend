@@ -1,4 +1,4 @@
-<Project Sdk="MSTest.Sdk/3.6.4">
+﻿<Project Sdk="MSTest.Sdk/3.6.4">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -10,6 +10,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ActiLink\ActiLink.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.3" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="xUnit" Version="2.9.3" />
   </ItemGroup>
 
 </Project>
