@@ -5,7 +5,6 @@ using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Db Context
 builder.Services.AddDbContext<WeatherContext>(options =>
     options.UseInMemoryDatabase("InMemoryDb"));
@@ -14,7 +13,6 @@ builder.Services.AddDbContext<WeatherContext>(options =>
 // Repositories and UoW
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
 
 // Docker environment variables
 var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
