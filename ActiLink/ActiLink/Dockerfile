@@ -27,4 +27,12 @@ RUN dotnet publish "./ActiLink.csproj" -c $BUILD_CONFIGURATION -o /app/publish /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Instalacja narzędzi do EF Core, które umożliwią uruchomienie komend takich jak 'dotnet ef'
+RUN dotnet tool install --global dotnet-ef
+
+# Dodajemy ścieżkę do zainstalowanych narzędzi EF, aby były dostępne z poziomu kontenera
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Uruchomienie aplikacji
 ENTRYPOINT ["dotnet", "ActiLink.dll"]
