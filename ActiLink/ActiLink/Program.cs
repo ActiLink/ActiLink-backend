@@ -23,6 +23,11 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
 var connectionString = $"Server={dbHost},1433;Database={dbName};User Id=sa;Password={dbPassword};TrustServerCertificate=True;";
 
 
+// Add ApiContext with SQL Server database
+builder.Services.AddDbContext<ApiContext>(options =>
+    options.UseSqlServer(connectionString));
+
+
 // Add services to the container.
 
 builder.Services.AddControllers();
