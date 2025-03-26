@@ -40,6 +40,23 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// apply migrations
+/*using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+ 
+    try
+    {
+        var context = services.GetRequiredService<ApiContext>();
+        context.Database.Migrate(); // uruchamia wszystkie migracje automatycznie
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("B³¹d przy uruchamianiu migracji: " + ex.Message);
+        throw;
+    }
+}*/
+
 // Inicjalizacja danych w bazie
 using (var scope = app.Services.CreateScope())
 {
