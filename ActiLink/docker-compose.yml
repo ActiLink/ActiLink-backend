@@ -27,6 +27,7 @@ services:
     build:
       context: .
       dockerfile: ActiLink/Dockerfile
+      target: final
     ports:
     - "7062:8080"
     - "5289:8081"  
@@ -36,7 +37,6 @@ services:
     - DB_HOST=actilink-db
     - DB_NAME=ActiLink # may need to change this in the future
     - DB_SA_PASSWORD=${MSSQL_SA_PASSWORD}
-    restart: always
 volumes:
   db_data:
 
