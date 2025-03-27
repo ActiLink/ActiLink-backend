@@ -74,7 +74,7 @@ lub w Visual Studio (należy pamiętać o wyłączeniu poprzedniego kontenera):
 
 ![image](https://github.com/user-attachments/assets/7a4a67d6-94c1-4a3d-89fc-5a28112bb50e)
 
-Jeśli istnieją niezastosowane migracje, uruchom je poleceniem:
+Jeśli istnieją niezastosowane migracje, po uruchomieniu kontenera z bazą danych, uruchom je poleceniem:
 ```bash
 docker-compose -f docker-compose.migrate.yml run actilink-migrator
 ```
