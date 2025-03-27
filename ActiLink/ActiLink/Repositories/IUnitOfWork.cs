@@ -1,8 +1,10 @@
-﻿namespace ActiLink.Repositories
+﻿using ActiLink.Model;
+
+namespace ActiLink.Repositories
 {
     public interface IUnitOfWork
     {
-        IRepository<WeatherForecast> WeatherForecastRepository { get; }
+        IRepository<Organizer> OrganizerRepository { get; }
         Task<int> SaveChangesAsync();
     }
 

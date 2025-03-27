@@ -1,0 +1,12 @@
+services:
+  actilink-migrator:
+    container_name: actilink-migrator
+    build:
+      context: .
+      dockerfile: ActiLink/Dockerfile
+      target: ef-migrations 
+    environment:
+      - DB_HOST=actilink-db
+      - DB_NAME=ActiLink
+      - DB_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+    restart: "no"

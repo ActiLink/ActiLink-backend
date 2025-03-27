@@ -2,12 +2,10 @@ using ActiLink.Repositories;
 using ActiLink;
 using Microsoft.EntityFrameworkCore;
 using System;
+using ActiLink.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Db Context
-builder.Services.AddDbContext<WeatherContext>(options =>
-    options.UseInMemoryDatabase("InMemoryDb"));
 
 
 // Repositories and UoW
@@ -23,6 +21,11 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
 var connectionString = $"Server={dbHost},1433;Database={dbName};User Id=sa;Password={dbPassword};TrustServerCertificate=True;";
 
 
+// Add ApiContext with SQL Server database
+builder.Services.AddDbContext<ApiContext>(options =>
+    options.UseSqlServer(connectionString));
+
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -35,41 +38,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Inicjalizacja danych w bazie
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<WeatherContext>();
-
-    if (!context.WeatherForecasts.Any())
-    {
-        context.WeatherForecasts.AddRange(new List<WeatherForecast>
-        {
-            new WeatherForecast
-            {
-                Id = 1,
-                Date = DateOnly.FromDateTime(DateTime.Now),
-                TemperatureC = 25,
-                Summary = "Sunny"
-            },
-            new WeatherForecast
-            {
-                Id = 2,
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
-                TemperatureC = 18,
-                Summary = "Cloudy"
-            },
-            new WeatherForecast
-            {
-                Id = 3,
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(2)),
-                TemperatureC = 15,
-                Summary = "Rainy"
-            }
-        });
-        context.SaveChanges();
-    }
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

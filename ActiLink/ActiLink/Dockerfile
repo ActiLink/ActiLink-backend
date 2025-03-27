@@ -12,6 +12,8 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
 COPY ["ActiLink/ActiLink.csproj", "ActiLink/"]
 RUN dotnet restore "./ActiLink/ActiLink.csproj"
 COPY . .
@@ -27,4 +29,20 @@ RUN dotnet publish "./ActiLink.csproj" -c $BUILD_CONFIGURATION -o /app/publish /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Instalacja narzędzi do EF Core, które umożliwią uruchomienie komend takich jak 'dotnet ef'
+#RUN dotnet tool install --global dotnet-ef
+
+# Dodajemy ścieżkę do zainstalowanych narzędzi EF, aby były dostępne z poziomu kontenera
+#ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Uruchomienie aplikacji
 ENTRYPOINT ["dotnet", "ActiLink.dll"]
+
+
+# Etap tylko do migracji EF Core
+FROM build AS ef-migrations
+WORKDIR /src/ActiLink
+
+# Ef tool już zainstalowany wcześniej w etapie build
+ENTRYPOINT ["dotnet", "ef", "database", "update", "--project", ".", "--startup-project", ".", "--context", "ApiContext"]

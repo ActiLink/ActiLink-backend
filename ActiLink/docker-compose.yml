@@ -14,6 +14,7 @@ services:
     build:
       context: .
       dockerfile: ActiLink/Dockerfile
+      target: final
     ports:
     - "7062:8080"
     - "5289:8081"  
