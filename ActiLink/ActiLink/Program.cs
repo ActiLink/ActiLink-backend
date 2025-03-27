@@ -2,12 +2,10 @@ using ActiLink.Repositories;
 using ActiLink;
 using Microsoft.EntityFrameworkCore;
 using System;
+using ActiLink.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Db Context
-builder.Services.AddDbContext<WeatherContext>(options =>
-    options.UseInMemoryDatabase("InMemoryDb"));
 
 
 // Repositories and UoW
@@ -40,58 +38,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// apply migrations
-/*using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
- 
-    try
-    {
-        var context = services.GetRequiredService<ApiContext>();
-        context.Database.Migrate(); // uruchamia wszystkie migracje automatycznie
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("B³¹d przy uruchamianiu migracji: " + ex.Message);
-        throw;
-    }
-}*/
-
-// Inicjalizacja danych w bazie
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<WeatherContext>();
-
-    if (!context.WeatherForecasts.Any())
-    {
-        context.WeatherForecasts.AddRange(new List<WeatherForecast>
-        {
-            new WeatherForecast
-            {
-                Id = 1,
-                Date = DateOnly.FromDateTime(DateTime.Now),
-                TemperatureC = 25,
-                Summary = "Sunny"
-            },
-            new WeatherForecast
-            {
-                Id = 2,
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
-                TemperatureC = 18,
-                Summary = "Cloudy"
-            },
-            new WeatherForecast
-            {
-                Id = 3,
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(2)),
-                TemperatureC = 15,
-                Summary = "Rainy"
-            }
-        });
-        context.SaveChanges();
-    }
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
