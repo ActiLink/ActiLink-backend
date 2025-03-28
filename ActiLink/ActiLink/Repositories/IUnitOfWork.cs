@@ -4,7 +4,7 @@ namespace ActiLink.Repositories
 {
     public interface IUnitOfWork
     {
-        IRepository<Organizer> OrganizerRepository { get; }
+        IRepository<User> UserRepository { get; }
         Task<int> SaveChangesAsync();
     }
 
