@@ -42,7 +42,7 @@ namespace ActiLink.Controllers
                 user = await _userService.CreateUserAsync(username, email, password);
 
                 _logger.LogInformation("User {userId} created successfully", user.Id);
-                return CreatedAtAction("GetUserById", new {id = user.Id}, _mapper.Map<UserDto>(user));
+                return CreatedAtAction(nameof(GetUserByIdAsync), new {id = user.Id}, _mapper.Map<UserDto>(user));
             }
             catch (UserRegistrationException ex)
             {
@@ -78,7 +78,8 @@ namespace ActiLink.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to fetch</param>
         /// <returns>Returns an Ok result with the user's details if found, otherwise a NotFound result</returns>
-        [HttpGet("{id}", Name = "GetUserById")]
+        [HttpGet("{id}")]
+        [ActionName(nameof(GetUserByIdAsync))]
         public async Task<IActionResult> GetUserByIdAsync([FromRoute] string id)
         {
             _logger.LogInformation("Fetching user with ID: {UserId}", id);
