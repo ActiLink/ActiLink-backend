@@ -1,8 +1,9 @@
 using ActiLink.Repositories;
 using ActiLink;
 using Microsoft.EntityFrameworkCore;
-using System;
+using Microsoft.AspNetCore.Identity;
 using ActiLink.Model;
+using ActiLink.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,14 @@ builder.Services.AddDbContext<ApiContext>(options =>
 
 // Add services to the container.
 
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
+
+// Add services
+builder.Services.AddScoped<UserService>();
+
+
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -36,8 +45,14 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+// Add Identity
+builder.Services.AddIdentityCore<Organizer>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApiContext>()
+    .AddUserManager<UserManager<Organizer>>();
 
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -63,3 +78,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+

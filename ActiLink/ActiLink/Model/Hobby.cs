@@ -2,6 +2,9 @@
 
 namespace ActiLink.Model
 {
+    /// <summary>
+    /// Represents a hobby
+    /// </summary>
     public class Hobby
     {
         public Guid Id { get; private set; } = Guid.NewGuid();
