@@ -32,9 +32,12 @@ builder.Services.AddDbContext<ApiContext>(options =>
 
 // Add services to the container.
 
+// Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
+// Add services
 builder.Services.AddScoped<UserService>();
+
 
 
 builder.Services.AddControllers();
@@ -45,7 +48,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
+// Add Identity
 builder.Services.AddIdentityCore<Organizer>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApiContext>()
@@ -53,7 +56,6 @@ builder.Services.AddIdentityCore<Organizer>(options => options.SignIn.RequireCon
 
 
 var app = builder.Build();
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

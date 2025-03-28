@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ActiLink
 {
+    /// <summary>
+    /// Database context for the API
+    /// </summary>
     internal class ApiContext : IdentityDbContext<Organizer>
     {
         //DbSet<Organizer> Organizers { get; set; }

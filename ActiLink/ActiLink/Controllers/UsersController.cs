@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ActiLink.Controllers
 {
+    /// <summary>
+    /// Controller for managing users
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class UsersController : Controller
@@ -22,6 +25,11 @@ namespace ActiLink.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Creates a new user
+        /// </summary>
+        /// <param name="newUserDto">The data transfer object containing the new user's details</param>
+        /// <returns>Returns a CreatedAtAction result with the created user's details or an error response</returns>
         [HttpPost("register")]
         public async Task<IActionResult> CreateUserAsync([FromBody] NewUserDto newUserDto)
         {
@@ -52,6 +60,10 @@ namespace ActiLink.Controllers
             }
         }
 
+        /// <summary>
+        /// Fetches all users
+        /// </summary>
+        /// <returns>Returns a list of all users</returns>
         [HttpGet]
         public async Task<IEnumerable<UserDto>> GetUsersAsync()
         {
@@ -61,6 +73,11 @@ namespace ActiLink.Controllers
             return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
+        /// <summary>
+        /// Fetches a user by their ID
+        /// </summary>
+        /// <param name="id">The ID of the user to fetch</param>
+        /// <returns>Returns an Ok result with the user's details if found, otherwise a NotFound result</returns>
         [HttpGet("{id}", Name = "GetUserById")]
         public async Task<IActionResult> GetUserByIdAsync([FromRoute] string id)
         {
@@ -75,6 +92,5 @@ namespace ActiLink.Controllers
 
             return Ok(_mapper.Map<UserDto>(user));
         }
-
     }
 }

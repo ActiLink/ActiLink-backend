@@ -4,6 +4,9 @@ using AutoMapper;
 
 namespace ActiLink.MapperProfiles
 {
+    /// <summary>
+    /// Profile for mapping user objects
+    /// </summary>
     public class UserProfile : Profile
     {
         public UserProfile()
