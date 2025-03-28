@@ -32,8 +32,9 @@ namespace ActiLink.Controllers
                 _logger.LogInformation("Creating user {username} with email {email}", username, email);
 
                 user = await _userService.CreateUserAsync(username, email, password);
+
                 _logger.LogInformation("User {userId} created successfully", user.Id);
-                return CreatedAtAction(nameof(GetUserByIdAsync), new { id = user.Id }, newUserDto);
+                return CreatedAtAction("GetUserById", new {id = user.Id}, _mapper.Map<UserDto>(user));
             }
             catch (UserRegistrationException ex)
             {
@@ -60,7 +61,7 @@ namespace ActiLink.Controllers
             return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetUserById")]
         public async Task<IActionResult> GetUserByIdAsync([FromRoute] string id)
         {
             _logger.LogInformation("Fetching user with ID: {UserId}", id);
