@@ -2,9 +2,20 @@
 
 namespace ActiLink.Repositories
 {
+    /// <summary>
+    /// Interface for the Unit of Work pattern. This interface is used to manage the repositories.
+    /// </summary>
     public interface IUnitOfWork
     {
-        IRepository<Organizer> OrganizerRepository { get; }
+        /// <summary>
+        /// Repository for the User entity
+        /// </summary>
+        IRepository<User> UserRepository { get; }
+
+        /// <summary>
+        /// Saves the changes to the database
+        /// </summary>
+        /// <returns>The number of affected rows</returns>
         Task<int> SaveChangesAsync();
     }
 
