@@ -16,11 +16,17 @@ namespace ActiLink.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<Organizer> _userManager;
         private readonly SignInManager<Organizer> _signInManager;
+        private readonly string _jwtSecret;
+        private readonly string _jwtIssuer;
+        private readonly string _jwtAudience;
         public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, SignInManager<Organizer> signInManager)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _signInManager = signInManager;
+            _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+            _jwtIssuer = Environment.GetEnvironmentVariable("JWT_VALID_ISSUER");
+            _jwtAudience = Environment.GetEnvironmentVariable("JWT_VALID_AUDIENCE");
         }
 
         /// <summary>
@@ -40,6 +46,14 @@ namespace ActiLink.Services
             return result.Succeeded ? GenericServiceResult<User>.Success(user) : GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description));
         }
 
+        /// <summary>
+        /// Authenticates a user with the specified <paramref name="email"/> and <paramref name="password"/>.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation.
+        /// </returns>
         public async Task<GenericServiceResult<string>> LoginAsync(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -60,7 +74,7 @@ namespace ActiLink.Services
         private string GenerateJwtToken(Organizer user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("Test_key:8b7F!xLp9zK3^wQv123456789"); 
+            var key = Encoding.ASCII.GetBytes(_jwtSecret); 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 // in the future roles will need to be added to the claims to create a correct token for each user
@@ -70,8 +84,8 @@ namespace ActiLink.Services
                     new Claim(ClaimTypes.Email, user.Email ?? ""),
                     new Claim(ClaimTypes.Name, user.UserName ?? "")
                 }),
-                Issuer = "ActiLink",
-                Audience = "ActiLink",
+                Issuer = _jwtIssuer,
+                Audience = _jwtAudience,
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

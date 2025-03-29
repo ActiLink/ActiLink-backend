@@ -67,12 +67,12 @@ builder.Services.AddAuthentication(options =>
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = "ActiLink",
+            ValidIssuer = Environment.GetEnvironmentVariable("JWT_VALID_ISSUER"),
             ValidateAudience = true,
-            ValidAudience = "ActiLink",
+            ValidAudience = Environment.GetEnvironmentVariable("JWT_VALID_AUDIENCE"),
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Test_key:8b7F!xLp9zK3^wQv123456789"))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY")))
         };
     });
 builder.Services.AddAuthorization();
