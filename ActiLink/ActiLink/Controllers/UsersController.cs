@@ -62,6 +62,38 @@ namespace ActiLink.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+        /// <summary>
+        /// Logs in a user with the specified email and password.
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns>Returns a JWT token which can be used for authentication on other endpoints</returns>
+        [HttpPost("login")]
+        [ProducesResponseType<UserDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginDto loginDto)
+        {
+            try
+            {
+                var (email, password) = loginDto;
+                _logger.LogInformation("Attempting login for email: {Email}", loginDto.Email);
+                var result = await _userService.LoginAsync(email, password);
+
+                if (!result.Succeeded)
+                {
+                    _logger.LogWarning("User login failed: {errors}", result.Errors);
+                    return BadRequest(result.Errors);
+                }
+
+                var user = result.Data!;
+                _logger.LogInformation("Login successful for email: {Email}", loginDto.Email);
+                return Ok(new {token = result.Data});
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred during login");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
 
         /// <summary>
         /// Fetches all users.

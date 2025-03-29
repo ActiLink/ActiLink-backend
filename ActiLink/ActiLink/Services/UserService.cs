@@ -4,6 +4,10 @@ using ActiLink.Repositories;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace ActiLink.Services
 {
@@ -11,10 +15,12 @@ namespace ActiLink.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<Organizer> _userManager;
-        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager)
+        private readonly SignInManager<Organizer> _signInManager;
+        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, SignInManager<Organizer> signInManager)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         /// <summary>
@@ -32,6 +38,45 @@ namespace ActiLink.Services
             var result = await _userManager.CreateAsync(user, password);
 
             return result.Succeeded ? GenericServiceResult<User>.Success(user) : GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description));
+        }
+
+        public async Task<GenericServiceResult<string>> LoginAsync(string email, string password)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return GenericServiceResult<string>.Failure(new[] { "Invalid email or password." });
+
+            var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
+
+            if (!result.Succeeded)
+                return GenericServiceResult<string>.Failure(new[] { "Invalid email or password." });
+
+            var token = GenerateJwtToken(user);
+
+            return GenericServiceResult<string>.Success(token);
+
+        }
+        private string GenerateJwtToken(Organizer user)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes("Test_key:8b7F!xLp9zK3^wQv123456789"); 
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                // in the future roles will need to be added to the claims to create a correct token for each user
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id ?? ""),
+                    new Claim(ClaimTypes.Email, user.Email ?? ""),
+                    new Claim(ClaimTypes.Name, user.UserName ?? "")
+                }),
+                Issuer = "ActiLink",
+                Audience = "ActiLink",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
 
         /// <summary>
