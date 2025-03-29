@@ -68,7 +68,7 @@ namespace ActiLink.Controllers
         /// <param name="loginDto"></param>
         /// <returns>Returns a JWT token which can be used for authentication on other endpoints</returns>
         [HttpPost("login")]
-        [ProducesResponseType<UserDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> LoginAsync([FromBody] LoginDto loginDto)
         {
@@ -84,13 +84,43 @@ namespace ActiLink.Controllers
                     return BadRequest(result.Errors);
                 }
 
-                var user = result.Data!;
+                var (accessToken, refreshToken) = result.Data!;
                 _logger.LogInformation("Login successful for email: {Email}", loginDto.Email);
-                return Ok(new {token = result.Data});
+                return Ok(new TokenResponse(accessToken, refreshToken));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred during login");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Refreshes JWT access token using a valid refresh token.
+        /// </summary>
+        /// <param name="refreshDto">DTO containing refresh token</param>
+        /// <returns>New access token and refresh token</returns>
+        [HttpPost("refresh")]
+        [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenDto refreshDto)
+        {
+            try
+            {
+                var result = await _userService.RefreshTokenAsync(refreshDto.RefreshToken);
+
+                if (!result.Succeeded)
+                {
+                    _logger.LogWarning("Token refresh failed: {errors}", result.Errors);
+                    return BadRequest(result.Errors);
+                }
+
+               (string accessToken, string refreshToken) = result.Data!;
+                return Ok(new TokenResponse(accessToken, refreshToken));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during token refresh");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }

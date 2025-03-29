@@ -2,11 +2,13 @@
 using ActiLink.Model;
 using ActiLink.Repositories;
 using AutoMapper;
+using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace ActiLink.Services
@@ -54,30 +56,37 @@ namespace ActiLink.Services
         /// <returns>
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation.
         /// </returns>
-        public async Task<GenericServiceResult<string>> LoginAsync(string email, string password)
+        public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> LoginAsync(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
-                return GenericServiceResult<string>.Failure(new[] { "Invalid email or password." });
+                return GenericServiceResult<(string,string)>.Failure(new[] { "Invalid email or password." });
 
             var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
 
             if (!result.Succeeded)
-                return GenericServiceResult<string>.Failure(new[] { "Invalid email or password." });
+                return GenericServiceResult<(string,string)>.Failure(new[] { "Invalid email or password." });
 
-            var token = GenerateJwtToken(user);
+            var accessToken = GenerateJwtAccessToken(user);
+            var refreshToken = GenerateRefreshToken();
 
-            return GenericServiceResult<string>.Success(token);
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
+
+            await _userManager.UpdateAsync(user);
+
+            return GenericServiceResult<(string, string)>.Success((accessToken, refreshToken));
 
         }
-        private string GenerateJwtToken(Organizer user)
+        // generate access token for user
+        private string GenerateJwtAccessToken(Organizer user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSecret); 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                // in the future roles will need to be added to the claims to create a correct token for each user
+                // TODO: in the future roles will need to be added to the claims to create a correct token for each user
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id ?? ""),
@@ -91,6 +100,35 @@ namespace ActiLink.Services
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+        // generate refresh token for user
+        private string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
+
+        public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> RefreshTokenAsync(string refreshToken)
+        {
+            var user = await _userManager.Users
+                .FirstOrDefaultAsync(u =>
+                    u.RefreshToken == refreshToken &&
+                    u.RefreshTokenExpiryTime > DateTime.UtcNow);
+
+            if (user == null)
+                return GenericServiceResult<(string, string)>.Failure(new[] { "Invalid or expired refresh token." });
+
+            var newAccessToken = GenerateJwtAccessToken(user);
+            var newRefreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
+
+            await _userManager.UpdateAsync(user);
+
+            return GenericServiceResult<(string, string)>.Success((newAccessToken, newRefreshToken));
         }
 
         /// <summary>
