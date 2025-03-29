@@ -1,5 +1,4 @@
 ﻿using ActiLink.DTOs;
-using ActiLink.Exceptions;
 using ActiLink.Model;
 using ActiLink.Services;
 using AutoMapper;
@@ -26,11 +25,13 @@ namespace ActiLink.Controllers
         }
 
         /// <summary>
-        /// Creates a new user
+        /// Creates a new user with the specified details in the request body.
         /// </summary>
-        /// <param name="newUserDto">The data transfer object containing the new user's details</param>
-        /// <returns>Returns a CreatedAtAction result with the created user's details or an error response</returns>
+        /// <param name="newUserDto">The data transfer object containing the new user's details.</param>
+        /// <returns>Returns a CreatedAtAction result with the created user's details or an error response.</returns>
         [HttpPost("register")]
+        [ProducesResponseType<UserDto>(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateUserAsync([FromBody] NewUserDto newUserDto)
         {
             User? user = null;
@@ -39,15 +40,17 @@ namespace ActiLink.Controllers
                 var (username, email, password) = newUserDto;
                 _logger.LogInformation("Creating user {username} with email {email}", username, email);
 
-                user = await _userService.CreateUserAsync(username, email, password);
+                var result = await _userService.CreateUserAsync(username, email, password);
 
+                if (!result.Succeeded)
+                {
+                    _logger.LogWarning("User registration failed: {errors}", result.Errors);
+                    return BadRequest(result.Errors);
+                }
+
+                user = result.Data!;
                 _logger.LogInformation("User {userId} created successfully", user.Id);
                 return CreatedAtAction(nameof(GetUserByIdAsync), new {id = user.Id}, _mapper.Map<UserDto>(user));
-            }
-            catch (UserRegistrationException ex)
-            {
-                _logger.LogError(ex, "User registration failed");
-                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -61,9 +64,11 @@ namespace ActiLink.Controllers
         }
 
         /// <summary>
-        /// Fetches all users
+        /// Fetches all users.
         /// </summary>
-        /// <returns>Returns a list of all users</returns>
+        /// <returns>
+        /// Returns a <see cref="IEnumerable{T}"/> of all users.
+        /// </returns>
         [HttpGet]
         public async Task<IEnumerable<UserDto>> GetUsersAsync()
         {
@@ -74,12 +79,16 @@ namespace ActiLink.Controllers
         }
 
         /// <summary>
-        /// Fetches a user by their ID
+        /// Fetches a user by their ID.
         /// </summary>
         /// <param name="id">The ID of the user to fetch</param>
-        /// <returns>Returns an Ok result with the user's details if found, otherwise a NotFound result</returns>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="IActionResult"/> of the operation with the <see cref="UserDto"/> if the user exists.  
+        /// </returns>
         [HttpGet("{id}")]
         [ActionName(nameof(GetUserByIdAsync))]
+        [ProducesResponseType<UserDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetUserByIdAsync([FromRoute] string id)
         {
             _logger.LogInformation("Fetching user with ID: {UserId}", id);

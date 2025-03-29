@@ -46,7 +46,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add Identity
-builder.Services.AddIdentityCore<Organizer>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentityCore<Organizer>(options => options.User.RequireUniqueEmail = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApiContext>()
     .AddUserManager<UserManager<Organizer>>();

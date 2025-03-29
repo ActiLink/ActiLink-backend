@@ -1,5 +1,4 @@
 ﻿using ActiLink.DTOs;
-using ActiLink.Exceptions;
 using ActiLink.Model;
 using ActiLink.Repositories;
 using AutoMapper;
@@ -19,49 +18,57 @@ namespace ActiLink.Services
         }
 
         /// <summary>
-        /// Creates a new user
+        /// Creates a new user with the specified <paramref name="username"/>, <paramref name="email"/> and <paramref name="password"/>.
         /// </summary>
         /// <param name="username"></param>
         /// <param name="email"></param>
-        /// <param name="password"></param>
-        /// <returns>The created user</returns>
-        /// <exception cref="UserRegistrationException"></exception>
-        public async Task<User> CreateUserAsync(string username, string email, string password)
+        /// <param name="password">Must meet the password policy requirements</param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation.
+        /// </returns>
+        public async Task<GenericServiceResult<User>> CreateUserAsync(string username, string email, string password)
         {
             var user = new User(username, email);
             var result = await _userManager.CreateAsync(user, password);
 
-            return result.Succeeded ? user : throw new UserRegistrationException("User registration failed", result.Errors);
+            return result.Succeeded ? GenericServiceResult<User>.Success(user) : GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description));
         }
 
         /// <summary>
         /// Gets all users
         /// </summary>
-        /// <returns>An IEnumerable of all users</returns>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="IEnumerable{T}"/> of all users.
+        /// </returns>
         public async Task<IEnumerable<User>> GetUsersAsync()
         {
             return await _unitOfWork.UserRepository.GetAllAsync();
         }
 
         /// <summary>
-        /// Gets a user by their ID
+        /// Finds and returns a user, if any, who has the specified <paramref name="id"/>.
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>The user if found, null otherwise</returns>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the user matching the specified <paramref name="id"/> if it exists.
+        /// </returns>
         public async Task<User?> GetUserByIdAsync(string id)
         {
             return await _userManager.FindByIdAsync(id) as User;
         }
 
         /// <summary>
-        /// Deletes a user
+        /// Deletes a <paramref name="user"/> if exists
         /// </summary>
         /// <param name="user"></param>
-        /// <returns>True if the user was deleted, false otherwise</returns>
-        public async Task<bool> DeleteUserAsync(User user)
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation.
+        /// </returns>
+        public async Task<ServiceResult> DeleteUserAsync(User user)
         {
             var result = await _userManager.DeleteAsync(user);
-            return result.Succeeded;
+
+            return result.Succeeded ? ServiceResult.Success() : ServiceResult.Failure(result.Errors.Select(e => e.Description));
         }
 
     }
