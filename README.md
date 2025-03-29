@@ -18,8 +18,7 @@ Po uruchomieniu aplikacji API będzie dostępne pod następującymi adresami:
 - [https://localhost:5289/swagger](https://localhost:5289/swagger)  
 - [http://localhost:7062/swagger](http://localhost:7062/swagger)
 
-W obecnej wersji dostępny jest jeden endpoint:  
-- `GET /WeatherForecast` – zwraca przykładową prognozę pogody 
+Można tam pozyskać informacje o dostępnych endpointach.
 
 ## 📦 Instalacja i uruchomienie  
 Aby uruchomić backend lokalnie, wykonaj następujące kroki:  
@@ -63,7 +62,34 @@ Aby uruchomić backend lokalnie, wykonaj następujące kroki:
    i dodać:  
    ```env
    MSSQL_SA_PASSWORD=Twoje_haslo123
-   ```  
+   ```
+3. **Wygeneruj silny, losowy klucz JWT (256-bitowy):**
+
+   - **Windows (CMD/PowerShell):**
+     ```bash
+     .set-jwt-key.bat
+     ```
+
+   - **Linux/macOS (bash):**
+     ```bash
+     .set-jwt-key.sh
+     ```
+
+   Skrypt:
+   - automatycznie utworzy plik `.env` (jeśli nie istnieje),
+   - wygeneruje losowo klucz i doda lub zaktualizuje wartość `JWT_SECRET_KEY`,
+   - nie usuwa innych zmiennych środowiskowych w `.env`.
+
+
+4. **Alternatywnie:** Jeśli skrypty nie zadziałają, możesz ręcznie edytować lub utworzyć plik `.env`:
+   ```bash
+   notepad .env
+   ```
+   i dodać następujące wpisy
+   ```bash
+   MSSQL_SA_PASSWORD=Twoje_haslo123
+   JWT_SECRET_KEY=losowo_wygenerowany_klucz
+   ```
 ### 4. **Obsługa Dockera**  
 #### **Budowanie i uruchomienie kontenera:**  
 Zbudować i uruchomić można w konsoli:
@@ -99,6 +125,7 @@ docker-compose down
 docker rmi actilink:latest
 docker rmi mcr.microsoft.com/mssql/server:2022-latest
 ```
+lub w gui w zakładce Images
 #### **Usunięcie zawartości bazy danych**
 Dane w bazie powinny przetrwać usunięcie kontenera. oraz ponowną kompilację. Aby usunąć zawartość bazy danych należy zamknąć kontener z dodatkową flagą:
 ```bash
