@@ -19,15 +19,15 @@ namespace ActiLink.UnitTests
     [TestClass]
     public class UserAuthTests
     {
-        private Mock<UserManager<Organizer>> _mockUserManager;
-        private Mock<SignInManager<Organizer>> _mockSignInManager;
-        private Mock<IUnitOfWork> _mockUnitOfWork;
-        private Mock<ILogger<UsersController>> _mockLogger;
-        private Mock<IMapper> _mockMapper;
-        private Mock<IConfiguration> _mockConfiguration;
-        private UsersController _controller;
-        private UserService _userService;
-        private TokenGenerator _tokenGenerator;
+        private Mock<UserManager<Organizer>> _mockUserManager = null!;
+        private Mock<SignInManager<Organizer>> _mockSignInManager = null!;
+        private Mock<IUnitOfWork> _mockUnitOfWork = null!;
+        private Mock<ILogger<UsersController>> _mockLogger = null!;
+        private Mock<IMapper> _mockMapper = null!;
+        private Mock<IConfiguration> _mockConfiguration = null!;
+        private UsersController _controller = null!;
+        private UserService _userService = null!;
+        private TokenGenerator _tokenGenerator = null!;
 
         [TestInitialize]
         public void Setup()
@@ -35,13 +35,13 @@ namespace ActiLink.UnitTests
             // Mockowanie zależności dla UserService
             var store = new Mock<IUserStore<Organizer>>();
             _mockUserManager = new Mock<UserManager<Organizer>>(
-                store.Object, null, null, null, null, null, null, null, null);
+                store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
             _mockSignInManager = new Mock<SignInManager<Organizer>>(
                 _mockUserManager.Object,
                 Mock.Of<Microsoft.AspNetCore.Http.IHttpContextAccessor>(),
                 Mock.Of<IUserClaimsPrincipalFactory<Organizer>>(),
-                null, null, null, null);
+                null!, null!, null!, null!);
 
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockConfiguration = new Mock<IConfiguration>();
@@ -91,7 +91,7 @@ namespace ActiLink.UnitTests
 
             // Assert
             Assert.IsInstanceOfType(result, typeof(CreatedAtActionResult));
-            var createdAtResult = result as CreatedAtActionResult;
+            var createdAtResult = (CreatedAtActionResult)result;
             Assert.AreEqual(nameof(UsersController.GetUserByIdAsync), createdAtResult.ActionName);
             Assert.AreEqual(userDto, createdAtResult.Value);
         }
@@ -112,8 +112,17 @@ namespace ActiLink.UnitTests
 
             // Assert
             Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
-            var badRequestResult = result as BadRequestObjectResult;
+            var badRequestResult = (BadRequestObjectResult)result;
             Assert.IsNotNull(badRequestResult.Value);
+
+            if (badRequestResult.Value is IEnumerable<string> errorsResult)
+            {
+                Assert.IsTrue(errorsResult.Any(e => e.Contains("Invalid email") || e.Contains("Password too short")));
+            }
+            else
+            {
+                Assert.Fail("Expected IEnumerable<string> as result value");
+            }
         }
 
         [TestMethod]
@@ -160,16 +169,23 @@ namespace ActiLink.UnitTests
             var loginDto = new LoginDto("wrong@example.com", "Password123!");
 
             _mockUserManager.Setup(x => x.FindByEmailAsync(loginDto.Email))
-                .ReturnsAsync((User)null);
+                .ReturnsAsync((User?)null);
 
             // Act
             var result = await _controller.LoginAsync(loginDto);
 
             // Assert
             Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
-            var badRequestResult = result as BadRequestObjectResult;
-            var errors = badRequestResult.Value as IEnumerable<string>;
-            Assert.IsTrue(errors.Any(e => e.Contains("Invalid email or password")));
+            var badRequestResult = (BadRequestObjectResult)result;
+
+            if (badRequestResult.Value is IEnumerable<string> errors)
+            {
+                Assert.IsTrue(errors.Any(e => e.Contains("Invalid email or password")));
+            }
+            else
+            {
+                Assert.Fail("Expected IEnumerable<string> as result value");
+            }
         }
 
         [TestMethod]
@@ -190,40 +206,16 @@ namespace ActiLink.UnitTests
 
             // Assert
             Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
-            var badRequestResult = result as BadRequestObjectResult;
-            var errors = badRequestResult.Value as IEnumerable<string>;
-            Assert.IsTrue(errors.Any(e => e.Contains("Invalid email or password")));
+            var badRequestResult = (BadRequestObjectResult)result;
+
+            if (badRequestResult.Value is IEnumerable<string> errors)
+            {
+                Assert.IsTrue(errors.Any(e => e.Contains("Invalid email or password")));
+            }
+            else
+            {
+                Assert.Fail("Expected IEnumerable<string> as result value");
+            }
         }
-
-        //[TestMethod]
-        //public async Task RefreshToken_ValidToken_ReturnsNewTokens()
-        //{
-        //    // Arrange
-        //    var refreshToken = "valid_refresh_token";
-        //    var user = new User("TestUser", "test@example.com")
-        //    {
-        //        Id = "123",
-        //        RefreshToken = refreshToken,
-        //        RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1)
-        //    };
-
-        //    _mockUserManager.Setup(x => x.Users)
-        //        .Returns(new List<User> { user }.AsQueryable().BuildMockDbSet().Object);
-
-        //    _mockUserManager.Setup(x => x.UpdateAsync(user))
-        //        .ReturnsAsync(IdentityResult.Success);
-
-        //    // Act
-        //    var result = await _userService.RefreshTokenAsync(refreshToken);
-
-        //    // Assert
-        //    Assert.IsTrue(result.Succeeded);
-        //    Assert.IsNotNull(result.Data);
-
-        //    var tokens = result.Data;
-        //    Assert.IsFalse(string.IsNullOrEmpty(tokens.AccessToken));
-        //    Assert.IsFalse(string.IsNullOrEmpty(tokens.RefreshToken));
-        //    Assert.AreNotEqual(refreshToken, tokens.RefreshToken); // Nowy refresh token powinien być inny
-        //}
     }
 }
