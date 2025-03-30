@@ -102,7 +102,7 @@ lub w Visual Studio (należy pamiętać o wyłączeniu poprzedniego kontenera):
 
 Jeśli istnieją niezastosowane migracje, po uruchomieniu kontenera z bazą danych, uruchom je poleceniem:
 ```bash
-docker-compose -f docker-compose.migrate.yml run actilink-migrator
+docker-compose -f docker-compose.migrate.yml run --build actilink-migrator
 ```
 
 #### **Zatrzymanie kontenera bez usuwania:**  

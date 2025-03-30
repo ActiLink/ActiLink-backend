@@ -5,5 +5,5 @@
     /// </summary>
     /// <param name="AccessToken"></param>
     /// <param name="RefreshToken"></param>
-    public record TokenResponse(string AccessToken, string RefreshToken);
+    public record TokenResponseDto(string AccessToken, string RefreshToken);
 }

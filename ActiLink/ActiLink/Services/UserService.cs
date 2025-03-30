@@ -17,18 +17,13 @@ namespace ActiLink.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<Organizer> _userManager;
-        private readonly SignInManager<Organizer> _signInManager;
-        private readonly string _jwtSecret;
-        private readonly string _jwtIssuer;
-        private readonly string _jwtAudience;
-        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, SignInManager<Organizer> signInManager)
+        private static readonly string[] InvalidLoginError = ["Invalid email or password."];
+        private readonly TokenGenerator _tokenGenerator;
+        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, SignInManager<Organizer> signInManager, TokenGenerator tokenGenerator)
         {
-            _unitOfWork = unitOfWork;
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
-            _jwtIssuer = Environment.GetEnvironmentVariable("JWT_VALID_ISSUER");
-            _jwtAudience = Environment.GetEnvironmentVariable("JWT_VALID_AUDIENCE");
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _tokenGenerator = tokenGenerator ?? throw new ArgumentNullException(nameof(tokenGenerator));
         }
 
         /// <summary>
@@ -61,15 +56,15 @@ namespace ActiLink.Services
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
-                return GenericServiceResult<(string,string)>.Failure(new[] { "Invalid email or password." });
+                return GenericServiceResult<(string,string)>.Failure(InvalidLoginError);
 
-            var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
+            var result = await _userManager.CheckPasswordAsync(user, password);
 
-            if (!result.Succeeded)
-                return GenericServiceResult<(string,string)>.Failure(new[] { "Invalid email or password." });
+            if (!result)
+                return GenericServiceResult<(string,string)>.Failure(InvalidLoginError);
 
-            var accessToken = GenerateJwtAccessToken(user);
-            var refreshToken = GenerateRefreshToken();
+            var accessToken = _tokenGenerator.GenerateJwtAccessToken(user);
+            var refreshToken = _tokenGenerator.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
@@ -78,36 +73,6 @@ namespace ActiLink.Services
 
             return GenericServiceResult<(string, string)>.Success((accessToken, refreshToken));
 
-        }
-        // generate access token for user
-        private string GenerateJwtAccessToken(Organizer user)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtSecret); 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                // TODO: in the future roles will need to be added to the claims to create a correct token for each user
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id ?? ""),
-                    new Claim(ClaimTypes.Email, user.Email ?? ""),
-                    new Claim(ClaimTypes.Name, user.UserName ?? "")
-                }),
-                Issuer = _jwtIssuer,
-                Audience = _jwtAudience,
-                Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
-        // generate refresh token for user
-        private string GenerateRefreshToken()
-        {
-            var randomBytes = new byte[64];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes);
         }
 
         public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> RefreshTokenAsync(string refreshToken)
@@ -118,10 +83,10 @@ namespace ActiLink.Services
                     u.RefreshTokenExpiryTime > DateTime.UtcNow);
 
             if (user == null)
-                return GenericServiceResult<(string, string)>.Failure(new[] { "Invalid or expired refresh token." });
+                return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
 
-            var newAccessToken = GenerateJwtAccessToken(user);
-            var newRefreshToken = GenerateRefreshToken();
+            var newAccessToken = _tokenGenerator.GenerateJwtAccessToken(user);
+            var newRefreshToken = _tokenGenerator.GenerateRefreshToken();
 
             user.RefreshToken = newRefreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);

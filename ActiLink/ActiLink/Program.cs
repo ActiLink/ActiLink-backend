@@ -37,7 +37,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 // Add services
 builder.Services.AddScoped<UserService>();
-
+builder.Services.AddScoped<TokenGenerator>();
 
 
 builder.Services.AddControllers();
@@ -72,7 +72,7 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = Environment.GetEnvironmentVariable("JWT_VALID_AUDIENCE"),
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY")))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!))
         };
     });
 builder.Services.AddAuthorization();

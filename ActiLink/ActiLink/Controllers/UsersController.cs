@@ -68,7 +68,7 @@ namespace ActiLink.Controllers
         /// <param name="loginDto"></param>
         /// <returns>Returns a JWT token which can be used for authentication on other endpoints</returns>
         [HttpPost("login")]
-        [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> LoginAsync([FromBody] LoginDto loginDto)
         {
@@ -86,7 +86,7 @@ namespace ActiLink.Controllers
 
                 var (accessToken, refreshToken) = result.Data!;
                 _logger.LogInformation("Login successful for email: {Email}", loginDto.Email);
-                return Ok(new TokenResponse(accessToken, refreshToken));
+                return Ok(new TokenResponseDto(accessToken, refreshToken));
             }
             catch (Exception ex)
             {
@@ -101,7 +101,7 @@ namespace ActiLink.Controllers
         /// <param name="refreshDto">DTO containing refresh token</param>
         /// <returns>New access token and refresh token</returns>
         [HttpPost("refresh")]
-        [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenDto refreshDto)
         {
@@ -116,7 +116,7 @@ namespace ActiLink.Controllers
                 }
 
                (string accessToken, string refreshToken) = result.Data!;
-                return Ok(new TokenResponse(accessToken, refreshToken));
+                return Ok(new TokenResponseDto(accessToken, refreshToken));
             }
             catch (Exception ex)
             {
