@@ -2,8 +2,14 @@
 using ActiLink.Model;
 using ActiLink.Repositories;
 using AutoMapper;
+using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ActiLink.Services
 {
@@ -11,10 +17,14 @@ namespace ActiLink.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<Organizer> _userManager;
-        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager)
+        private static readonly string[] InvalidLoginError = ["Invalid email or password."];
+        private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
+        private readonly TokenGenerator _tokenGenerator;
+        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, SignInManager<Organizer> signInManager, TokenGenerator tokenGenerator)
         {
-            _unitOfWork = unitOfWork;
-            _userManager = userManager;
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _tokenGenerator = tokenGenerator ?? throw new ArgumentNullException(nameof(tokenGenerator));
         }
 
         /// <summary>
@@ -32,6 +42,59 @@ namespace ActiLink.Services
             var result = await _userManager.CreateAsync(user, password);
 
             return result.Succeeded ? GenericServiceResult<User>.Success(user) : GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description));
+        }
+
+        /// <summary>
+        /// Authenticates a user with the specified <paramref name="email"/> and <paramref name="password"/>.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation.
+        /// </returns>
+        public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> LoginAsync(string email, string password)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return GenericServiceResult<(string,string)>.Failure(InvalidLoginError);
+
+            var result = await _userManager.CheckPasswordAsync(user, password);
+
+            if (!result)
+                return GenericServiceResult<(string,string)>.Failure(InvalidLoginError);
+
+            var accessToken = _tokenGenerator.GenerateJwtAccessToken(user);
+            var refreshToken = _tokenGenerator.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
+
+            await _userManager.UpdateAsync(user);
+
+            return GenericServiceResult<(string, string)>.Success((accessToken, refreshToken));
+
+        }
+
+        public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> RefreshTokenAsync(string refreshToken)
+        {
+            var user = await _userManager.Users
+                .FirstOrDefaultAsync(u =>
+                    u.RefreshToken == refreshToken &&
+                    u.RefreshTokenExpiryTime > DateTime.UtcNow);
+
+            if (user == null)
+                return GenericServiceResult<(string, string)>.Failure(InvalidRefreshTokenError);
+
+            var newAccessToken = _tokenGenerator.GenerateJwtAccessToken(user);
+            var newRefreshToken = _tokenGenerator.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
+
+            await _userManager.UpdateAsync(user);
+
+            return GenericServiceResult<(string, string)>.Success((newAccessToken, newRefreshToken));
         }
 
         /// <summary>
