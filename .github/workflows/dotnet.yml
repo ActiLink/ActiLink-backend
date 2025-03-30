@@ -24,5 +24,7 @@ jobs:
       run: dotnet restore ActiLink/ActiLink.sln
     - name: Build
       run: dotnet build ActiLink/ActiLink.sln --no-restore
-    - name: Test
+    - name: Run Unit Tests
       run: dotnet test ActiLink/ActiLink.UnitTests/ActiLink.UnitTests.csproj --no-build --verbosity normal
+    - name: Run Integration Tests
+      run: dotnet test ActiLink/ActiLink.IntegrationTests/ActiLink.IntegrationTests.csproj --no-build --verbosity normal
