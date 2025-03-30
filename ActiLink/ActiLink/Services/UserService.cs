@@ -18,6 +18,7 @@ namespace ActiLink.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<Organizer> _userManager;
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
+        private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
         private readonly TokenGenerator _tokenGenerator;
         public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, SignInManager<Organizer> signInManager, TokenGenerator tokenGenerator)
         {
@@ -83,7 +84,7 @@ namespace ActiLink.Services
                     u.RefreshTokenExpiryTime > DateTime.UtcNow);
 
             if (user == null)
-                return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
+                return GenericServiceResult<(string, string)>.Failure(InvalidRefreshTokenError);
 
             var newAccessToken = _tokenGenerator.GenerateJwtAccessToken(user);
             var newRefreshToken = _tokenGenerator.GenerateRefreshToken();

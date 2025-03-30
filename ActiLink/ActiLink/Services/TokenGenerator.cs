@@ -15,7 +15,7 @@ namespace ActiLink.Services
 
         public TokenGenerator(IConfiguration configuration)
         {
-            _jwtSecret = configuration["JWT_SECRET_KEY"] ?? throw new ArgumentNullException("JWT_SECRET_KEY environment variable is not set.");
+            _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")?? throw new ArgumentNullException("JWT_SECRET_KEY environment variable is not set.");
             _jwtIssuer = Environment.GetEnvironmentVariable("JWT_VALID_ISSUER") ?? throw new ArgumentNullException("JWT_VALID_ISSUER environment variable is not set.");
             _jwtAudience = Environment.GetEnvironmentVariable("JWT_VALID_AUDIENCE") ?? throw new ArgumentNullException("JWT_VALID_AUDIENCE environment variable is not set.");
         }
