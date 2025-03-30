@@ -45,4 +45,4 @@ FROM build AS ef-migrations
 WORKDIR /src/ActiLink
 
 # Ef tool już zainstalowany wcześniej w etapie build
-ENTRYPOINT ["dotnet", "ef", "database", "update", "--project", ".", "--startup-project", ".", "--context", "ApiContext"]
+ENTRYPOINT ["dotnet", "ef", "database", "update", "--context", "ApiContext"]

@@ -22,8 +22,11 @@ services:
     - actilink-db
     environment:
     - DB_HOST=actilink-db
-    - DB_NAME=ActiLink # may need to change this in the future
+    - DB_NAME=ActiLink 
     - DB_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+    - JWT_VALID_ISSUER=ActiLinkIssuer
+    - JWT_VALID_AUDIENCE=ActiLinkAudience 
+    - JWT_SECRET_KEY=${JWT_SECRET} 
 volumes:
   db_data:
 
