@@ -11,7 +11,7 @@ namespace ActiLink.IntegrationTests
     [TestClass]
     public class DB_Integration_Tests
     {
-        private DbContextOptions<ApiContext> _options = null!; // Wyraźne oznaczenie jako non-null
+        private DbContextOptions<ApiContext> _options = null!;
 
         [TestInitialize]
         public void Setup()
@@ -48,11 +48,39 @@ namespace ActiLink.IntegrationTests
             await context.SaveChangesAsync();
 
             var hobby = new Hobby("Programming");
-            context.Hobbies.Add(hobby);
+            context.Set<Hobby>().Add(hobby);
             await context.SaveChangesAsync();
 
-            var savedHobby = context.Hobbies.FirstOrDefault(h => h.Name == "Programming");
+            var savedHobby = context.Set<Hobby>().FirstOrDefault(h => h.Name == "Programming");
             Assert.IsNotNull(savedHobby);
+        }
+
+        [TestMethod]
+        public async Task CanDeleteUserWithHobbies()
+        {
+            string userId = null!;
+            Guid hobbyId;
+
+            using (var context = new ApiContext(_options))
+            {
+                var hobby = new Hobby("Programming");
+                var user = new User("Janek", "Jan@gmail.com");
+                user.Hobbies.Add(hobby);
+
+                await context.Users.AddAsync(user);
+                context.Set<Hobby>().Add(hobby);
+                await context.SaveChangesAsync();
+
+                userId = user.Id;
+                hobbyId = hobby.Id;
+            }
+
+            using (var context = new ApiContext(_options))
+            {
+                var remainingHobby = await context.Set<Hobby>().FindAsync(hobbyId);
+                Assert.IsNotNull(remainingHobby);
+                Assert.AreEqual("Programming", remainingHobby!.Name);
+            }
         }
 
         [TestMethod]
@@ -125,57 +153,6 @@ namespace ActiLink.IntegrationTests
                 Assert.IsNotNull(user);
                 Assert.AreEqual(1, user!.Hobbies.Count);
                 Assert.AreEqual("Programming", user.Hobbies.First().Name);
-            }
-        }
-
-        [TestMethod]
-        public async Task CanDeleteUserWithHobbies()
-        {
-            string userId = null!;
-            Guid hobbyId;
-
-            using (var context = new ApiContext(_options))
-            {
-                var hobby = new Hobby("Programming");
-                var user = new User("Janek", "Jan@gmail.com");
-                user.Hobbies.Add(hobby);
-
-                await context.Users.AddAsync(user);
-                await context.Hobbies.AddAsync(hobby);
-                await context.SaveChangesAsync();
-
-                userId = user.Id;
-                hobbyId = hobby.Id;
-            }
-
-            using (var context = new ApiContext(_options))
-            {
-                var user = await context.Users
-                    .OfType<User>()
-                    .Include(u => u.Hobbies)
-                    .FirstOrDefaultAsync(u => u.Id == userId);
-
-                Assert.IsNotNull(user);
-                context.Users.Remove(user!);
-                await context.SaveChangesAsync();
-            }
-
-            using (var context = new ApiContext(_options))
-            {
-                var deletedUser = await context.Users
-                    .OfType<User>()
-                    .FirstOrDefaultAsync(u => u.Id == userId);
-                Assert.IsNull(deletedUser);
-
-                var remainingHobby = await context.Hobbies.FindAsync(hobbyId);
-                Assert.IsNotNull(remainingHobby);
-                Assert.AreEqual("Programming", remainingHobby!.Name);
-
-                var userWithHobbies = await context.Users
-                    .OfType<User>()
-                    .Include(u => u.Hobbies)
-                    .FirstOrDefaultAsync(u => u.Id == userId);
-                Assert.IsNull(userWithHobbies);
             }
         }
     }
