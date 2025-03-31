@@ -11,7 +11,7 @@ namespace ActiLink.IntegrationTests
     [TestClass]
     public class DB_Integration_Tests
     {
-        private DbContextOptions<ApiContext> _options = null!;
+        private DbContextOptions<ApiContext> _options = null!; // Wyraźne oznaczenie jako non-null
 
         [TestInitialize]
         public void Setup()
@@ -53,34 +53,6 @@ namespace ActiLink.IntegrationTests
 
             var savedHobby = context.Set<Hobby>().FirstOrDefault(h => h.Name == "Programming");
             Assert.IsNotNull(savedHobby);
-        }
-
-        [TestMethod]
-        public async Task CanDeleteUserWithHobbies()
-        {
-            string userId = null!;
-            Guid hobbyId;
-
-            using (var context = new ApiContext(_options))
-            {
-                var hobby = new Hobby("Programming");
-                var user = new User("Janek", "Jan@gmail.com");
-                user.Hobbies.Add(hobby);
-
-                await context.Users.AddAsync(user);
-                context.Set<Hobby>().Add(hobby);
-                await context.SaveChangesAsync();
-
-                userId = user.Id;
-                hobbyId = hobby.Id;
-            }
-
-            using (var context = new ApiContext(_options))
-            {
-                var remainingHobby = await context.Set<Hobby>().FindAsync(hobbyId);
-                Assert.IsNotNull(remainingHobby);
-                Assert.AreEqual("Programming", remainingHobby!.Name);
-            }
         }
 
         [TestMethod]
@@ -153,6 +125,46 @@ namespace ActiLink.IntegrationTests
                 Assert.IsNotNull(user);
                 Assert.AreEqual(1, user!.Hobbies.Count);
                 Assert.AreEqual("Programming", user.Hobbies.First().Name);
+            }
+        }
+
+        [TestMethod]
+        public async Task CanDeleteUserWithHobbies()
+        {
+            string userId = null!;
+            Guid hobbyId;
+
+            using (var context = new ApiContext(_options))
+            {
+                var hobby = new Hobby("Programming");
+                var user = new User("Janek", "Jan@gmail.com");
+                user.Hobbies.Add(hobby);
+
+                await context.Users.AddAsync(user);
+                context.Set<Hobby>().Add(hobby);
+                await context.SaveChangesAsync();
+
+                userId = user.Id;
+                hobbyId = hobby.Id;
+            }
+
+            using (var context = new ApiContext(_options))
+            {
+                var user = await context.Users
+                    .OfType<User>()
+                    .Include(u => u.Hobbies)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+
+                Assert.IsNotNull(user);
+                context.Users.Remove(user!);
+                await context.SaveChangesAsync();
+            }
+
+            using (var context = new ApiContext(_options))
+            {
+                var remainingHobby = await context.Set<Hobby>().FindAsync(hobbyId);
+                Assert.IsNotNull(remainingHobby);
+                Assert.AreEqual("Programming", remainingHobby!.Name);
             }
         }
     }
