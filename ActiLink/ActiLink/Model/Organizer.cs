@@ -9,6 +9,7 @@ namespace ActiLink.Model
     {
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
+        public ICollection<Event > Events { get; set; } = new List<Event>();
         protected Organizer(string username, string email) : base(username)
         {
             Email = email;
