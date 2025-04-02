@@ -12,6 +12,8 @@ namespace ActiLink.DTOs
     /// <param name="Price">Price of the event.</param>
     /// <param name="MaxUsers">Maximum number of participants.</param>
     /// <param name="MinUsers">Minimum number of participants.</param>
+    /// <param name="Participants">List of Participants.</param>
+    /// <param name="Hobbies">List of Hobbies related to this event.</param>
     public record EventDto(
         Guid Id,
         Guid OrganizerId,
@@ -21,10 +23,25 @@ namespace ActiLink.DTOs
         int Width,
         decimal Price,
         int MaxUsers,
-        int MinUsers
+        int MinUsers,
+        List<UserDto> Participants,
+        List<HobbyDto> Hobbies
     )
     {
-        public EventDto() : this(default, default, default, default, default, default, default, default, default) { }
+        public EventDto() 
+            : this(
+                default, 
+                default, 
+                default, 
+                default, 
+                default, 
+                default, 
+                default, 
+                default, 
+                default,
+                new List<UserDto>(),
+                new List<HobbyDto>()) 
+        { }
     }
 
 }
