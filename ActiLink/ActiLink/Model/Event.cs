@@ -24,7 +24,7 @@ namespace ActiLink.Model
         /// <summary>
         /// Constructor for creating an event.
         /// </summary>
-
+        private Event() { }
         public Event(string organizerId, DateTime startTime, DateTime endTime, Location location,
                      decimal price, int maxUsers, int minUsers)
         {
@@ -53,12 +53,12 @@ namespace ActiLink.Model
         }
 
         public void AddParticipant(User user)
-        {
-            if (SignUpList.Count >= MaxUsers)
-            {
-                throw new InvalidOperationException($"Cannot add more than {MaxUsers} participants");
-            }
-            SignUpList.Add(user);
-        }
+{
+    if (SignUpList.Count >= MaxUsers)
+    {
+        throw new InvalidOperationException($"Cannot add more than {MaxUsers} participants");
+    }
+    SignUpList.Add(user);
+}
     }
 }
