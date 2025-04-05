@@ -41,6 +41,9 @@ namespace ActiLink.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("OrganizerId1")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -50,6 +53,8 @@ namespace ActiLink.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrganizerId");
+
+                    b.HasIndex("OrganizerId1");
 
                     b.ToTable("Events");
                 });
@@ -307,24 +312,28 @@ namespace ActiLink.Migrations
 
             modelBuilder.Entity("ActiLink.Model.Event", b =>
                 {
-                    b.HasOne("ActiLink.Model.Organizer", "Organizer")
-                        .WithMany("Events")
+                    b.HasOne("ActiLink.Model.Organizer", null)
+                        .WithMany()
                         .HasForeignKey("OrganizerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("ActiLink.Model.Organizer", null)
+                        .WithMany("Events")
+                        .HasForeignKey("OrganizerId1");
 
                     b.OwnsOne("ActiLink.Model.Location", "Location", b1 =>
                         {
                             b1.Property<Guid>("EventId")
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.Property<double>("Latitude")
-                                .HasColumnType("float")
-                                .HasColumnName("Latitude");
+                            b1.Property<int>("Height")
+                                .HasColumnType("int")
+                                .HasColumnName("Location_Latitude");
 
-                            b1.Property<double>("Longitude")
-                                .HasColumnType("float")
-                                .HasColumnName("Longitude");
+                            b1.Property<int>("Width")
+                                .HasColumnType("int")
+                                .HasColumnName("Location_Longitude");
 
                             b1.HasKey("EventId");
 
@@ -336,8 +345,6 @@ namespace ActiLink.Migrations
 
                     b.Navigation("Location")
                         .IsRequired();
-
-                    b.Navigation("Organizer");
                 });
 
             modelBuilder.Entity("ActiLink.Model.Hobby", b =>
