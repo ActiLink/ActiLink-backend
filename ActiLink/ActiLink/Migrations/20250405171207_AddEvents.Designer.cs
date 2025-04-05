@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ActiLink.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20250405165024_AddEvents")]
+    [Migration("20250405171207_AddEvents")]
     partial class AddEvents
     {
         /// <inheritdoc />
