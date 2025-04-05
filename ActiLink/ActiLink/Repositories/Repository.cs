@@ -40,6 +40,8 @@ namespace ActiLink.Repositories
         {
             _dbSet.Remove(entity);
         }
+
+        public IQueryable<TEntity> Query() => _dbSet.AsQueryable();
     }
 
 }

@@ -1,5 +1,5 @@
 ﻿using ActiLink.Model;
-using ActiLink.Repositories;
+using ActiLink.Repositories.Extensions;
 using System.Threading.Tasks;
 
 namespace ActiLink.Repositories
@@ -16,7 +16,8 @@ namespace ActiLink.Repositories
         }
 
         public IRepository<User> UserRepository => _userRepository ??= new Repository<User>(_context);
-        public IRepository<Event> EventRepository => _eventRepository ??= new EventRepository(_context);
+        public IRepository<Event> EventRepository => _eventRepository ??= new Repository<Event>(_context);
+
 
         public async Task<int> SaveChangesAsync()
         {

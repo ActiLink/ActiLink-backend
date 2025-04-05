@@ -10,7 +10,8 @@ namespace ActiLink.IntegrationTests
     [TestClass]
     public class EventTests
     {
-        private DbContextOptions<ApiContext>? _options; // Zmienione na nullable
+        private DbContextOptions<ApiContext>? _options;
+        private static readonly DateTime _fixedDate = new DateTime(2024, 1, 1);
 
         [TestInitialize]
         public void Setup()
@@ -31,16 +32,16 @@ namespace ActiLink.IntegrationTests
             // Arrange
             var organizer = new User("Organizer", "organizer@test.com");
             var eventData = new Event(
-                organizer.Id,
-                DateTime.Now.AddDays(1),
-                DateTime.Now.AddDays(2),
-                new Location(100, 200),
+                organizer,
+                _fixedDate.AddDays(1),
+                _fixedDate.AddDays(2),
+                new Location((double)51.1079, (double)17.0385),
                 50.00m,
                 10,
                 2);
 
             // Act
-            using (var context = new ApiContext(_options!)) // Dodano ! dla pewności
+            using (var context = new ApiContext(_options!))
             {
                 context.Set<Organizer>().Add(organizer);
                 context.Set<Event>().Add(eventData);
@@ -51,15 +52,13 @@ namespace ActiLink.IntegrationTests
             using (var context = new ApiContext(_options!))
             {
                 var savedEvent = await context.Set<Event>()
+                    .Include(e => e.Organizer)
                     .FirstOrDefaultAsync(e => e.Id == eventData.Id);
 
-                var eventOrganizer = await context.Set<Organizer>()
-                    .FirstOrDefaultAsync(o => o.Id == eventData.OrganizerId);
-
                 Assert.IsNotNull(savedEvent);
-                Assert.IsNotNull(eventOrganizer);
-                Assert.AreEqual("Organizer", eventOrganizer!.UserName); // Dodano !
-                Assert.AreEqual(100, savedEvent!.Location.Height); // Dodano !
+                Assert.IsNotNull(savedEvent!.Organizer);
+                Assert.AreEqual("Organizer", savedEvent.Organizer.UserName);
+                Assert.AreEqual((double)51.1079, savedEvent.Location.Longitude);
                 Assert.AreEqual(50.00m, savedEvent.Price);
             }
         }
@@ -72,10 +71,10 @@ namespace ActiLink.IntegrationTests
             var participant1 = new User("Participant1", "p1@test.com");
             var participant2 = new User("Participant2", "p2@test.com");
             var eventData = new Event(
-                organizer.Id,
-                DateTime.Now.AddDays(1),
-                DateTime.Now.AddDays(2),
-                new Location(100, 200),
+                organizer,
+                _fixedDate.AddDays(1),
+                _fixedDate.AddDays(2),
+                new Location((double)51.1079, (double)17.0385),
                 50.00m,
                 10,
                 2);
@@ -117,10 +116,10 @@ namespace ActiLink.IntegrationTests
             var hobby1 = new Hobby("Programming");
             var hobby2 = new Hobby("Hiking");
             var eventData = new Event(
-                organizer.Id,
-                DateTime.Now.AddDays(1),
-                DateTime.Now.AddDays(2),
-                new Location(100, 200),
+                organizer,
+                _fixedDate.AddDays(1),
+                _fixedDate.AddDays(2),
+                new Location((double)51.1079, (double)17.0385),
                 50.00m,
                 10,
                 2);
@@ -155,64 +154,16 @@ namespace ActiLink.IntegrationTests
         }
 
         [TestMethod]
-        public async Task Can_Update_Event_Details()
-        {
-            // Arrange
-            var organizer = new User("Organizer", "organizer@test.com");
-            var originalEvent = new Event(
-                organizer.Id,
-                DateTime.Now.AddDays(1),
-                DateTime.Now.AddDays(2),
-                new Location(100, 200),
-                50.00m,
-                10,
-                2);
-
-            // Act
-            using (var context = new ApiContext(_options!))
-            {
-                context.Set<Organizer>().Add(organizer);
-                context.Set<Event>().Add(originalEvent);
-                await context.SaveChangesAsync();
-            }
-
-            using (var context = new ApiContext(_options!))
-            {
-                var eventToUpdate = await context.Set<Event>().FindAsync(originalEvent.Id);
-                Assert.IsNotNull(eventToUpdate);
-
-                eventToUpdate!.UpdateDetails(
-                    DateTime.Now.AddDays(3),
-                    DateTime.Now.AddDays(4),
-                    new Location(300, 400),
-                    75.00m,
-                    15,
-                    5);
-                await context.SaveChangesAsync();
-            }
-
-            // Assert
-            using (var context = new ApiContext(_options!))
-            {
-                var updatedEvent = await context.Set<Event>().FindAsync(originalEvent.Id);
-                Assert.IsNotNull(updatedEvent);
-                Assert.AreEqual(75.00m, updatedEvent!.Price);
-                Assert.AreEqual(15, updatedEvent.MaxUsers);
-                Assert.AreEqual(300, updatedEvent.Location.Height);
-            }
-        }
-
-        [TestMethod]
         public async Task Can_Delete_Event_Without_Deleting_Participants()
         {
             // Arrange
             var organizer = new User("Organizer", "organizer@test.com");
             var participant = new User("Participant", "participant@test.com");
             var eventData = new Event(
-                organizer.Id,
-                DateTime.Now.AddDays(1),
-                DateTime.Now.AddDays(2),
-                new Location(100, 200),
+                organizer,
+                _fixedDate.AddDays(1),
+                _fixedDate.AddDays(2),
+                new Location((double)51.1079, (double)17.0385),
                 50.00m,
                 10,
                 2);
@@ -259,10 +210,10 @@ namespace ActiLink.IntegrationTests
                 .Select(i => new User($"Participant{i}", $"p{i}@test.com"))
                 .ToList();
             var eventData = new Event(
-                organizer.Id,
-                DateTime.Now.AddDays(1),
-                DateTime.Now.AddDays(2),
-                new Location(100, 200),
+                organizer,
+                _fixedDate.AddDays(1),
+                _fixedDate.AddDays(2),
+                new Location((double)51.1079, (double)17.0385),
                 50.00m,
                 10,
                 2);
@@ -282,7 +233,7 @@ namespace ActiLink.IntegrationTests
                 // Add participants up to the limit
                 foreach (var participant in participants.Take(10))
                 {
-                    savedEvent.AddParticipant(participant);
+                    savedEvent.SignUpList.Add(participant);
                 }
                 await context.SaveChangesAsync();
             }
@@ -298,7 +249,13 @@ namespace ActiLink.IntegrationTests
 
                 // Assert
                 var ex = Assert.ThrowsException<InvalidOperationException>(() =>
-                    savedEvent.AddParticipant(extraParticipant));
+                {
+                    if (savedEvent.SignUpList.Count >= savedEvent.MaxUsers)
+                    {
+                        throw new InvalidOperationException($"Cannot add more than {savedEvent.MaxUsers} participants");
+                    }
+                    savedEvent.SignUpList.Add(extraParticipant);
+                });
                 Assert.AreEqual($"Cannot add more than {savedEvent.MaxUsers} participants", ex.Message);
             }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ActiLink.Model;
+using System;
 
 namespace ActiLink.DTOs
 {
@@ -9,6 +10,7 @@ namespace ActiLink.DTOs
     /// <param name="OrganizerId">Unique identifier of the organizer.</param>
     /// <param name="StartTime">Start time of the event.</param>
     /// <param name="EndTime">End time of the event.</param>
+    /// <param name="Location"> Location of the event</param>
     /// <param name="Price">Price of the event.</param>
     /// <param name="MaxUsers">Maximum number of participants.</param>
     /// <param name="MinUsers">Minimum number of participants.</param>
@@ -16,11 +18,10 @@ namespace ActiLink.DTOs
     /// <param name="Hobbies">List of Hobbies related to this event.</param>
     public record EventDto(
         Guid Id,
-        Guid OrganizerId,
+        string OrganizerId,
         DateTime StartTime,
         DateTime EndTime,
-        int Height,
-        int Width,
+        Location Location,
         decimal Price,
         int MaxUsers,
         int MinUsers,
@@ -28,19 +29,18 @@ namespace ActiLink.DTOs
         List<HobbyDto> Hobbies
     )
     {
-        public EventDto() 
+        public EventDto()
             : this(
-                default, 
-                default, 
-                default, 
-                default, 
-                default, 
-                default, 
-                default, 
-                default, 
+                default,
+                string.Empty,
+                default,
+                default,
+                new Location(0, 0),
+                default,
+                default,
                 default,
                 new List<UserDto>(),
-                new List<HobbyDto>()) 
+                new List<HobbyDto>())
         { }
     }
 

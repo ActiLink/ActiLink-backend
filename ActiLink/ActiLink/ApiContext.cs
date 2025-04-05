@@ -24,21 +24,18 @@ namespace ActiLink
                 .HasDiscriminator<string>("OrganizerType")
                 .HasValue<User>("User");
 
-            // Konfiguracja dla Event
             modelBuilder.Entity<Event>(e =>
             {
-                // Konfiguracja Location jako owned entity
                 e.OwnsOne(x => x.Location, l =>
                 {
-                    l.Property(p => p.Height).HasColumnName("Location_Latitude");
-                    l.Property(p => p.Width).HasColumnName("Location_Longitude");
+                    l.Property(p => p.Longitude).HasColumnName("Longitude");
+                    l.Property(p => p.Latitude).HasColumnName("Latitude");
                 });
 
-                // Relacja z Organizer
-                e.HasOne<Organizer>()
-                    .WithMany()
-                    .HasForeignKey(e => e.OrganizerId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(ev => ev.Organizer)
+                            .WithMany(o => o.Events)
+                            .IsRequired()
+                            .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

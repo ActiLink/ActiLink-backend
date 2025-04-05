@@ -19,8 +19,8 @@ namespace ActiLink.Migrations
                     OrganizerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Location_Height = table.Column<int>(type: "int", nullable: false),
-                    Location_Width = table.Column<int>(type: "int", nullable: false),
+                    Location_Longitude = table.Column<double>(type: "float", nullable: false),
+                    Location_Latitude = table.Column<double>(type: "float", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     MaxUsers = table.Column<int>(type: "int", nullable: false),
                     MinUsers = table.Column<int>(type: "int", nullable: false)

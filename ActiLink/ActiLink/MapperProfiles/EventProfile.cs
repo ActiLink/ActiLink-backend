@@ -9,29 +9,37 @@ namespace ActiLink.MapperProfiles
     {
         public EventProfile()
         {
-            CreateMap<Event, EventDto>()
-                .ForMember(dest => dest.Height, opt => opt.MapFrom(src => src.Location.Height))
-                .ForMember(dest => dest.Width, opt => opt.MapFrom(src => src.Location.Width))
-                .ForMember(dest => dest.Participants, opt => opt.MapFrom(src =>
-                    src.SignUpList == null
-                        ? new List<UserDto>()
-                        : src.SignUpList.Select(u => new UserDto(
-                            u.Id,
-                            u.UserName ?? string.Empty,  // Zapewnia wartość domyślną jeśli null
-                            u.Email ?? string.Empty
-                        ))));
-
-            // Mapowanie NewEventDto -> Event
-            CreateMap<NewEventDto, Event>()
-                .ConstructUsing(src => new Event(
-                    src.OrganizerId.ToString(),
-                    src.StartTime,
-                    src.EndTime,
-                    new Location(src.Height, src.Width),
-                    src.Price,
-                    src.MaxUsers,
-                    src.MinUsers
+            // Map User to UserDto with null handling
+            CreateMap<User, UserDto>()
+                .ConstructUsing(u => new UserDto(
+                    u.Id,
+                    u.UserName ?? string.Empty,
+                    u.Email ?? string.Empty
                 ));
+
+            // Map Hobby to HobbyDto
+            CreateMap<Hobby, HobbyDto>();
+
+            // Map Event to EventDto
+            CreateMap<Event, EventDto>()
+                .ForMember(dest => dest.OrganizerId, opt => opt.MapFrom(src => src.Organizer.Id))
+                .ForMember(dest => dest.Participants, opt => opt.MapFrom(src => src.SignUpList))
+                .ForMember(dest => dest.Hobbies, opt => opt.MapFrom(src => src.RelatedHobbies));
+
+            // Map NewEventDto to Event
+            CreateMap<NewEventDto, Event>()
+                .ForMember(dest => dest.SignUpList, opt => opt.MapFrom(_ => new List<User>()))
+                .ForMember(dest => dest.RelatedHobbies, opt => opt.MapFrom(_ => new List<Hobby>()))
+                .AfterMap((src, dest, context) =>
+                {
+                    var organizer = context.Items["Organizer"] as Organizer
+                        ?? throw new InvalidOperationException("Organizer must be provided in context items");
+
+                    // Using reflection to set the private Organizer property
+                    typeof(Event)
+                        .GetProperty(nameof(Event.Organizer))?
+                        .SetValue(dest, organizer);
+                });
         }
     }
 }
