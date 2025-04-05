@@ -11,6 +11,7 @@ namespace ActiLink.Repositories
         /// Repository for the User entity
         /// </summary>
         IRepository<User> UserRepository { get; }
+        IRepository<Event> EventRepository { get; }
 
         /// <summary>
         /// Saves the changes to the database

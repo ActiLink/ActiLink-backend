@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ActiLink\ActiLink\ActiLink.csproj" />
+    <ProjectReference Include="..\ActiLink\ActiLink.csproj" />
   </ItemGroup>
 
   <ItemGroup>
