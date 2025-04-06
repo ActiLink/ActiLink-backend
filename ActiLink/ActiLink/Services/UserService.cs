@@ -11,12 +11,12 @@ namespace ActiLink.Services
         private readonly UserManager<Organizer> _userManager;
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
-        private readonly TokenGenerator _jwtTokenProvider;
+        private readonly TokenGenerator _tokenGenerator;
         public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, TokenGenerator tokenGenerator)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            _jwtTokenProvider = tokenGenerator ?? throw new ArgumentNullException(nameof(tokenGenerator));
+            _tokenGenerator = tokenGenerator ?? throw new ArgumentNullException(nameof(tokenGenerator));
         }
 
         /// <summary>
@@ -56,8 +56,8 @@ namespace ActiLink.Services
             if (!result)
                 return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
 
-            var accessToken = _jwtTokenProvider.GenerateAccessToken(user);
-            var refreshToken = _jwtTokenProvider.GenerateRefreshToken();
+            var accessToken = _tokenGenerator.GenerateAccessToken(user);
+            var refreshToken = _tokenGenerator.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
@@ -85,8 +85,8 @@ namespace ActiLink.Services
             if (user == null)
                 return GenericServiceResult<(string, string)>.Failure(InvalidRefreshTokenError);
 
-            var newAccessToken = _jwtTokenProvider.GenerateAccessToken(user);
-            var newRefreshToken = _jwtTokenProvider.GenerateRefreshToken();
+            var newAccessToken = _tokenGenerator.GenerateAccessToken(user);
+            var newRefreshToken = _tokenGenerator.GenerateRefreshToken();
 
             user.RefreshToken = newRefreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
