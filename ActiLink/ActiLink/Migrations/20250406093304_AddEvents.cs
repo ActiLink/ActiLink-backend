@@ -28,12 +28,12 @@ namespace ActiLink.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrganizerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    OrganizerId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Longitude = table.Column<double>(type: "float", nullable: false),
-                    Latitude = table.Column<double>(type: "float", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Location_Longitude = table.Column<double>(type: "float", nullable: false),
+                    Location_Latitude = table.Column<double>(type: "float", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
                     MaxUsers = table.Column<int>(type: "int", nullable: false),
                     MinUsers = table.Column<int>(type: "int", nullable: false)
                 },
@@ -44,8 +44,7 @@ namespace ActiLink.Migrations
                         name: "FK_Events_AspNetUsers_OrganizerId",
                         column: x => x.OrganizerId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(

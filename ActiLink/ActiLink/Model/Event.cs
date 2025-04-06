@@ -1,4 +1,5 @@
-﻿using Microsoft.SqlServer;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.SqlServer;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
@@ -15,6 +16,7 @@ namespace ActiLink.Model
         public DateTime StartTime { get; private set; }
         public DateTime EndTime { get; private set; }
         public Location Location { get; private set; } = new Location(0, 0);
+        [Precision(10, 2)]
         public decimal Price { get; private set; }
         public int MaxUsers { get; private set; }
         public int MinUsers { get; private set; }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ActiLink.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20250405171207_AddEvents")]
+    [Migration("20250406093304_AddEvents")]
     partial class AddEvents
     {
         /// <inheritdoc />
@@ -41,11 +41,11 @@ namespace ActiLink.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("OrganizerId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
@@ -312,9 +312,7 @@ namespace ActiLink.Migrations
                 {
                     b.HasOne("ActiLink.Model.Organizer", "Organizer")
                         .WithMany("Events")
-                        .HasForeignKey("OrganizerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("OrganizerId");
 
                     b.OwnsOne("ActiLink.Model.Location", "Location", b1 =>
                         {
@@ -322,12 +320,10 @@ namespace ActiLink.Migrations
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<double>("Latitude")
-                                .HasColumnType("float")
-                                .HasColumnName("Latitude");
+                                .HasColumnType("float");
 
                             b1.Property<double>("Longitude")
-                                .HasColumnType("float")
-                                .HasColumnName("Longitude");
+                                .HasColumnType("float");
 
                             b1.HasKey("EventId");
 
