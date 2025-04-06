@@ -12,13 +12,13 @@ namespace ActiLink.Controllers
     [Route("[controller]")]
     public class EventsController : ControllerBase
     {
-        private readonly EventService eventService;
+        private readonly EventService _eventService;
         private readonly ILogger<UsersController> _logger;
         private readonly IMapper _mapper;
 
         public EventsController(ILogger<UsersController> logger, EventService eventService, IMapper mapper)
         {
-            this.eventService = eventService;
+            this._eventService = eventService;
             _logger = logger;
             _mapper = mapper;
         }

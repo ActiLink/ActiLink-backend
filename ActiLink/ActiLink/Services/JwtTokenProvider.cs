@@ -13,7 +13,7 @@ namespace ActiLink.Services
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
 
-        public JwtTokenProvider(IConfiguration configuration)
+        public JwtTokenProvider()
         {
             _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")?? throw new ArgumentNullException("JWT_SECRET_KEY environment variable is not set.");
             _jwtIssuer = Environment.GetEnvironmentVariable("JWT_VALID_ISSUER") ?? throw new ArgumentNullException("JWT_VALID_ISSUER environment variable is not set.");

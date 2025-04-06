@@ -20,11 +20,9 @@ namespace ActiLink.UnitTests
     public class UserAuthTests
     {
         private Mock<UserManager<Organizer>> _mockUserManager = null!;
-        private Mock<SignInManager<Organizer>> _mockSignInManager = null!;
         private Mock<IUnitOfWork> _mockUnitOfWork = null!;
         private Mock<ILogger<UsersController>> _mockLogger = null!;
         private Mock<IMapper> _mockMapper = null!;
-        private Mock<IConfiguration> _mockConfiguration = null!;
         private UsersController _controller = null!;
         private UserService _userService = null!;
         private JwtTokenProvider _tokenGenerator = null!;
@@ -37,14 +35,7 @@ namespace ActiLink.UnitTests
             _mockUserManager = new Mock<UserManager<Organizer>>(
                 store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
-            _mockSignInManager = new Mock<SignInManager<Organizer>>(
-                _mockUserManager.Object,
-                Mock.Of<Microsoft.AspNetCore.Http.IHttpContextAccessor>(),
-                Mock.Of<IUserClaimsPrincipalFactory<Organizer>>(),
-                null!, null!, null!, null!);
-
             _mockUnitOfWork = new Mock<IUnitOfWork>();
-            _mockConfiguration = new Mock<IConfiguration>();
 
             // Ustawienie zmiennych środowiskowych dla TokenGenerator
             Environment.SetEnvironmentVariable("JWT_SECRET_KEY", "test_secret_key_12345678901234567890");
@@ -52,13 +43,12 @@ namespace ActiLink.UnitTests
             Environment.SetEnvironmentVariable("JWT_VALID_AUDIENCE", "TestAudience");
 
             // Inicjalizacja TokenGenerator z mockowaną konfiguracją
-            _tokenGenerator = new JwtTokenProvider(_mockConfiguration.Object);
+            _tokenGenerator = new JwtTokenProvider();
 
             // Tworzenie rzeczywistej instancji UserService z mockami
             _userService = new UserService(
                 _mockUnitOfWork.Object,
                 _mockUserManager.Object,
-                _mockSignInManager.Object,
                 _tokenGenerator);
 
             // Mockowanie zależności dla UsersController
@@ -90,7 +80,7 @@ namespace ActiLink.UnitTests
             var result = await _controller.CreateUserAsync(newUserDto);
 
             // Assert
-            Assert.IsInstanceOfType(result, typeof(CreatedAtActionResult));
+            Assert.IsInstanceOfType<CreatedAtActionResult>(result);
             var createdAtResult = (CreatedAtActionResult)result;
             Assert.AreEqual(nameof(UsersController.GetUserByIdAsync), createdAtResult.ActionName);
             Assert.AreEqual(userDto, createdAtResult.Value);
@@ -105,13 +95,13 @@ namespace ActiLink.UnitTests
 
             // Mockowanie nieudanej rejestracji
             _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
-                .ReturnsAsync(IdentityResult.Failed(errors.Select(e => new IdentityError { Description = e }).ToArray()));
+                .ReturnsAsync(IdentityResult.Failed([.. errors.Select(e => new IdentityError { Description = e })]));
 
             // Act
             var result = await _controller.CreateUserAsync(newUserDto);
 
             // Assert
-            Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
+            Assert.IsInstanceOfType<BadRequestObjectResult>(result);
             var badRequestResult = (BadRequestObjectResult)result;
             Assert.IsNotNull(badRequestResult.Value);
 
@@ -157,9 +147,9 @@ namespace ActiLink.UnitTests
             Assert.IsTrue(result.Succeeded);
             Assert.IsNotNull(result.Data);
 
-            var tokens = result.Data;
-            Assert.IsFalse(string.IsNullOrEmpty(tokens.AccessToken));
-            Assert.IsFalse(string.IsNullOrEmpty(tokens.RefreshToken));
+            var (AccessToken, RefreshToken) = result.Data;
+            Assert.IsFalse(string.IsNullOrEmpty(AccessToken));
+            Assert.IsFalse(string.IsNullOrEmpty(RefreshToken));
         }
 
         [TestMethod]
@@ -175,7 +165,7 @@ namespace ActiLink.UnitTests
             var result = await _controller.LoginAsync(loginDto);
 
             // Assert
-            Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
+            Assert.IsInstanceOfType<BadRequestObjectResult>(result);
             var badRequestResult = (BadRequestObjectResult)result;
 
             if (badRequestResult.Value is IEnumerable<string> errors)
@@ -205,7 +195,7 @@ namespace ActiLink.UnitTests
             var result = await _controller.LoginAsync(loginDto);
 
             // Assert
-            Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
+            Assert.IsInstanceOfType<BadRequestObjectResult>(result);
             var badRequestResult = (BadRequestObjectResult)result;
 
             if (badRequestResult.Value is IEnumerable<string> errors)
