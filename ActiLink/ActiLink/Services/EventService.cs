@@ -46,13 +46,13 @@ namespace ActiLink.Services
         /// <summary>
         /// Deletes the specified event.
         /// </summary>
-        /// <param name="event"></param>
+        /// <param name="eventToDelete"></param>
         /// <returns>
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation.
         /// </returns>
-        public async Task<ServiceResult> DeleteEventAsync(Event @event)
+        public async Task<ServiceResult> DeleteEventAsync(Event eventToDelete)
         {
-            _unitOfWork.EventRepository.Delete(@event);
+            _unitOfWork.EventRepository.Delete(eventToDelete);
             int result = await _unitOfWork.SaveChangesAsync();
 
             return result > 0

@@ -35,7 +35,7 @@ namespace ActiLink.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateEventAsync([FromBody] NewEventDto newEventDto)
         {
-            Event? @event = null;
+            Event? newEvent = null;
             try
             {
                 var createEventObject = _mapper.Map<CreateEventObject>(newEventDto);
@@ -46,14 +46,14 @@ namespace ActiLink.Controllers
                     _logger.LogWarning("Event creation failed: {Errors}", result.Errors);
                     return BadRequest(result.Errors);
                 }
-                @event = result.Data!;
-                _logger.LogInformation("Event {EventId} created successfully", @event.Id);
-                return CreatedAtAction(nameof(GetEventByIdAsync), new { id = @event.Id }, _mapper.Map<EventDto>(@event));
+                newEvent = result.Data!;
+                _logger.LogInformation("Event {EventId} created successfully", newEvent.Id);
+                return CreatedAtAction(nameof(GetEventByIdAsync), new { id = newEvent.Id }, _mapper.Map<EventDto>(newEvent));
             }
             catch (Exception ex)
             {
-                if (@event is not null)
-                    _ = await _eventService.DeleteEventAsync(@event);
+                if (newEvent is not null)
+                    _ = await _eventService.DeleteEventAsync(newEvent);
 
                 _logger.LogError(ex, "An unexpected error occurred while creating the event");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
