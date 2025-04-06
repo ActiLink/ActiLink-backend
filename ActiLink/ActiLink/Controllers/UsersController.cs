@@ -13,11 +13,11 @@ namespace ActiLink.Controllers
     [Route("[controller]")]
     public class UsersController : Controller
     {
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly ILogger<UsersController> _logger;
         private readonly IMapper _mapper;
 
-        public UsersController(ILogger<UsersController> logger, UserService userService, IMapper mapper)
+        public UsersController(ILogger<UsersController> logger, IUserService userService, IMapper mapper)
         {
             _userService = userService;
             _logger = logger;
@@ -129,7 +129,7 @@ namespace ActiLink.Controllers
         /// Fetches all users.
         /// </summary>
         /// <returns>
-        /// Returns a <see cref="IEnumerable{T}"/> of all users.
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing an <see cref="IEnumerable{UserDto}"/> of all users.
         /// </returns>
         [HttpGet]
         public async Task<IEnumerable<UserDto>> GetUsersAsync()
@@ -162,6 +162,7 @@ namespace ActiLink.Controllers
                 return NotFound();
             }
 
+            _logger.LogInformation("User with ID {UserId} found", id);
             return Ok(_mapper.Map<UserDto>(user));
         }
     }

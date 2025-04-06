@@ -22,8 +22,8 @@ namespace ActiLink.DTOs
         DateTime EndTime,
         Location Location,
         decimal Price,
-        int MaxUsers,
         int MinUsers,
+        int MaxUsers,
         List<UserDto> Participants,
         List<HobbyDto> Hobbies
     )

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace ActiLink.UnitTests
+namespace ActiLink.UnitTests.UserTests
 {
     [TestClass]
     public class UserAuthTests
