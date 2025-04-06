@@ -90,7 +90,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var newEventDto = new NewEventDto(userId, startTime, endTime, location, price, minUsers, maxUsers);
 
-            var errors = new List<string> { "Błąd przy tworzeniu wydarzenia" };
+            var errors = new List<string> { "Failed to create event" };
             var serviceResult = GenericServiceResult<Event>.Failure(errors);
 
             _eventServiceMock
