@@ -1,6 +1,4 @@
 ﻿using ActiLink.Model;
-using ActiLink.Repositories.Extensions;
-using System.Threading.Tasks;
 
 namespace ActiLink.Repositories
 {

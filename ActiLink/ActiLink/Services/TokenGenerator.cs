@@ -1,9 +1,9 @@
-﻿using ActiLink.Model;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using ActiLink.Model;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ActiLink.Services
 {
@@ -13,14 +13,14 @@ namespace ActiLink.Services
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
 
-        public TokenGenerator(IConfiguration configuration)
+        public TokenGenerator()
         {
-            _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")?? throw new ArgumentNullException("JWT_SECRET_KEY environment variable is not set.");
+            _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? throw new ArgumentNullException("JWT_SECRET_KEY environment variable is not set.");
             _jwtIssuer = Environment.GetEnvironmentVariable("JWT_VALID_ISSUER") ?? throw new ArgumentNullException("JWT_VALID_ISSUER environment variable is not set.");
             _jwtAudience = Environment.GetEnvironmentVariable("JWT_VALID_AUDIENCE") ?? throw new ArgumentNullException("JWT_VALID_AUDIENCE environment variable is not set.");
         }
 
-        public string GenerateJwtAccessToken(Organizer user)
+        public string GenerateAccessToken(Organizer user)
         {
             var key = Encoding.ASCII.GetBytes(_jwtSecret);
             var tokenHandler = new JwtSecurityTokenHandler();

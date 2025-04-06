@@ -1,15 +1,7 @@
-﻿using ActiLink.DTOs;
-using ActiLink.Model;
+﻿using ActiLink.Model;
 using ActiLink.Repositories;
-using AutoMapper;
-using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace ActiLink.Services
 {
@@ -20,7 +12,7 @@ namespace ActiLink.Services
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
         private readonly TokenGenerator _tokenGenerator;
-        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, SignInManager<Organizer> signInManager, TokenGenerator tokenGenerator)
+        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, TokenGenerator tokenGenerator)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
@@ -57,14 +49,14 @@ namespace ActiLink.Services
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
-                return GenericServiceResult<(string,string)>.Failure(InvalidLoginError);
+                return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
 
             var result = await _userManager.CheckPasswordAsync(user, password);
 
             if (!result)
-                return GenericServiceResult<(string,string)>.Failure(InvalidLoginError);
+                return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
 
-            var accessToken = _tokenGenerator.GenerateJwtAccessToken(user);
+            var accessToken = _tokenGenerator.GenerateAccessToken(user);
             var refreshToken = _tokenGenerator.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
@@ -76,6 +68,13 @@ namespace ActiLink.Services
 
         }
 
+        /// <summary>
+        /// Refreshes the access token using the specified <paramref name="refreshToken"/>.
+        /// </summary>
+        /// <param name="refreshToken"></param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation with the new access and refresh tokens.
+        /// </returns>
         public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> RefreshTokenAsync(string refreshToken)
         {
             var user = await _userManager.Users
@@ -86,7 +85,7 @@ namespace ActiLink.Services
             if (user == null)
                 return GenericServiceResult<(string, string)>.Failure(InvalidRefreshTokenError);
 
-            var newAccessToken = _tokenGenerator.GenerateJwtAccessToken(user);
+            var newAccessToken = _tokenGenerator.GenerateAccessToken(user);
             var newRefreshToken = _tokenGenerator.GenerateRefreshToken();
 
             user.RefreshToken = newRefreshToken;

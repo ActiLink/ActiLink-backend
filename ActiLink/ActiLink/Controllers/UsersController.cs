@@ -50,13 +50,13 @@ namespace ActiLink.Controllers
 
                 user = result.Data!;
                 _logger.LogInformation("User {userId} created successfully", user.Id);
-                return CreatedAtAction(nameof(GetUserByIdAsync), new {id = user.Id}, _mapper.Map<UserDto>(user));
+                return CreatedAtAction(nameof(GetUserByIdAsync), new { id = user.Id }, _mapper.Map<UserDto>(user));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
 
-                if(user is not null)
+                if (user is not null)
                     _ = await _userService.DeleteUserAsync(user);
 
                 return StatusCode(StatusCodes.Status500InternalServerError);
@@ -115,7 +115,7 @@ namespace ActiLink.Controllers
                     return BadRequest(result.Errors);
                 }
 
-               (string accessToken, string refreshToken) = result.Data!;
+                (string accessToken, string refreshToken) = result.Data!;
                 return Ok(new TokenResponseDto(accessToken, refreshToken));
             }
             catch (Exception ex)
