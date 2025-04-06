@@ -1,7 +1,6 @@
 ﻿using ActiLink.DTOs;
 using ActiLink.Model;
 using AutoMapper;
-using System.Linq;
 
 namespace ActiLink.MapperProfiles
 {

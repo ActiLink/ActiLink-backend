@@ -1,15 +1,7 @@
-﻿using ActiLink.DTOs;
-using ActiLink.Model;
+﻿using ActiLink.Model;
 using ActiLink.Repositories;
-using AutoMapper;
-using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace ActiLink.Services
 {
@@ -57,12 +49,12 @@ namespace ActiLink.Services
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
-                return GenericServiceResult<(string,string)>.Failure(InvalidLoginError);
+                return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
 
             var result = await _userManager.CheckPasswordAsync(user, password);
 
             if (!result)
-                return GenericServiceResult<(string,string)>.Failure(InvalidLoginError);
+                return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
 
             var accessToken = _jwtTokenProvider.GenerateAccessToken(user);
             var refreshToken = _jwtTokenProvider.GenerateRefreshToken();

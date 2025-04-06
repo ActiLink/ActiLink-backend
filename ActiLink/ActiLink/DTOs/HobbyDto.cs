@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ActiLink.DTOs
+﻿namespace ActiLink.DTOs
 {
     /// <summary>
     /// Data transfer object for Hobby (read operations)

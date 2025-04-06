@@ -1,7 +1,6 @@
 ﻿using ActiLink.Model;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.CompilerServices;
 
 namespace ActiLink
 {
