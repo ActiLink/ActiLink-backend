@@ -1,8 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.SqlServer;
-using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
 
 namespace ActiLink.Model
 {
@@ -26,7 +22,7 @@ namespace ActiLink.Model
         /// <summary>
         /// Constructor for creating an event.
         /// </summary>
-        private Event() {}
+        private Event() { }
         public Event(Organizer organizer, DateTime startTime, DateTime endTime, Location location,
                      decimal price, int maxUsers, int minUsers)
         {

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ActiLink.Model;
+﻿using ActiLink.Model;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,10 +1,5 @@
-﻿using ActiLink;
-using ActiLink.Model;
+﻿using ActiLink.Model;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ActiLink.IntegrationTests
 {

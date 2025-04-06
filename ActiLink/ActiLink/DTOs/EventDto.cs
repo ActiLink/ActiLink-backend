@@ -1,5 +1,4 @@
 ﻿using ActiLink.Model;
-using System;
 
 namespace ActiLink.DTOs
 {
