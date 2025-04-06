@@ -11,8 +11,8 @@ namespace ActiLink.Services
         private readonly UserManager<Organizer> _userManager;
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
-        private readonly JwtTokenProvider _jwtTokenProvider;
-        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, JwtTokenProvider tokenGenerator)
+        private readonly TokenGenerator _jwtTokenProvider;
+        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, TokenGenerator tokenGenerator)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));

@@ -37,7 +37,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 // Add services
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<JwtTokenProvider>();
+builder.Services.AddScoped<TokenGenerator>();
 
 
 builder.Services.AddControllers();
