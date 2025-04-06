@@ -7,20 +7,20 @@ using System.Text;
 
 namespace ActiLink.Services
 {
-    public class TokenGenerator
+    public class JwtTokenProvider
     {
         private readonly string _jwtSecret;
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
 
-        public TokenGenerator(IConfiguration configuration)
+        public JwtTokenProvider(IConfiguration configuration)
         {
             _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")?? throw new ArgumentNullException("JWT_SECRET_KEY environment variable is not set.");
             _jwtIssuer = Environment.GetEnvironmentVariable("JWT_VALID_ISSUER") ?? throw new ArgumentNullException("JWT_VALID_ISSUER environment variable is not set.");
             _jwtAudience = Environment.GetEnvironmentVariable("JWT_VALID_AUDIENCE") ?? throw new ArgumentNullException("JWT_VALID_AUDIENCE environment variable is not set.");
         }
 
-        public string GenerateJwtAccessToken(Organizer user)
+        public string GenerateAccessToken(Organizer user)
         {
             var key = Encoding.ASCII.GetBytes(_jwtSecret);
             var tokenHandler = new JwtSecurityTokenHandler();
