@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace ActiLink.IntegrationTests
 {
     [TestClass]
-    public class DB_Integration_Tests
+    public class UserTests
     {
         private DbContextOptions<ApiContext> _options = null!; // Wyraźne oznaczenie jako non-null
 

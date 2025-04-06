@@ -11,6 +11,7 @@ namespace ActiLink
     internal class ApiContext : IdentityDbContext<Organizer>
     {
         //DbSet<Organizer> Organizers { get; set; }
+        DbSet<Event> Events { get; set; }  // Added DbSet for Event
         DbSet<Hobby> Hobbies { get; set; }
 
         public ApiContext(DbContextOptions<ApiContext> options) : base(options) { }
