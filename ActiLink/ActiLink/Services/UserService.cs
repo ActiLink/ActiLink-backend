@@ -26,7 +26,8 @@ namespace ActiLink.Services
         /// <param name="email"></param>
         /// <param name="password">Must meet the password policy requirements</param>
         /// <returns>
-        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation.
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="GenericServiceResult{T}"/> of the operation
+        /// with the created <see cref="User"/> object or null and error messages if the creation failed.
         /// </returns>
         public async Task<GenericServiceResult<User>> CreateUserAsync(string username, string email, string password)
         {
@@ -42,7 +43,8 @@ namespace ActiLink.Services
         /// <param name="email"></param>
         /// <param name="password"></param>
         /// <returns>
-        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation.
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="GenericServiceResult{T}"/> of the operation 
+        /// with the access and refresh tokens or null and error messages if the authentication failed.
         /// </returns>
         public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> LoginAsync(string email, string password)
         {
@@ -73,7 +75,8 @@ namespace ActiLink.Services
         /// </summary>
         /// <param name="refreshToken"></param>
         /// <returns>
-        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation with the new access and refresh tokens.
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="GenericServiceResult{T}"/> of the operation 
+        /// with the new access and refresh tokens or null and error messages if the refresh token is invalid or expired.
         /// </returns>
         public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> RefreshTokenAsync(string refreshToken)
         {

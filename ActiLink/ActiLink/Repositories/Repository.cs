@@ -20,7 +20,7 @@ namespace ActiLink.Repositories
             return await _dbSet.ToListAsync();
         }
 
-        public async Task<TEntity?> GetByIdAsync(Guid id)
+        public async Task<TEntity?> GetByIdAsync<TKey>(TKey id)
         {
             return await _dbSet.FindAsync(id);
         }
