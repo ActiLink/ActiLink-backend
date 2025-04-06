@@ -16,5 +16,8 @@ namespace ActiLink.Model
         {
             Name = name;
         }
+
+        public ICollection<User> Users { get; private set; } = [];
+        public ICollection<Event> Events { get; private set; } = [];
     }
 }
