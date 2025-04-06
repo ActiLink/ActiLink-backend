@@ -14,8 +14,8 @@ namespace ActiLink.Model
         public Location Location { get; private set; } = new Location(0, 0);
         [Precision(10, 2)]
         public decimal Price { get; private set; }
-        public int MaxUsers { get; private set; }
         public int MinUsers { get; private set; }
+        public int MaxUsers { get; private set; }
         public ICollection<User> SignUpList { get; private set; } = [];
         public ICollection<Hobby> RelatedHobbies { get; private set; } = [];
 
@@ -24,15 +24,15 @@ namespace ActiLink.Model
         /// </summary>
         private Event() { }
         public Event(Organizer organizer, DateTime startTime, DateTime endTime, Location location,
-                     decimal price, int maxUsers, int minUsers)
+                     decimal price, int minUsers, int maxUsers)
         {
             Organizer = organizer;
             StartTime = startTime;
             EndTime = endTime;
             Location = location;
             Price = price;
-            MaxUsers = maxUsers;
             MinUsers = minUsers;
+            MaxUsers = maxUsers;
         }
     }
 }

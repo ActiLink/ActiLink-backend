@@ -9,10 +9,10 @@ namespace ActiLink.Model
         public double Latitude { get; set; }
         public Location() { }
 
-        public Location(double longitude, double latitude)
+        public Location(double latitude, double longitude)
         {
-            Longitude = longitude;
             Latitude = latitude;
+            Longitude = longitude;
         }
     }
 }

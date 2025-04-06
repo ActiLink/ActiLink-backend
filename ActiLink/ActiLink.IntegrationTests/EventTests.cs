@@ -54,7 +54,7 @@ namespace ActiLink.IntegrationTests
                 Assert.IsNotNull(savedEvent);
                 Assert.IsNotNull(savedEvent!.Organizer);
                 Assert.AreEqual("Organizer", savedEvent.Organizer.UserName);
-                Assert.AreEqual(51.1079, savedEvent.Location.Longitude);
+                Assert.AreEqual(51.1079, savedEvent.Location.Latitude);
                 Assert.AreEqual(50.00m, savedEvent.Price);
             }
         }

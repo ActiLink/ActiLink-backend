@@ -18,7 +18,7 @@ namespace ActiLink.DTOs
         DateTime EndTime,
         Location Location,
         decimal Price,
-        int MaxUsers,
-        int MinUsers
+        int MinUsers,
+        int MaxUsers
     );
 }

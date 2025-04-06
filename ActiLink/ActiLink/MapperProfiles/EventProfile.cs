@@ -1,5 +1,6 @@
 ﻿using ActiLink.DTOs;
 using ActiLink.Model;
+using ActiLink.Services;
 using AutoMapper;
 
 namespace ActiLink.MapperProfiles
@@ -17,8 +18,11 @@ namespace ActiLink.MapperProfiles
                 .ForMember(dest => dest.Participants, opt => opt.MapFrom(src => src.SignUpList))
                 .ForMember(dest => dest.Hobbies, opt => opt.MapFrom(src => src.RelatedHobbies));
 
-            // Map NewEventDto to Event
-            CreateMap<NewEventDto, Event>()
+            // Map NewEventDto to CreateEventObject (used in services)
+            CreateMap<NewEventDto, CreateEventObject>();
+
+            // Map CreateEventObject to Event
+            CreateMap<CreateEventObject, Event>()
                 .ForMember(dest => dest.SignUpList, opt => opt.MapFrom(_ => new List<User>()))
                 .ForMember(dest => dest.RelatedHobbies, opt => opt.MapFrom(_ => new List<Hobby>()))
                 .AfterMap((src, dest, context) =>
