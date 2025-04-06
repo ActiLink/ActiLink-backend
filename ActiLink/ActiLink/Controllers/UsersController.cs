@@ -13,11 +13,11 @@ namespace ActiLink.Controllers
     [Route("[controller]")]
     public class UsersController : Controller
     {
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly ILogger<UsersController> _logger;
         private readonly IMapper _mapper;
 
-        public UsersController(ILogger<UsersController> logger, UserService userService, IMapper mapper)
+        public UsersController(ILogger<UsersController> logger, IUserService userService, IMapper mapper)
         {
             _userService = userService;
             _logger = logger;
