@@ -9,11 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActiLink.UnitTests", "ActiL
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8D762DDC-DAFB-4387-B608-B38377F6CEF5}"
-	ProjectSection(SolutionItems) = preProject
-		ActiLink.IntegrationTests\ActiLink.IntegrationTests.csproj = ActiLink.IntegrationTests\ActiLink.IntegrationTests.csproj
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActiLink.IntegrationTests", "ActiLink.IntegrationTests\ActiLink.IntegrationTests.csproj", "{4276104D-CA6B-44E2-899C-B51C3C658025}"
 EndProject
 Global
