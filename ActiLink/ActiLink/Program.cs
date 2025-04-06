@@ -36,8 +36,8 @@ builder.Services.AddDbContext<ApiContext>(options =>
 builder.Services.AddAutoMapper(typeof(Program));
 
 // Add services
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<TokenGenerator>();
 
 
