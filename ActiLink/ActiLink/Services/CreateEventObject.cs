@@ -8,7 +8,7 @@ namespace ActiLink.Services
         DateTime EndTime,
         Location Location,
         decimal Price,
-        int MaxUsers,
         int MinUsers
+        int MaxUsers,
     );
 }

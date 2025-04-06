@@ -37,6 +37,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 // Add services
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<TokenGenerator>();
 
 
