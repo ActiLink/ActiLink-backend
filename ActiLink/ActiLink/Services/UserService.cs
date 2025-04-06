@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ActiLink.Services
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<Organizer> _userManager;

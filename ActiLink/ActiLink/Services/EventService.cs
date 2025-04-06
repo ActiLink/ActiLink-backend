@@ -4,7 +4,7 @@ using AutoMapper;
 
 namespace ActiLink.Services
 {
-    public class EventService
+    public class EventService : IEventService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -73,6 +73,12 @@ namespace ActiLink.Services
             return await _unitOfWork.EventRepository.GetByIdAsync(eventId);
         }
 
+        /// <summary>
+        /// Gets all events.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="IEnumerable{T}"/> of all events.
+        /// </returns>
         public async Task<IEnumerable<Event>> GetAllEventsAsync()
         {
             return await _unitOfWork.EventRepository.GetAllAsync();
