@@ -1,12 +1,11 @@
-﻿
-using ActiLink.Model;
+﻿using ActiLink.Model;
 using ActiLink.Repositories;
 using ActiLink.Services;
 using AutoMapper;
 using Moq;
 
 
-namespace ActiLink.UnitTests
+namespace ActiLink.UnitTests.EventTests
 {
     [TestClass]
     public class EventServiceTests

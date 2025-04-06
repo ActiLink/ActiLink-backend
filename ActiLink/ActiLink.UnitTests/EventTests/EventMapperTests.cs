@@ -10,7 +10,7 @@ using ActiLink.Services;
 using AutoMapper;
 using Moq;
 
-namespace ActiLink.UnitTests
+namespace ActiLink.UnitTests.EventTests
 {
     [TestClass]
     public class EventMapperTests

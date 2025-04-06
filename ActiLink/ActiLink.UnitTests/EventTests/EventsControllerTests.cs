@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace ActiLink.UnitTests
+namespace ActiLink.UnitTests.EventTests
 {
     [TestClass]
     public class EventsControllerTests
