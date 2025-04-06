@@ -35,7 +35,7 @@ namespace ActiLink.IntegrationTests
                 organizer,
                 _fixedDate.AddDays(1),
                 _fixedDate.AddDays(2),
-                new Location((double)51.1079, (double)17.0385),
+                new Location(51.1079, 17.0385),
                 50.00m,
                 10,
                 2);
@@ -58,7 +58,7 @@ namespace ActiLink.IntegrationTests
                 Assert.IsNotNull(savedEvent);
                 Assert.IsNotNull(savedEvent!.Organizer);
                 Assert.AreEqual("Organizer", savedEvent.Organizer.UserName);
-                Assert.AreEqual((double)51.1079, savedEvent.Location.Longitude);
+                Assert.AreEqual(51.1079, savedEvent.Location.Longitude);
                 Assert.AreEqual(50.00m, savedEvent.Price);
             }
         }
@@ -74,7 +74,7 @@ namespace ActiLink.IntegrationTests
                 organizer,
                 _fixedDate.AddDays(1),
                 _fixedDate.AddDays(2),
-                new Location((double)51.1079, (double)17.0385),
+                new Location(51.1079, 17.0385),
                 50.00m,
                 10,
                 2);
@@ -119,7 +119,7 @@ namespace ActiLink.IntegrationTests
                 organizer,
                 _fixedDate.AddDays(1),
                 _fixedDate.AddDays(2),
-                new Location((double)51.1079, (double)17.0385),
+                new Location(51.1079, 17.0385),
                 50.00m,
                 10,
                 2);
@@ -163,7 +163,7 @@ namespace ActiLink.IntegrationTests
                 organizer,
                 _fixedDate.AddDays(1),
                 _fixedDate.AddDays(2),
-                new Location((double)51.1079, (double)17.0385),
+                new Location(51.1079, 17.0385),
                 50.00m,
                 10,
                 2);
@@ -213,7 +213,7 @@ namespace ActiLink.IntegrationTests
                 organizer,
                 _fixedDate.AddDays(1),
                 _fixedDate.AddDays(2),
-                new Location((double)51.1079, (double)17.0385),
+                new Location(51.1079, 17.0385),
                 50.00m,
                 10,
                 2);

@@ -23,20 +23,6 @@ namespace ActiLink
             modelBuilder.Entity<Organizer>()
                 .HasDiscriminator<string>("OrganizerType")
                 .HasValue<User>("User");
-
-            modelBuilder.Entity<Event>(e =>
-            {
-                e.OwnsOne(x => x.Location, l =>
-                {
-                    l.Property(p => p.Longitude).HasColumnName("Longitude");
-                    l.Property(p => p.Latitude).HasColumnName("Latitude");
-                });
-
-                e.HasOne(ev => ev.Organizer)
-                            .WithMany(o => o.Events)
-                            .IsRequired()
-                            .OnDelete(DeleteBehavior.Restrict);
-            });
         }
     }
 }

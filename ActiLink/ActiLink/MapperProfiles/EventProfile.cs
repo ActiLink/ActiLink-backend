@@ -9,14 +9,6 @@ namespace ActiLink.MapperProfiles
     {
         public EventProfile()
         {
-            // Map User to UserDto with null handling
-            CreateMap<User, UserDto>()
-                .ConstructUsing(u => new UserDto(
-                    u.Id,
-                    u.UserName ?? string.Empty,
-                    u.Email ?? string.Empty
-                ));
-
             // Map Hobby to HobbyDto
             CreateMap<Hobby, HobbyDto>();
 
