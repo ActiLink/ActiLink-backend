@@ -3,6 +3,7 @@ using ActiLink.Model;
 using ActiLink.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ActiLink.Services
 {
@@ -14,12 +15,12 @@ namespace ActiLink.Services
         private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
         private readonly JwtTokenProvider _tokenProvider;
         private readonly JwtSettings _jwtSettings;
-        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, JwtTokenProvider provider, JwtSettings jwtSettings)
+        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, JwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _tokenProvider = provider ?? throw new ArgumentNullException(nameof(provider));
-            _jwtSettings = jwtSettings ?? throw new ArgumentNullException(nameof(jwtSettings));
+            _jwtSettings = jwtOptions.Value ?? throw new ArgumentNullException(nameof(jwtOptions));
         }
 
         /// <summary>
@@ -64,10 +65,15 @@ namespace ActiLink.Services
             var accessToken = _tokenProvider.GenerateAccessToken(user);
             var refreshToken = _tokenProvider.GenerateRefreshToken(user.Id);
 
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays);
-
-            await _userManager.UpdateAsync(user);
+            var refreshTokenEntity = new RefreshToken
+            {
+                Token = refreshToken,
+                ExpiryTimeUtc = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
+                TokenOwner = user
+            };
+            
+            await _unitOfWork.RefreshTokenRepository.AddAsync(refreshTokenEntity);
+            await _unitOfWork.SaveChangesAsync();
 
             return GenericServiceResult<(string, string)>.Success((accessToken, refreshToken));
 
@@ -83,21 +89,33 @@ namespace ActiLink.Services
         /// </returns>
         public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> RefreshTokenAsync(string refreshToken)
         {
-            var user = await _userManager.Users
-                .FirstOrDefaultAsync(u =>
-                    u.RefreshToken == refreshToken &&
-                    u.RefreshTokenExpiryTime > DateTime.UtcNow);
+            var refreshTokenEntity = await _unitOfWork
+                .RefreshTokenRepository
+                .Query()
+                .Include(rt => rt.TokenOwner)
+                .FirstOrDefaultAsync(rt =>
+                    rt.Token == refreshToken &&
+                    rt.ExpiryTimeUtc > DateTime.UtcNow);
 
-            if (user == null)
+            if (refreshTokenEntity == null)
                 return GenericServiceResult<(string, string)>.Failure(InvalidRefreshTokenError);
+
+            var user = refreshTokenEntity.TokenOwner;
 
             var newAccessToken = _tokenProvider.GenerateAccessToken(user);
             var newRefreshToken = _tokenProvider.GenerateRefreshToken(user.Id!);
 
-            user.RefreshToken = newRefreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays);
+            _unitOfWork.RefreshTokenRepository.Delete(refreshTokenEntity);
 
-            await _userManager.UpdateAsync(user);
+            var newToken = new RefreshToken
+            {
+                Token = newRefreshToken,
+                ExpiryTimeUtc = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
+                TokenOwner = user
+            };
+
+            await _unitOfWork.RefreshTokenRepository.AddAsync(newToken);
+            await _unitOfWork.SaveChangesAsync();
 
             return GenericServiceResult<(string, string)>.Success((newAccessToken, newRefreshToken));
         }

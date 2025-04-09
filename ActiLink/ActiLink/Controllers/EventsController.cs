@@ -35,6 +35,7 @@ namespace ActiLink.Controllers
         [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> CreateEventAsync([FromBody] NewEventDto newEventDto)
         {
             Event? newEvent = null;
@@ -74,6 +75,7 @@ namespace ActiLink.Controllers
         [Authorize]
         [ActionName(nameof(GetEventByIdAsync))]
         [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetEventByIdAsync(Guid id)
         {
@@ -97,6 +99,8 @@ namespace ActiLink.Controllers
         /// </returns>
         [HttpGet]
         [Authorize]
+        [ProducesResponseType(typeof(IEnumerable<EventDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IEnumerable<EventDto>> GetAllEventsAsync()
         {
             _logger.LogInformation("Fetching all events");

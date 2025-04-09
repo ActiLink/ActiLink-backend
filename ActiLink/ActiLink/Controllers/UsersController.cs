@@ -135,6 +135,8 @@ namespace ActiLink.Controllers
         /// </returns>
         [HttpGet]
         [Authorize]
+        [ProducesResponseType(typeof(IEnumerable<UserDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IEnumerable<UserDto>> GetUsersAsync()
         {
             _logger.LogInformation("Fetching all users");
@@ -154,6 +156,7 @@ namespace ActiLink.Controllers
         [Authorize]
         [ActionName(nameof(GetUserByIdAsync))]
         [ProducesResponseType<UserDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetUserByIdAsync([FromRoute] string id)
         {
