@@ -2,7 +2,9 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using ActiLink.Configuration;
 using ActiLink.Model;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ActiLink.Services
@@ -12,12 +14,14 @@ namespace ActiLink.Services
         private readonly string _jwtSecret;
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
+        private readonly JwtSettings _jwtSettings;
 
-        public JwtTokenProvider()
+        public JwtTokenProvider(IOptions<JwtSettings> jwtOptions)
         {
             _jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? throw new ArgumentNullException("JWT_SECRET_KEY environment variable is not set.");
             _jwtIssuer = Environment.GetEnvironmentVariable("JWT_VALID_ISSUER") ?? throw new ArgumentNullException("JWT_VALID_ISSUER environment variable is not set.");
             _jwtAudience = Environment.GetEnvironmentVariable("JWT_VALID_AUDIENCE") ?? throw new ArgumentNullException("JWT_VALID_AUDIENCE environment variable is not set.");
+            _jwtSettings = jwtOptions.Value;
         }
 
         public string GenerateAccessToken(Organizer user)
@@ -38,7 +42,7 @@ namespace ActiLink.Services
                 Subject = new ClaimsIdentity(claims),
                 Issuer = _jwtIssuer,
                 Audience = _jwtAudience,
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiryMinutes),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
@@ -62,7 +66,7 @@ namespace ActiLink.Services
                 Subject = new ClaimsIdentity(claims),
                 Issuer = _jwtIssuer,
                 Audience = _jwtAudience,
-                Expires = DateTime.UtcNow.AddDays(30), 
+                Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays), 
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 

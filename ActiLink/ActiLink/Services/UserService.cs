@@ -1,4 +1,5 @@
-﻿using ActiLink.Model;
+﻿using ActiLink.Configuration;
+using ActiLink.Model;
 using ActiLink.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +13,13 @@ namespace ActiLink.Services
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
         private readonly JwtTokenProvider _tokenProvider;
-        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, JwtTokenProvider provider)
+        private readonly JwtSettings _jwtSettings;
+        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, JwtTokenProvider provider, JwtSettings jwtSettings)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _tokenProvider = provider ?? throw new ArgumentNullException(nameof(provider));
+            _jwtSettings = jwtSettings ?? throw new ArgumentNullException(nameof(jwtSettings));
         }
 
         /// <summary>
@@ -62,7 +65,7 @@ namespace ActiLink.Services
             var refreshToken = _tokenProvider.GenerateRefreshToken(user.Id);
 
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays);
 
             await _userManager.UpdateAsync(user);
 
@@ -92,7 +95,7 @@ namespace ActiLink.Services
             var newRefreshToken = _tokenProvider.GenerateRefreshToken(user.Id!);
 
             user.RefreshToken = newRefreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays);
 
             await _userManager.UpdateAsync(user);
 

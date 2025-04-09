@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 ENV_FILE=".env"
 VAR_NAME="JWT_SECRET"

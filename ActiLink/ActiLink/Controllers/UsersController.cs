@@ -117,6 +117,7 @@ namespace ActiLink.Controllers
                 }
 
                 (string accessToken, string refreshToken) = result.Data!;
+                _logger.LogInformation("Token refresh successful");
                 return Ok(new TokenResponseDto(accessToken, refreshToken));
             }
             catch (Exception ex)
@@ -150,6 +151,7 @@ namespace ActiLink.Controllers
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="IActionResult"/> of the operation with the <see cref="UserDto"/> if the user exists.  
         /// </returns>
         [HttpGet("{id}")]
+        [Authorize]
         [ActionName(nameof(GetUserByIdAsync))]
         [ProducesResponseType<UserDto>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

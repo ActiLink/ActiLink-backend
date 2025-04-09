@@ -1,5 +1,6 @@
 using System.Text;
 using ActiLink;
+using ActiLink.Configuration;
 using ActiLink.Model;
 using ActiLink.Repositories;
 using ActiLink.Services;
@@ -35,6 +36,9 @@ builder.Services.AddDbContext<ApiContext>(options =>
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
+// Add configuration
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+
 // Add services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEventService, EventService>();
@@ -62,7 +66,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "WprowadŸ **Bearer &lt;twój_token&gt;**. Przyk³ad: `Bearer eyJhbGciOi...`"
+        Description = "Input **Bearer &lt;your_token&gt;**. Example: `Bearer eyJhbGciOi...`"
     });
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -106,20 +110,6 @@ builder.Services.AddAuthentication(options =>
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!))
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-                if (!string.IsNullOrEmpty(authHeader) && !authHeader.StartsWith("Bearer "))
-                {
-                    context.Token = authHeader; // ustaw token rêcznie
-                }
-
-                return Task.CompletedTask;
-            }
         };
     });
 builder.Services.AddAuthorization();
