@@ -2,6 +2,7 @@
 using ActiLink.Model;
 using ActiLink.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ActiLink.Controllers
@@ -100,7 +101,7 @@ namespace ActiLink.Controllers
         /// </summary>
         /// <param name="refreshDto">DTO containing refresh token</param>
         /// <returns>New access token and refresh token</returns>
-        [HttpPost("refresh")]
+        [HttpPost("token")]
         [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenDto refreshDto)
@@ -132,6 +133,7 @@ namespace ActiLink.Controllers
         /// The <see cref="Task"/> that represents the asynchronous operation, containing an <see cref="IEnumerable{UserDto}"/> of all users.
         /// </returns>
         [HttpGet]
+        [Authorize]
         public async Task<IEnumerable<UserDto>> GetUsersAsync()
         {
             _logger.LogInformation("Fetching all users");

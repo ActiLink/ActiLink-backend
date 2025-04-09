@@ -11,12 +11,12 @@ namespace ActiLink.Services
         private readonly UserManager<Organizer> _userManager;
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
-        private readonly TokenGenerator _tokenGenerator;
-        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, TokenGenerator tokenGenerator)
+        private readonly JwtTokenProvider _tokenProvider;
+        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, JwtTokenProvider provider)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            _tokenGenerator = tokenGenerator ?? throw new ArgumentNullException(nameof(tokenGenerator));
+            _tokenProvider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace ActiLink.Services
             if (!result)
                 return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
 
-            var accessToken = _tokenGenerator.GenerateAccessToken(user);
-            var refreshToken = _tokenGenerator.GenerateRefreshToken();
+            var accessToken = _tokenProvider.GenerateAccessToken(user);
+            var refreshToken = _tokenProvider.GenerateRefreshToken(user.Id);
 
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
@@ -88,8 +88,8 @@ namespace ActiLink.Services
             if (user == null)
                 return GenericServiceResult<(string, string)>.Failure(InvalidRefreshTokenError);
 
-            var newAccessToken = _tokenGenerator.GenerateAccessToken(user);
-            var newRefreshToken = _tokenGenerator.GenerateRefreshToken();
+            var newAccessToken = _tokenProvider.GenerateAccessToken(user);
+            var newRefreshToken = _tokenProvider.GenerateRefreshToken(user.Id!);
 
             user.RefreshToken = newRefreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);

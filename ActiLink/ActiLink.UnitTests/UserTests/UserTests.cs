@@ -20,7 +20,7 @@ namespace ActiLink.UnitTests.UserTests
         private Mock<IMapper> _mockMapper = null!;
         private UsersController _controller = null!;
         private UserService _userService = null!;
-        private TokenGenerator _tokenGenerator = null!;
+        private JwtTokenProvider _tokenGenerator = null!;
 
         [TestInitialize]
         public void Setup()
@@ -38,7 +38,7 @@ namespace ActiLink.UnitTests.UserTests
             Environment.SetEnvironmentVariable("JWT_VALID_AUDIENCE", "TestAudience");
 
             // Inicjalizacja TokenGenerator z mockowaną konfiguracją
-            _tokenGenerator = new TokenGenerator();
+            _tokenGenerator = new JwtTokenProvider();
 
             // Tworzenie rzeczywistej instancji UserService z mockami
             _userService = new UserService(
