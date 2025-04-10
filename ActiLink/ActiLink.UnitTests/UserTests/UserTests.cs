@@ -1,4 +1,5 @@
-﻿using ActiLink.Controllers;
+﻿using ActiLink.Configuration;
+using ActiLink.Controllers;
 using ActiLink.DTOs;
 using ActiLink.Model;
 using ActiLink.Repositories;
@@ -7,6 +8,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace ActiLink.UnitTests.UserTests
@@ -20,7 +22,7 @@ namespace ActiLink.UnitTests.UserTests
         private Mock<IMapper> _mockMapper = null!;
         private UsersController _controller = null!;
         private UserService _userService = null!;
-        private TokenGenerator _tokenGenerator = null!;
+        private JwtTokenProvider _tokenGenerator = null!;
 
         [TestInitialize]
         public void Setup()
@@ -32,19 +34,35 @@ namespace ActiLink.UnitTests.UserTests
 
             _mockUnitOfWork = new Mock<IUnitOfWork>();
 
+            var refreshTokenRepoMock = new Mock<IRepository<RefreshToken>>();
+            refreshTokenRepoMock
+                .Setup(r => r.AddAsync(It.IsAny<RefreshToken>()))
+                .Returns(Task.CompletedTask);
+
+            _mockUnitOfWork.Setup(u => u.RefreshTokenRepository).Returns(refreshTokenRepoMock.Object);
+
             // Ustawienie zmiennych środowiskowych dla TokenGenerator
             Environment.SetEnvironmentVariable("JWT_SECRET_KEY", "test_secret_key_12345678901234567890");
             Environment.SetEnvironmentVariable("JWT_VALID_ISSUER", "TestIssuer");
             Environment.SetEnvironmentVariable("JWT_VALID_AUDIENCE", "TestAudience");
 
+            // Ustawienie konfiguracji
+            var jwtSettings = new JwtSettings
+            {
+                AccessTokenExpiryMinutes = 60,
+                RefreshTokenExpiryDays = 30
+            };
+            var jwtOptions = Options.Create(jwtSettings);
+
             // Inicjalizacja TokenGenerator z mockowaną konfiguracją
-            _tokenGenerator = new TokenGenerator();
+            _tokenGenerator = new JwtTokenProvider(jwtOptions);
 
             // Tworzenie rzeczywistej instancji UserService z mockami
             _userService = new UserService(
                 _mockUnitOfWork.Object,
                 _mockUserManager.Object,
-                _tokenGenerator);
+                _tokenGenerator,
+                jwtOptions);
 
             // Mockowanie zależności dla UsersController
             _mockLogger = new Mock<ILogger<UsersController>>();
@@ -134,6 +152,10 @@ namespace ActiLink.UnitTests.UserTests
             // Mockowanie UserManager.UpdateAsync
             _mockUserManager.Setup(x => x.UpdateAsync(user))
                 .ReturnsAsync(IdentityResult.Success);
+
+            // Mockowanie UserManager.GenerateAccessTokenAsync
+            _mockUnitOfWork.Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
 
             // Act
             var result = await _userService.LoginAsync(email, password);

@@ -1,7 +1,10 @@
-﻿using ActiLink.Model;
+﻿using ActiLink.Configuration;
+using ActiLink.Extensions;
+using ActiLink.Model;
 using ActiLink.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ActiLink.Services
 {
@@ -11,12 +14,16 @@ namespace ActiLink.Services
         private readonly UserManager<Organizer> _userManager;
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
-        private readonly TokenGenerator _tokenGenerator;
-        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, TokenGenerator tokenGenerator)
+        private static readonly string[] FailedRefreshTokenSave = ["Failed to save the refresh token."];
+        private static readonly string[] FailedRefreshTokenUpdate = ["Failed to update the refresh token."];
+        private readonly JwtTokenProvider _tokenProvider;
+        private readonly JwtSettings _jwtSettings;
+        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, JwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            _tokenGenerator = tokenGenerator ?? throw new ArgumentNullException(nameof(tokenGenerator));
+            _tokenProvider = provider ?? throw new ArgumentNullException(nameof(provider));
+            _jwtSettings = jwtOptions.Value ?? throw new ArgumentNullException(nameof(jwtOptions));
         }
 
         /// <summary>
@@ -58,13 +65,20 @@ namespace ActiLink.Services
             if (!result)
                 return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
 
-            var accessToken = _tokenGenerator.GenerateAccessToken(user);
-            var refreshToken = _tokenGenerator.GenerateRefreshToken();
+            var accessToken = _tokenProvider.GenerateAccessToken(user);
+            var refreshToken = _tokenProvider.GenerateRefreshToken(user.Id);
 
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
-
-            await _userManager.UpdateAsync(user);
+            var refreshTokenEntity = new RefreshToken
+            {
+                Token = refreshToken,
+                ExpiryTimeUtc = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
+                TokenOwner = user
+            };
+            
+            await _unitOfWork.RefreshTokenRepository.AddAsync(refreshTokenEntity);
+            var saveResult = await _unitOfWork.SaveChangesAsync();
+            if (saveResult == 0)
+                return GenericServiceResult<(string, string)>.Failure(FailedRefreshTokenSave);
 
             return GenericServiceResult<(string, string)>.Success((accessToken, refreshToken));
 
@@ -80,21 +94,31 @@ namespace ActiLink.Services
         /// </returns>
         public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> RefreshTokenAsync(string refreshToken)
         {
-            var user = await _userManager.Users
-                .FirstOrDefaultAsync(u =>
-                    u.RefreshToken == refreshToken &&
-                    u.RefreshTokenExpiryTime > DateTime.UtcNow);
+            var refreshTokenEntity = await _unitOfWork
+                .RefreshTokenRepository
+                .GetValidTokenWithOwnerAsync(refreshToken);
 
-            if (user == null)
+            if (refreshTokenEntity == null)
                 return GenericServiceResult<(string, string)>.Failure(InvalidRefreshTokenError);
 
-            var newAccessToken = _tokenGenerator.GenerateAccessToken(user);
-            var newRefreshToken = _tokenGenerator.GenerateRefreshToken();
+            var user = refreshTokenEntity.TokenOwner;
 
-            user.RefreshToken = newRefreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
+            var newAccessToken = _tokenProvider.GenerateAccessToken(user);
+            var newRefreshToken = _tokenProvider.GenerateRefreshToken(user.Id!);
 
-            await _userManager.UpdateAsync(user);
+            _unitOfWork.RefreshTokenRepository.Delete(refreshTokenEntity);
+
+            var newToken = new RefreshToken
+            {
+                Token = newRefreshToken,
+                ExpiryTimeUtc = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
+                TokenOwner = user
+            };
+
+            await _unitOfWork.RefreshTokenRepository.AddAsync(newToken);
+            var saveResult = await _unitOfWork.SaveChangesAsync();
+            if(saveResult == 0)
+                return GenericServiceResult<(string, string)>.Failure(FailedRefreshTokenUpdate);
 
             return GenericServiceResult<(string, string)>.Success((newAccessToken, newRefreshToken));
         }

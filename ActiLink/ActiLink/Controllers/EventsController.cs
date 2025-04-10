@@ -2,6 +2,7 @@
 using ActiLink.Model;
 using ActiLink.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ActiLink.Controllers
@@ -31,8 +32,10 @@ namespace ActiLink.Controllers
         /// Returns a CreatedAtAction result with the created event's details or an error response.
         /// </returns>
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> CreateEventAsync([FromBody] NewEventDto newEventDto)
         {
             Event? newEvent = null;
@@ -69,8 +72,10 @@ namespace ActiLink.Controllers
         /// with the <see cref="EventDto"/> object or an error response if the event was not found.
         /// </returns>
         [HttpGet("{id}")]
+        [Authorize]
         [ActionName(nameof(GetEventByIdAsync))]
         [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetEventByIdAsync(Guid id)
         {
@@ -93,6 +98,9 @@ namespace ActiLink.Controllers
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="IEnumerable{EventDto}"/> of all events.
         /// </returns>
         [HttpGet]
+        [Authorize]
+        [ProducesResponseType(typeof(IEnumerable<EventDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IEnumerable<EventDto>> GetAllEventsAsync()
         {
             _logger.LogInformation("Fetching all events");

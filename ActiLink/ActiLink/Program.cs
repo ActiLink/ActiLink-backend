@@ -1,5 +1,6 @@
 using System.Text;
 using ActiLink;
+using ActiLink.Configuration;
 using ActiLink.Model;
 using ActiLink.Repositories;
 using ActiLink.Services;
@@ -24,10 +25,15 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
 // TODO: test if the connection string is correct
 var connectionString = $"Server={dbHost},1433;Database={dbName};User Id=sa;Password={dbPassword};TrustServerCertificate=True;";
 
+var env = builder.Environment;
 
-// Add ApiContext with SQL Server database
-builder.Services.AddDbContext<ApiContext>(options =>
-    options.UseSqlServer(connectionString));
+// Do not use sql server with tests
+if (!env.IsEnvironment("Testing"))
+{
+    // Add ApiContext with SQL Server database
+    builder.Services.AddDbContext<ApiContext>(options =>
+        options.UseSqlServer(connectionString));
+}
 
 
 // Add services to the container.
@@ -35,10 +41,13 @@ builder.Services.AddDbContext<ApiContext>(options =>
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
+// Add configuration
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+
 // Add services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEventService, EventService>();
-builder.Services.AddScoped<TokenGenerator>();
+builder.Services.AddScoped<JwtTokenProvider>();
 
 
 builder.Services.AddControllers();
@@ -47,7 +56,40 @@ builder.Services.AddOpenApi();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Add Swagger with authorization
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "ActiLink API",
+        Version = "v1"
+    });
+
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Input **Bearer &lt;your_token&gt;**. Example: `Bearer eyJhbGciOi...`"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // Add Identity
 builder.Services.AddIdentity<Organizer, IdentityRole>(options =>

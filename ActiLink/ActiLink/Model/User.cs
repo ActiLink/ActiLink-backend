@@ -7,6 +7,7 @@
     {
 
         public ICollection<Hobby> Hobbies { get; } = [];
+        public ICollection<Event> SignedUpEvents { get; private set; } = [];
 
         public User(string userName, string email) : base(userName, email) { }
     }
