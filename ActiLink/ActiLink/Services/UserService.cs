@@ -1,4 +1,5 @@
 ﻿using ActiLink.Configuration;
+using ActiLink.Extensions;
 using ActiLink.Model;
 using ActiLink.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +14,8 @@ namespace ActiLink.Services
         private readonly UserManager<Organizer> _userManager;
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
+        private static readonly string[] FailedRefreshTokenSave = ["Failed to save the refresh token."];
+        private static readonly string[] FailedRefreshTokenUpdate = ["Failed to update the refresh token."];
         private readonly JwtTokenProvider _tokenProvider;
         private readonly JwtSettings _jwtSettings;
         public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, JwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
@@ -73,7 +76,9 @@ namespace ActiLink.Services
             };
             
             await _unitOfWork.RefreshTokenRepository.AddAsync(refreshTokenEntity);
-            await _unitOfWork.SaveChangesAsync();
+            var saveResult = await _unitOfWork.SaveChangesAsync();
+            if (saveResult == 0)
+                return GenericServiceResult<(string, string)>.Failure(FailedRefreshTokenSave);
 
             return GenericServiceResult<(string, string)>.Success((accessToken, refreshToken));
 
@@ -91,11 +96,7 @@ namespace ActiLink.Services
         {
             var refreshTokenEntity = await _unitOfWork
                 .RefreshTokenRepository
-                .Query()
-                .Include(rt => rt.TokenOwner)
-                .FirstOrDefaultAsync(rt =>
-                    rt.Token == refreshToken &&
-                    rt.ExpiryTimeUtc > DateTime.UtcNow);
+                .GetValidTokenWithOwnerAsync(refreshToken);
 
             if (refreshTokenEntity == null)
                 return GenericServiceResult<(string, string)>.Failure(InvalidRefreshTokenError);
@@ -115,7 +116,9 @@ namespace ActiLink.Services
             };
 
             await _unitOfWork.RefreshTokenRepository.AddAsync(newToken);
-            await _unitOfWork.SaveChangesAsync();
+            var saveResult = await _unitOfWork.SaveChangesAsync();
+            if(saveResult == 0)
+                return GenericServiceResult<(string, string)>.Failure(FailedRefreshTokenUpdate);
 
             return GenericServiceResult<(string, string)>.Success((newAccessToken, newRefreshToken));
         }

@@ -20,11 +20,11 @@ Po uruchomieniu aplikacji API będzie dostępne pod następującymi adresami:
 
 Można tam pozyskać informacje o dostępnych endpointach.
 
-Aby przetestować w swaggerze endpointy wymagające autoryzacji należy pozyskać swój **access token** (np. logując się) a następnie kliknąć w **Authorize** i wprowadzić token do pola formularza.
+Aby przetestować w Swaggerze endpointy wymagające autoryzacji należy pozyskać swój **access token** (np. logując się) a następnie kliknąć w **Authorize** i wprowadzić token do pola formularza.
 
 ![image](https://github.com/user-attachments/assets/30cc69bb-511f-48c7-b8b7-0fb446cf35ac)
 
-Token w tym plu należy podać w formacie:
+Token w tym polu należy podać w formacie:
 ```bash
 Bearer <twój_token>
 ```

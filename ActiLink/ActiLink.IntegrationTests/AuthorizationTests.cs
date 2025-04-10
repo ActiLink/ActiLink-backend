@@ -76,34 +76,44 @@ namespace ActiLink.IntegrationTests
         [TestMethod]
         public async Task GetUserById_WithoutToken_ReturnsUnauthorized()
         {
-            var id = Guid.NewGuid();
+            // Arrange
+            var id = "c1a66a01-4d77-400b-b798-7b536120c568";
+            // Act
             var response = await _client.GetAsync($"/users/{id}");
+            // Assert
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
         [TestMethod]
         public async Task GetUserById_WithInvalidToken_ReturnsUnauthorized()
         {
-            var id = Guid.NewGuid();
+            // Arrange
+            var id = "efa37205-32bf-47ca-8ca4-bb4533db7729";
             var request = new HttpRequestMessage(HttpMethod.Get, $"/users/{id}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "invalid.token.value");
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
         [TestMethod]
         public async Task GetUserById_WithValidToken_AcceptsToken()
         {
-            var id = Guid.NewGuid();
+            // Arrange
+            var id = "8f895393-8201-42df-8a7e-50c2254e33a1";
             var request = new HttpRequestMessage(HttpMethod.Get, $"/users/{id}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.IsTrue(response.StatusCode != HttpStatusCode.Unauthorized, "Should be authorized");
         }
 
         [TestMethod]
         public async Task CreateEvent_WithoutToken_ReturnsUnauthorized()
         {
+            // Arrange
             var request = new HttpRequestMessage(HttpMethod.Post, "/events")
             {
                 Content = JsonContent.Create(new
@@ -118,13 +128,15 @@ namespace ActiLink.IntegrationTests
                     RelatedHobbyIds = new List<Guid>() 
                 })
             };
-
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
         [TestMethod]
         public async Task CreateEvent_WithInvalidToken_ReturnsUnauthorized()
         {
+            // Arrange
             var request = new HttpRequestMessage(HttpMethod.Post, "/events");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "invalid.token.value");
 
@@ -138,13 +150,15 @@ namespace ActiLink.IntegrationTests
                 MinUsers = 5,
                 MaxUsers = 20
             });
-
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
         [TestMethod]
         public async Task CreateEvent_WithValidToken_AcceptsToken()
         {
+            // Arrange
             var request = new HttpRequestMessage(HttpMethod.Post, "/events");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
 
@@ -158,15 +172,16 @@ namespace ActiLink.IntegrationTests
                 MinUsers = 5,
                 MaxUsers = 20
             });
-
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreNotEqual(HttpStatusCode.Unauthorized, response.StatusCode, "Should be authorized");
             Assert.IsTrue(response.StatusCode is HttpStatusCode.Created or HttpStatusCode.BadRequest);
         }
         [TestMethod]
         public async Task GetEventById_WithoutToken_ReturnsUnauthorized()
         {
-            var id = Guid.NewGuid();
+            var id = "e869b0dd-91e9-4fce-9e53-8a15afac9ec5";
             var request = new HttpRequestMessage(HttpMethod.Get, $"/events/{id}");
             var response = await _client.SendAsync(request);
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -174,47 +189,62 @@ namespace ActiLink.IntegrationTests
         [TestMethod]
         public async Task GetEventById_WithInvalidToken_ReturnsUnauthorized()
         {
-            var id = Guid.NewGuid();
+            // Arrange
+            var id = "82230b3a-bf3c-466e-8329-281a301f4d45";
             var request = new HttpRequestMessage(HttpMethod.Get, $"/events/{id}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "invalid.token.value");
 
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
         [TestMethod]
         public async Task GetEventById_WithValidToken_AcceptsToken()
         {
-            var id = Guid.NewGuid(); 
+            // Arrange
+            var id = "164d6163-1608-4458-98a7-66116111c298"; 
             var request = new HttpRequestMessage(HttpMethod.Get, $"/events/{id}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
 
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreNotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             Assert.IsTrue(response.StatusCode == HttpStatusCode.NotFound || response.StatusCode == HttpStatusCode.OK);
         }
         [TestMethod]
         public async Task GetAllEvents_WithoutToken_ReturnsUnauthorized()
         {
+            // Arrange
             var request = new HttpRequestMessage(HttpMethod.Get, "/events");
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
         [TestMethod]
         public async Task GetAllEvents_WithInvalidToken_ReturnsUnauthorized()
         {
+            // Arrange
             var request = new HttpRequestMessage(HttpMethod.Get, "/events");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "invalid.token.value");
 
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
         [TestMethod]
         public async Task GetAllEvents_WithValidToken_AcceptsToken()
         {
+            // Arrange
             var request = new HttpRequestMessage(HttpMethod.Get, "/events");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
 
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
     }

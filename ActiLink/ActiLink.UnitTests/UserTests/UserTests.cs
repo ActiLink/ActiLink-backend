@@ -153,6 +153,10 @@ namespace ActiLink.UnitTests.UserTests
             _mockUserManager.Setup(x => x.UpdateAsync(user))
                 .ReturnsAsync(IdentityResult.Success);
 
+            // Mockowanie UserManager.GenerateAccessTokenAsync
+            _mockUnitOfWork.Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
             // Act
             var result = await _userService.LoginAsync(email, password);
 
