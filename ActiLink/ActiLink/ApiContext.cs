@@ -12,6 +12,7 @@ namespace ActiLink
         //DbSet<Organizer> Organizers { get; set; }
         DbSet<Event> Events { get; set; }  // Added DbSet for Event
         DbSet<Hobby> Hobbies { get; set; }
+        DbSet<RefreshToken> RefreshTokens { get; set; } // Added DbSet for RefreshToken
 
         public ApiContext(DbContextOptions<ApiContext> options) : base(options) { }
 

@@ -2,6 +2,7 @@
 using ActiLink.Model;
 using ActiLink.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ActiLink.Controllers
@@ -100,7 +101,7 @@ namespace ActiLink.Controllers
         /// </summary>
         /// <param name="refreshDto">DTO containing refresh token</param>
         /// <returns>New access token and refresh token</returns>
-        [HttpPost("refresh")]
+        [HttpPost("token")]
         [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenDto refreshDto)
@@ -116,6 +117,7 @@ namespace ActiLink.Controllers
                 }
 
                 (string accessToken, string refreshToken) = result.Data!;
+                _logger.LogInformation("Token refresh successful");
                 return Ok(new TokenResponseDto(accessToken, refreshToken));
             }
             catch (Exception ex)
@@ -132,6 +134,9 @@ namespace ActiLink.Controllers
         /// The <see cref="Task"/> that represents the asynchronous operation, containing an <see cref="IEnumerable{UserDto}"/> of all users.
         /// </returns>
         [HttpGet]
+        [Authorize]
+        [ProducesResponseType(typeof(IEnumerable<UserDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IEnumerable<UserDto>> GetUsersAsync()
         {
             _logger.LogInformation("Fetching all users");
@@ -148,8 +153,10 @@ namespace ActiLink.Controllers
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="IActionResult"/> of the operation with the <see cref="UserDto"/> if the user exists.  
         /// </returns>
         [HttpGet("{id}")]
+        [Authorize]
         [ActionName(nameof(GetUserByIdAsync))]
         [ProducesResponseType<UserDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetUserByIdAsync([FromRoute] string id)
         {

@@ -12,6 +12,7 @@ namespace ActiLink.Repositories
         /// </summary>
         IRepository<User> UserRepository { get; }
         IRepository<Event> EventRepository { get; }
+        IRepository<RefreshToken> RefreshTokenRepository { get; }
 
         /// <summary>
         /// Saves the changes to the database

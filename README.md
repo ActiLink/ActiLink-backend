@@ -20,6 +20,25 @@ Po uruchomieniu aplikacji API będzie dostępne pod następującymi adresami:
 
 Można tam pozyskać informacje o dostępnych endpointach.
 
+Aby przetestować w Swaggerze endpointy wymagające autoryzacji należy pozyskać swój **access token** (np. logując się) a następnie kliknąć w **Authorize** i wprowadzić token do pola formularza.
+
+![image](https://github.com/user-attachments/assets/30cc69bb-511f-48c7-b8b7-0fb446cf35ac)
+
+Token w tym polu należy podać w formacie:
+```bash
+Bearer <twój_token>
+```
+
+Analogicznie, przy wysyłaniu zapytań HTTP np. z Postmana lub cURL, należy dodać nagłówek `Authorization`, gdzie:
+- **typ uwierzytelnienia (scheme)** to `Bearer`
+- **wartość** to sam token
+
+Przykład
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+
 ## 📦 Instalacja i uruchomienie  
 Aby uruchomić backend lokalnie, wykonaj następujące kroki:  
 
