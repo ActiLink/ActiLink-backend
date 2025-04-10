@@ -25,10 +25,15 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
 // TODO: test if the connection string is correct
 var connectionString = $"Server={dbHost},1433;Database={dbName};User Id=sa;Password={dbPassword};TrustServerCertificate=True;";
 
+var env = builder.Environment;
 
-// Add ApiContext with SQL Server database
-builder.Services.AddDbContext<ApiContext>(options =>
-    options.UseSqlServer(connectionString));
+// Do not use sql server with tests
+if (!env.IsEnvironment("Testing"))
+{
+    // Add ApiContext with SQL Server database
+    builder.Services.AddDbContext<ApiContext>(options =>
+        options.UseSqlServer(connectionString));
+}
 
 
 // Add services to the container.
@@ -51,6 +56,7 @@ builder.Services.AddOpenApi();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+// Add Swagger with authorization
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
