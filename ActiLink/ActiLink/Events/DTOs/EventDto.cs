@@ -46,8 +46,8 @@ namespace ActiLink.Events.DTOs
                 default,
                 default,
                 default,
-                new List<UserDto>(),
-                new List<HobbyDto>())
+                [],
+                [])
         { }
     }
 

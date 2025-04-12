@@ -1,5 +1,4 @@
-﻿using ActiLink.Organizers.Users;
-using ActiLink.Organizers.Users.DTOs;
+﻿using ActiLink.Organizers.Users.DTOs;
 using AutoMapper;
 
 namespace ActiLink.Organizers.Users.Infrastructure

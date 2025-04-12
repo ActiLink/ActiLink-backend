@@ -127,7 +127,7 @@ namespace ActiLink.UnitTests.EventTests
 
             _mockEventRepository
                 .Setup(r => r.Query())
-                .Returns(new TestAsyncEnumerable<Event>(new List<Event>()));
+                .Returns(new TestAsyncEnumerable<Event>([]));
 
             _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
 
@@ -191,7 +191,7 @@ namespace ActiLink.UnitTests.EventTests
 
             _mockEventRepository
                 .Setup(r => r.Query())
-                .Returns(new TestAsyncEnumerable<Event>(new List<Event>()));
+                .Returns(new TestAsyncEnumerable<Event>([]));
 
             _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
 
@@ -229,7 +229,7 @@ namespace ActiLink.UnitTests.EventTests
 
             _mockEventRepository
                 .Setup(r => r.Query())
-                .Returns(new TestAsyncEnumerable<Event>(new List<Event> { existingEvent }));
+                .Returns(new TestAsyncEnumerable<Event>([existingEvent]));
 
             _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
             _unitOfWorkMock
@@ -238,7 +238,7 @@ namespace ActiLink.UnitTests.EventTests
 
             _mockHobbyRepository
                 .Setup(r => r.Query())
-                .Returns(new TestAsyncEnumerable<Hobby>(new List<Hobby>()));
+                .Returns(new TestAsyncEnumerable<Hobby>([]));
             _unitOfWorkMock.Setup(u => u.HobbyRepository).Returns(_mockHobbyRepository.Object);
 
             _unitOfWorkMock
@@ -281,11 +281,11 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
             var updateEventObject = new UpdateEventObject(eventId, "Updated Title", "Updated Description", DateTime.Now, DateTime.Now.AddHours(1),
-                                                          new Location(0, 0), 50.0m, 1, 10, new List<Guid>());
+                                                          new Location(0, 0), 50.0m, 1, 10, []);
 
             _mockEventRepository
                 .Setup(r => r.Query())
-                .Returns(new TestAsyncEnumerable<Event>(new List<Event>()));
+                .Returns(new TestAsyncEnumerable<Event>([]));
 
             _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
 
@@ -311,7 +311,7 @@ namespace ActiLink.UnitTests.EventTests
 
             _mockEventRepository
                 .Setup(r => r.Query())
-                .Returns(new TestAsyncEnumerable<Event>(new List<Event> { eventToDelete }));
+                .Returns(new TestAsyncEnumerable<Event>([eventToDelete]));
 
             _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
             _unitOfWorkMock
@@ -336,7 +336,7 @@ namespace ActiLink.UnitTests.EventTests
 
             _mockEventRepository
                 .Setup(r => r.Query())
-                .Returns(new TestAsyncEnumerable<Event>(new List<Event>()));
+                .Returns(new TestAsyncEnumerable<Event>([]));
 
             _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
 

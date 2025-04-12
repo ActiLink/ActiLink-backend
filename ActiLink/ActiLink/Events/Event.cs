@@ -44,7 +44,7 @@ namespace ActiLink.Events
             Price = price;
             MinUsers = minUsers;
             MaxUsers = maxUsers;
-            RelatedHobbies = relatedHobbies.ToList() ?? new List<Hobby>();
+            RelatedHobbies = relatedHobbies.ToList() ?? [];
         }
     }
 }

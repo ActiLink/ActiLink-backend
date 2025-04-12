@@ -12,7 +12,7 @@ namespace ActiLink.UnitTests.EventTests
     [TestClass]
     public class EventMapperTests
     {
-        private IMapper _mapper = null!;
+        private Mapper _mapper = null!;
 
         [TestInitialize]
         public void Setup()
@@ -142,7 +142,7 @@ namespace ActiLink.UnitTests.EventTests
             var price = 150.00m;
             var minUsers = 3;
             var maxUsers = 15;
-            var hobbyIds = new List<Guid> { new Guid("44494479-076b-47e1-8004-399a5aa58156") };
+            var hobbyIds = new List<Guid> { new("44494479-076b-47e1-8004-399a5aa58156") };
 
             var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
             var expectedUpdateObject = new UpdateEventObject(eventId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);

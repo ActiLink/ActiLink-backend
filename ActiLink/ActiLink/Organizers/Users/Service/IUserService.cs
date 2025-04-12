@@ -1,5 +1,4 @@
-﻿using ActiLink.Organizers.Users;
-using ActiLink.Shared.ServiceUtils;
+﻿using ActiLink.Shared.ServiceUtils;
 
 namespace ActiLink.Organizers.Users.Service
 {

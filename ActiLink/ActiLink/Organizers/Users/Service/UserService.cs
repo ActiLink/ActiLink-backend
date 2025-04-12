@@ -1,6 +1,5 @@
 ﻿using ActiLink.Configuration;
 using ActiLink.Organizers.Authentication;
-using ActiLink.Organizers.Users;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
 using Microsoft.AspNetCore.Identity;

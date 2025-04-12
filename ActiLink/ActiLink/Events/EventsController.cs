@@ -104,15 +104,12 @@ namespace ActiLink.Events
 
                 if (!result.Succeeded)
                 {
-                    switch (result.ErrorCode)
+                    return result.ErrorCode switch
                     {
-                        case ErrorCode.Forbidden:
-                            return Forbid();
-                        case ErrorCode.NotFound:
-                            return NotFound();
-                        default:
-                            return BadRequest(result.Errors);
-                    }
+                        ErrorCode.Forbidden => Forbid(),
+                        ErrorCode.NotFound => NotFound(),
+                        _ => BadRequest(result.Errors),
+                    };
                 }
 
                 return Ok(_mapper.Map<EventDto>(result.Data!));
@@ -155,7 +152,7 @@ namespace ActiLink.Events
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An unexpected error occurred while fetching the event {id}");
+                _logger.LogError(ex, "An unexpected error occurred while fetching the event {id}", id);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
             }
         }
@@ -207,22 +204,19 @@ namespace ActiLink.Events
 
                 if (!result.Succeeded)
                 {
-                    switch (result.ErrorCode)
+                    return result.ErrorCode switch
                     {
-                        case ErrorCode.Forbidden:
-                            return Forbid();
-                        case ErrorCode.NotFound:
-                            return NotFound();
-                        default:
-                            return BadRequest(result.Errors);
-                    }
+                        ErrorCode.Forbidden => Forbid(),
+                        ErrorCode.NotFound => NotFound(),
+                        _ => BadRequest(result.Errors),
+                    };
                 }
 
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An unexpected error occurred while deleting the event {id} ");
+                _logger.LogError(ex, "An unexpected error occurred while deleting the event {id}", id);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
             }
         }

@@ -28,7 +28,7 @@ namespace ActiLink.UnitTests.EventTests
 
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
-        public ValueTask<bool> MoveNextAsync() => new ValueTask<bool>(_inner.MoveNext());
+        public ValueTask<bool> MoveNextAsync() => new(_inner.MoveNext());
 
         public T Current => _inner.Current;
     }

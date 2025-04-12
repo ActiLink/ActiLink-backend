@@ -5,10 +5,10 @@
     /// </summary>
     public enum ErrorCode
     {
-        None = 0,
-        NotFound = 1,
-        Forbidden = 2,
-        ValidationError = 3,
-        GeneralError = 4,
+        None,
+        NotFound,
+        Forbidden,
+        ValidationError,
+        GeneralError,
     }
 }

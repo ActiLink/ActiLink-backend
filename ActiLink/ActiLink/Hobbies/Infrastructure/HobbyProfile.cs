@@ -5,7 +5,7 @@ namespace ActiLink.Hobbies.Infrastructure
 {
     public class HobbyProfile : Profile
     {
-        public HobbyProfile() 
+        public HobbyProfile()
         {
             // Map Hobby to HobbyDto
             CreateMap<Hobby, HobbyDto>();
