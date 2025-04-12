@@ -44,14 +44,22 @@ namespace ActiLink.UnitTests.EventTests
             var minUsers = 1;
             var maxUsers = 100;
             var hobbyIds = new List<Guid>();
+            var hobby1 = new Hobby("Tenis");
+            var hobby2 = new Hobby("Piłka nożna");
+            var hobbies = new List<Hobby> { hobby1, hobby2 };
 
             var createEventObject = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
 
+            _mockHobbyRepository
+                 .Setup(r => r.Query())
+                 .Returns(new TestAsyncEnumerable<Hobby>(hobbies));
+            _unitOfWorkMock.Setup(u => u.HobbyRepository).Returns(_mockHobbyRepository.Object);
+
             // Setup mapper to map from CreateEventObject to Event.
             _mapperMock
-                .Setup(m => m.Map(It.IsAny<CreateEventObject>(), It.IsAny<Action<IMappingOperationOptions<object, Event>>>()))
+                .Setup(m => m.Map<Event>(It.IsAny<CreateEventObject>(), It.IsAny<Action<IMappingOperationOptions<object, Event>>>()))
                 .Returns(createdEvent);
 
             // Setup repository add and save.
