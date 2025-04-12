@@ -1,4 +1,8 @@
-﻿using ActiLink.Model;
+﻿using ActiLink.Events;
+using ActiLink.Hobbies;
+using ActiLink.Organizers;
+using ActiLink.Organizers.Users;
+using ActiLink.Shared.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace ActiLink.IntegrationTests

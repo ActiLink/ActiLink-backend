@@ -1,11 +1,11 @@
-﻿using ActiLink.Extensions;
-using ActiLink.Model;
-using ActiLink.Repositories;
-using ActiLink.Services;
+﻿using ActiLink.Events;
+using ActiLink.Events.Service;
+using ActiLink.Hobbies;
+using ActiLink.Organizers.Users;
+using ActiLink.Shared.Model;
+using ActiLink.Shared.Repositories;
 using AutoMapper;
-using Microsoft.Extensions.Logging;
 using Moq;
-using System.ComponentModel;
 
 
 namespace ActiLink.UnitTests.EventTests
@@ -223,7 +223,7 @@ namespace ActiLink.UnitTests.EventTests
             var updateEventObject = new UpdateEventObject(eventId, eventTitle, eventDescription, startTime, endTime,
                                                         location, price, minUsers, maxUsers, hobbyIds);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
-            var existingEvent = new Event(organizer, "Old Title", "Old Description", new DateTime(2024,2,6),new DateTime(2024, 2, 6).AddHours(3),
+            var existingEvent = new Event(organizer, "Old Title", "Old Description", new DateTime(2024, 2, 6), new DateTime(2024, 2, 6).AddHours(3),
                                          new Location(0, 0), 50.0m, 1, 10, []);
             Utils.SetupEventGuid(existingEvent, eventId);
 
@@ -248,7 +248,8 @@ namespace ActiLink.UnitTests.EventTests
 
             _mapperMock
                  .Setup(m => m.Map<UpdateEventObject, Event>(It.IsAny<UpdateEventObject>(), It.IsAny<Event>(), It.IsAny<Action<IMappingOperationOptions<UpdateEventObject, Event>>>()))
-                 .Callback<UpdateEventObject, Event, Action<IMappingOperationOptions<UpdateEventObject, Event>>>((src, dest, opt) => {
+                 .Callback<UpdateEventObject, Event, Action<IMappingOperationOptions<UpdateEventObject, Event>>>((src, dest, opt) =>
+                 {
                      typeof(Event).GetProperty(nameof(Event.Title))!.SetValue(dest, src.Title);
                      typeof(Event).GetProperty(nameof(Event.Description))!.SetValue(dest, src.Description);
                      typeof(Event).GetProperty(nameof(Event.StartTime))!.SetValue(dest, src.StartTime);

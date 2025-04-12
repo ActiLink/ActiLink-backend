@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ActiLink.DTOs;
-using System.Net.Http.Json;
+﻿using System.Net;
 using System.Net.Http.Headers;
-using ActiLink.Model;
-using ActiLink.Services;
+using System.Net.Http.Json;
+using ActiLink.Organizers;
+using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -125,7 +118,7 @@ namespace ActiLink.IntegrationTests
                     Price = 10.5m,
                     MinUsers = 5,
                     MaxUsers = 20,
-                    RelatedHobbyIds = new List<Guid>() 
+                    RelatedHobbyIds = new List<Guid>()
                 })
             };
             // Act
@@ -206,7 +199,7 @@ namespace ActiLink.IntegrationTests
         public async Task GetEventById_WithValidToken_AcceptsToken()
         {
             // Arrange
-            var id = "164d6163-1608-4458-98a7-66116111c298"; 
+            var id = "164d6163-1608-4458-98a7-66116111c298";
             var request = new HttpRequestMessage(HttpMethod.Get, $"/events/{id}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
 

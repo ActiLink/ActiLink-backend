@@ -1,9 +1,11 @@
 using System.Text;
 using ActiLink;
 using ActiLink.Configuration;
-using ActiLink.Model;
-using ActiLink.Repositories;
-using ActiLink.Services;
+using ActiLink.Events.Service;
+using ActiLink.Organizers;
+using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.Users.Service;
+using ActiLink.Shared.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

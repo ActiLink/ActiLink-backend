@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using ActiLink.Controllers;
-using ActiLink.DTOs;
-using ActiLink.Model;
-using ActiLink.Services;
+﻿using System.Security.Claims;
+using ActiLink.Events;
+using ActiLink.Events.DTOs;
+using ActiLink.Events.Service;
+using ActiLink.Organizers.Users;
+using ActiLink.Shared.Model;
+using ActiLink.Shared.ServiceUtils;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Security.Claims;
-using System.ComponentModel;
 
 namespace ActiLink.UnitTests.EventTests
 {
@@ -491,7 +488,7 @@ namespace ActiLink.UnitTests.EventTests
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
 
             var errors = new List<string> { "Event not found" };
-            var serviceResult = ServiceResult.Failure(errors,ErrorCode.NotFound);
+            var serviceResult = ServiceResult.Failure(errors, ErrorCode.NotFound);
 
             _eventServiceMock
                 .Setup(es => es.DeleteEventByIdAsync(eventId, userId))
