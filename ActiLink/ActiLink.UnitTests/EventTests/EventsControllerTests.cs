@@ -295,5 +295,296 @@ namespace ActiLink.UnitTests.EventTests
             Assert.IsNotNull(resultEvents);
             Assert.IsFalse(resultEvents.Any());
         }
+        [TestMethod]
+        public async Task UpdateEventAsync_Success_ReturnsOkResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var eventTitle = "Updated Event";
+            var eventDescription = "This is an updated test event.";
+            var startTime = new DateTime(2024, 8, 15);
+            var endTime = startTime.AddHours(3);
+            var location = new Location(53.483413, 20.095220);
+            var price = 75.5m;
+            var minUsers = 5;
+            var maxUsers = 50;
+            var hobbyIds = new List<Guid>();
+
+            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var organizer = new User("TestUser", "test@example.com") { Id = userId };
+            var updatedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
+            Utils.SetupEventGuid(updatedEvent, eventId);
+
+            var eventDto = new EventDto(eventId, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var serviceResult = GenericServiceResult<Event>.Success(updatedEvent);
+
+            _eventServiceMock
+                .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
+                .ReturnsAsync(serviceResult);
+
+            _mapperMock
+                .Setup(m => m.Map<EventDto>(updatedEvent))
+                .Returns(eventDto);
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId)
+    };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.UpdateEventAsync(eventId, updateEventDto);
+
+            // Then
+            Assert.IsInstanceOfType<OkObjectResult>(actionResult);
+            var okResult = (OkObjectResult)actionResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(StatusCodes.Status200OK, okResult.StatusCode);
+            Assert.IsNotNull(okResult.Value);
+            Assert.IsInstanceOfType<EventDto>(okResult.Value);
+            var returnedEventDto = (EventDto)okResult.Value;
+            Assert.AreEqual(eventDto, returnedEventDto);
+        }
+
+        [TestMethod]
+        public async Task UpdateEventAsync_NotAuthorized_ReturnsForbidResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
+                new Location(0, 0), 50m, 1, 10, new List<Guid>());
+
+            var errors = new List<string> { "You are not authorized to update this event." };
+            var serviceResult = GenericServiceResult<Event>.Failure(errors);
+
+            _eventServiceMock
+                .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
+                .ReturnsAsync(serviceResult);
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId)
+    };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.UpdateEventAsync(eventId, updateEventDto);
+
+            // Then
+            Assert.IsInstanceOfType<ForbidResult>(actionResult);
+        }
+
+        [TestMethod]
+        public async Task UpdateEventAsync_EventNotFound_ReturnsNotFoundResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
+                new Location(0, 0), 50m, 1, 10, new List<Guid>());
+
+            var errors = new List<string> { "Event not found" };
+            var serviceResult = GenericServiceResult<Event>.Failure(errors);
+
+            _eventServiceMock
+                .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
+                .ReturnsAsync(serviceResult);
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId)
+    };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.UpdateEventAsync(eventId, updateEventDto);
+
+            // Then
+            Assert.IsInstanceOfType<NotFoundResult>(actionResult);
+        }
+
+        [TestMethod]
+        public async Task UpdateEventAsync_ValidationFailure_ReturnsBadRequestResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
+                new Location(0, 0), 50m, 1, 10, new List<Guid>());
+
+            var errors = new List<string> { "Validation error" };
+            var serviceResult = GenericServiceResult<Event>.Failure(errors);
+
+            _eventServiceMock
+                .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
+                .ReturnsAsync(serviceResult);
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId)
+    };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.UpdateEventAsync(eventId, updateEventDto);
+
+            // Then
+            Assert.IsInstanceOfType<BadRequestObjectResult>(actionResult);
+            var badRequestResult = (BadRequestObjectResult)actionResult;
+            Assert.IsNotNull(badRequestResult.Value);
+            Assert.IsInstanceOfType<IEnumerable<string>>(badRequestResult.Value);
+            var errorList = (IEnumerable<string>)badRequestResult.Value;
+            Assert.AreEqual(1, errorList.Count());
+            Assert.AreEqual("Validation error", errorList.First());
+        }
+
+        [TestMethod]
+        public async Task DeleteEventAsync_Success_ReturnsNoContentResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+
+            var serviceResult = ServiceResult.Success();
+
+            _eventServiceMock
+                .Setup(es => es.DeleteEventByIdAsync(eventId, userId))
+                .ReturnsAsync(serviceResult);
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId)
+    };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.DeleteEventAsync(eventId);
+
+            // Then
+            Assert.IsInstanceOfType<NoContentResult>(actionResult);
+            var noContentResult = (NoContentResult)actionResult;
+            Assert.AreEqual(StatusCodes.Status204NoContent, noContentResult.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task DeleteEventAsync_EventNotFound_ReturnsNotFoundResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+
+            var errors = new List<string> { "Event not found" };
+            var serviceResult = ServiceResult.Failure(errors);
+
+            _eventServiceMock
+                .Setup(es => es.DeleteEventByIdAsync(eventId, userId))
+                .ReturnsAsync(serviceResult);
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId)
+    };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.DeleteEventAsync(eventId);
+
+            // Then
+            Assert.IsInstanceOfType<NotFoundResult>(actionResult);
+        }
+
+        [TestMethod]
+        public async Task DeleteEventAsync_NotAuthorized_ReturnsForbidResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+
+            var errors = new List<string> { "You are not authorized to delete this event." };
+            var serviceResult = ServiceResult.Failure(errors);
+
+            _eventServiceMock
+                .Setup(es => es.DeleteEventByIdAsync(eventId, userId))
+                .ReturnsAsync(serviceResult);
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId)
+    };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.DeleteEventAsync(eventId);
+
+            // Then
+            Assert.IsInstanceOfType<ForbidResult>(actionResult);
+        }
+
+        [TestMethod]
+        public async Task DeleteEventAsync_NoUserInToken_ReturnsUnauthorizedResult()
+        {
+            // Given
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+
+            // Setting up empty claims (no user ID)
+            var claims = new List<Claim>();
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.DeleteEventAsync(eventId);
+
+            // Then
+            Assert.IsInstanceOfType<UnauthorizedObjectResult>(actionResult);
+            var unauthorizedResult = (UnauthorizedObjectResult)actionResult;
+            Assert.AreEqual("User ID not found in token", unauthorizedResult.Value);
+        }
+
+        [TestMethod]
+        public async Task UpdateEventAsync_NoUserInToken_ReturnsUnauthorizedResult()
+        {
+            // Given
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
+                new Location(0, 0), 50m, 1, 10, new List<Guid>());
+
+            // Setting up empty claims (no user ID)
+            var claims = new List<Claim>();
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.UpdateEventAsync(eventId, updateEventDto);
+
+            // Then
+            Assert.IsInstanceOfType<UnauthorizedObjectResult>(actionResult);
+            var unauthorizedResult = (UnauthorizedObjectResult)actionResult;
+            Assert.AreEqual("User ID not found in token", unauthorizedResult.Value);
+        }
     }
 }

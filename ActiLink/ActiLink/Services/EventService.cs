@@ -33,10 +33,12 @@ namespace ActiLink.Services
             if (organizer is null)
                 return GenericServiceResult<Event>.Failure(["Organizer not found"]);
 
+            var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByIdsAsync(ceo.RelatedHobbyIds);
+
             // Map CreateEventObject to Event
             var newEvent = _mapper.Map<Event>(ceo, opts => { 
-                opts.Items["Organizer"] = organizer; 
-                opts.Items["Hobbies"] = _unitOfWork.HobbyRepository.GetHobbiesByIdsAsync(ceo.RelatedHobbyIds);
+                opts.Items["Organizer"] = organizer;
+                opts.Items["Hobbies"] = hobbies;
             });
 
             // Add entity to the repository
