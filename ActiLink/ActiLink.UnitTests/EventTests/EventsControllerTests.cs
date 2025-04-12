@@ -360,7 +360,7 @@ namespace ActiLink.UnitTests.EventTests
                 new Location(0, 0), 50m, 1, 10, new List<Guid>());
 
             var errors = new List<string> { "You are not authorized to update this event." };
-            var serviceResult = GenericServiceResult<Event>.Failure(errors);
+            var serviceResult = GenericServiceResult<Event>.Failure(errors, ErrorCode.Forbidden);
 
             _eventServiceMock
                 .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
@@ -392,7 +392,7 @@ namespace ActiLink.UnitTests.EventTests
                 new Location(0, 0), 50m, 1, 10, new List<Guid>());
 
             var errors = new List<string> { "Event not found" };
-            var serviceResult = GenericServiceResult<Event>.Failure(errors);
+            var serviceResult = GenericServiceResult<Event>.Failure(errors, ErrorCode.NotFound);
 
             _eventServiceMock
                 .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
@@ -491,7 +491,7 @@ namespace ActiLink.UnitTests.EventTests
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
 
             var errors = new List<string> { "Event not found" };
-            var serviceResult = ServiceResult.Failure(errors);
+            var serviceResult = ServiceResult.Failure(errors,ErrorCode.NotFound);
 
             _eventServiceMock
                 .Setup(es => es.DeleteEventByIdAsync(eventId, userId))
@@ -521,7 +521,7 @@ namespace ActiLink.UnitTests.EventTests
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
 
             var errors = new List<string> { "You are not authorized to delete this event." };
-            var serviceResult = ServiceResult.Failure(errors);
+            var serviceResult = ServiceResult.Failure(errors, ErrorCode.Forbidden);
 
             _eventServiceMock
                 .Setup(es => es.DeleteEventByIdAsync(eventId, userId))

@@ -104,12 +104,15 @@ namespace ActiLink.Controllers
 
                 if (!result.Succeeded)
                 {
-                    if (result.Errors.Contains("You are not authorized to update this event."))
-                        return Forbid();
-                    if (result.Errors.Contains("Event not found"))
-                        return NotFound();
-
-                    return BadRequest(result.Errors);
+                    switch (result.ErrorCode)
+                    {
+                        case ErrorCode.Forbidden:
+                            return Forbid();
+                        case ErrorCode.NotFound:
+                            return NotFound();
+                        default:
+                            return BadRequest(result.Errors);
+                    }
                 }
 
                 return Ok(_mapper.Map<EventDto>(result.Data!));
@@ -204,12 +207,15 @@ namespace ActiLink.Controllers
 
                 if (!result.Succeeded)
                 {
-                    if (result.Errors.Contains("Event not found"))
-                        return NotFound();
-                    if (result.Errors.Contains("You are not authorized to delete this event."))
-                        return Forbid();
-
-                    return BadRequest(result.Errors);
+                    switch (result.ErrorCode)
+                    {
+                        case ErrorCode.Forbidden:
+                            return Forbid();
+                        case ErrorCode.NotFound:
+                            return NotFound();
+                        default:
+                            return BadRequest(result.Errors);
+                    }
                 }
 
                 return NoContent();

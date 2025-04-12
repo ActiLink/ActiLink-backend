@@ -63,10 +63,10 @@ namespace ActiLink.Services
             // Check if the event exists
             var existingEvent = await _unitOfWork.EventRepository.GetByIdWithOrganizerAsync(eventToUpdate.Id);
             if (existingEvent is null)
-                return GenericServiceResult<Event>.Failure(["Event not found"]);
+                return GenericServiceResult<Event>.Failure(["Event not found"], ErrorCode.NotFound);
 
             if (existingEvent.Organizer.Id != requestingUserId)
-                return GenericServiceResult<Event>.Failure(["You are not authorized to update this event."]);
+                return GenericServiceResult<Event>.Failure(["You are not authorized to update this event."], ErrorCode.Forbidden);
 
             var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByIdsAsync(eventToUpdate.RelatedHobbyIds);
 
@@ -122,10 +122,10 @@ namespace ActiLink.Services
                 .FirstOrDefaultAsync(e => e.Id == eventId);
 
             if (eventToDelete is null)
-                return ServiceResult.Failure(["Event not found"]);
+                return ServiceResult.Failure(["Event not found"],ErrorCode.NotFound);
 
             if (eventToDelete.Organizer?.Id != requestingUserId)
-                return ServiceResult.Failure(["You are not authorized to delete this event."]);
+                return ServiceResult.Failure(["You are not authorized to delete this event."],ErrorCode.Forbidden);
 
             _unitOfWork.EventRepository.Delete(eventToDelete);
             var result = await _unitOfWork.SaveChangesAsync();
