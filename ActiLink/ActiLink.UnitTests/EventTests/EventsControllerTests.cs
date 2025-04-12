@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Security.Claims;
+using System.ComponentModel;
 
 namespace ActiLink.UnitTests.EventTests
 {
@@ -47,6 +48,8 @@ namespace ActiLink.UnitTests.EventTests
             // Given
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
             var startTime = new DateTime(1410, 7, 15);
             var endTime = startTime.AddHours(24);
             var location = new Location(53.483413, 20.095220);
@@ -55,11 +58,11 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 30_000;
             var hobbyIds = new List<Guid>();
 
-            var newEventDto = new NewEventDto(startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
-            var createdEvent = new Event(organizer, startTime, endTime, location, price, minUsers, maxUsers);
+            var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(createdEvent, eventId);
-            var eventDto = new EventDto(eventId, userId, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var eventDto = new EventDto(eventId, eventTitle, eventDescription, userId, startTime, endTime, location, price, minUsers, maxUsers, [], []);
 
             var serviceResult = GenericServiceResult<Event>.Success(createdEvent);
 
@@ -102,6 +105,8 @@ namespace ActiLink.UnitTests.EventTests
             // Given
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
             var startTime = new DateTime(1410, 7, 15);
             var endTime = startTime.AddHours(24);
             var location = new Location(53.483413, 20.095220);
@@ -110,7 +115,7 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 30_000;
             var hobbyIds = new List<Guid>();
 
-            var newEventDto = new NewEventDto( startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
 
             var errors = new List<string> { "Failed to create event" };
             var serviceResult = GenericServiceResult<Event>.Failure(errors);
@@ -151,6 +156,8 @@ namespace ActiLink.UnitTests.EventTests
             // Given
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
             var startTime = new DateTime(1410, 7, 15);
             var endTime = startTime.AddHours(24);
             var location = new Location(53.483413, 20.095220);
@@ -159,9 +166,9 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 30_000;
 
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
-            var foundEvent = new Event(organizer, startTime, endTime, location, price, minUsers, maxUsers);
+            var foundEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(foundEvent, eventId);
-            var expectedEventDto = new EventDto(eventId, userId, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var expectedEventDto = new EventDto(eventId, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
 
             _eventServiceMock
                 .Setup(es => es.GetEventByIdAsync(eventId))
@@ -222,6 +229,9 @@ namespace ActiLink.UnitTests.EventTests
             var eventId1 = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var eventId2 = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB2");
 
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
+
             var startTime = new DateTime(2024, 5, 24);
             var endTime = startTime.AddHours(2);
 
@@ -232,13 +242,13 @@ namespace ActiLink.UnitTests.EventTests
 
             var ogranizer = new User("TestUser", "test@example.com") { Id = userId };
 
-            var existingEvent1 = new Event(ogranizer, startTime, endTime, location, price, minUsers, maxUsers);
-            var existingEvent2 = new Event(ogranizer, startTime, endTime, location, price, minUsers, maxUsers);
+            var existingEvent1 = new Event(ogranizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
+            var existingEvent2 = new Event(ogranizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(existingEvent1, eventId1);
             Utils.SetupEventGuid(existingEvent2, eventId2);
 
-            var expectedEventDto1 = new EventDto(eventId1, userId, startTime, endTime, location, price, minUsers, maxUsers, [], []);
-            var expectedEventDto2 = new EventDto(eventId2, userId, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var expectedEventDto1 = new EventDto(eventId1, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var expectedEventDto2 = new EventDto(eventId2, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
 
             _eventServiceMock
                 .Setup(es => es.GetAllEventsAsync())

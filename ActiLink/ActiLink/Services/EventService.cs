@@ -66,7 +66,6 @@ namespace ActiLink.Services
             if (existingEvent.Organizer.Id != requestingUserId)
                 return GenericServiceResult<Event>.Failure(["You are not authorized to update this event."]);
 
-            var organizer = await _unitOfWork.UserRepository.GetByIdAsync(eventToUpdate.OrganizerId);
             var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByIdsAsync(eventToUpdate.RelatedHobbyIds);
 
             // Map updated properties
@@ -75,7 +74,6 @@ namespace ActiLink.Services
                existingEvent,
                opts =>
                {
-                   opts.Items["Organizer"] = organizer;
                    opts.Items["Hobbies"] = hobbies;
                });
 
@@ -145,7 +143,7 @@ namespace ActiLink.Services
         /// </returns>
         public async Task<Event?> GetEventByIdAsync(Guid eventId)
         {
-            return await _unitOfWork.EventRepository.GetByIdAsync(eventId);
+            return await _unitOfWork.EventRepository.GetByIdWithOrganizerAsync(eventId);
         }
 
         /// <summary>
@@ -156,7 +154,7 @@ namespace ActiLink.Services
         /// </returns>
         public async Task<IEnumerable<Event>> GetAllEventsAsync()
         {
-            return await _unitOfWork.EventRepository.GetAllAsync();
+            return await _unitOfWork.EventRepository.GetAllEventsAsync();
         }
     }
 }

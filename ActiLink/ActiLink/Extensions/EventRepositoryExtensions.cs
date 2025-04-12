@@ -8,9 +8,21 @@ namespace ActiLink.Extensions
     {
         public static async Task<Event?> GetByIdWithOrganizerAsync(this IRepository<Event> repository, Guid id)
         {
-            return await repository.Query()
-            .Include(e => e.Organizer)
-            .FirstOrDefaultAsync(e => e.Id == id);
+            return await repository
+                .Query()
+                .Include(e => e.Organizer)
+                .Include(e => e.SignUpList)
+                .Include(e => e.RelatedHobbies)
+                .FirstOrDefaultAsync(e => e.Id == id);
+        }
+        public static async Task<IEnumerable<Event>> GetAllEventsAsync(this IRepository<Event> repository)
+        {
+            return await repository
+                .Query()
+                .Include(e => e.Organizer)
+                .Include(e => e.SignUpList)
+                .Include(e => e.RelatedHobbies)
+                .ToListAsync();
         }
     }
 }

@@ -1,8 +1,11 @@
-﻿using ActiLink.Model;
+﻿using ActiLink.Extensions;
+using ActiLink.Model;
 using ActiLink.Repositories;
 using ActiLink.Services;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Moq;
+using System.ComponentModel;
 
 
 namespace ActiLink.UnitTests.EventTests
@@ -12,6 +15,7 @@ namespace ActiLink.UnitTests.EventTests
     {
         private Mock<IUnitOfWork> _unitOfWorkMock = null!;
         private Mock<IMapper> _mapperMock = null!;
+        private Mock<IRepository<Event>> _mockRepository = null!;
         private EventService _eventService = null!;
 
         [TestInitialize]
@@ -19,7 +23,9 @@ namespace ActiLink.UnitTests.EventTests
         {
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
+            _mockRepository = new Mock<IRepository<Event>>();
             _eventService = new EventService(_unitOfWorkMock.Object, _mapperMock.Object);
+
         }
 
         [TestMethod]
@@ -27,6 +33,8 @@ namespace ActiLink.UnitTests.EventTests
         {
             // Given
             var userId = "TestUserId";
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
             var startTime = new DateTime(2024, 1, 1);
             var endTime = startTime.AddHours(2);
             var location = new Location(0, 0);
@@ -35,9 +43,9 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 100;
             var hobbyIds = new List<Guid>();
 
-            var createEventObject = new CreateEventObject(userId, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var createEventObject = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
-            var createdEvent = new Event(organizer, startTime, endTime, location, price, minUsers, maxUsers);
+            var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
 
             // Setup mapper to map from CreateEventObject to Event.
             _mapperMock
@@ -70,6 +78,8 @@ namespace ActiLink.UnitTests.EventTests
             // Given
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
             var startTime = new DateTime(2024, 2, 6);
             var endTime = startTime.AddHours(3);
             var location = new Location(0, 0);
@@ -78,13 +88,18 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 100;
 
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
-            var existingEvent = new Event(organizer, startTime, endTime, location, price, minUsers, maxUsers);
+            var existingEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
 
             Utils.SetupEventGuid(existingEvent, eventId);
 
-            _unitOfWorkMock
-                .Setup(u => u.EventRepository.GetByIdAsync(eventId))
-                .ReturnsAsync(existingEvent);
+            var events = new List<Event> { existingEvent };
+
+            _mockRepository
+               .Setup(r => r.Query())
+               .Returns(new TestAsyncEnumerable<Event>(events));
+
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockRepository.Object);
+
 
             // When
             var resultEvent = await _eventService.GetEventByIdAsync(eventId);
@@ -99,9 +114,14 @@ namespace ActiLink.UnitTests.EventTests
         {
             // Given
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
-            _unitOfWorkMock
-                .Setup(u => u.EventRepository.GetByIdAsync(eventId))
-                .ReturnsAsync((Event?)null);
+
+            _mockRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<Event>(new List<Event>()));
+
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockRepository.Object);
+
+
 
             // When
             var resultEvent = await _eventService.GetEventByIdAsync(eventId);
@@ -118,6 +138,9 @@ namespace ActiLink.UnitTests.EventTests
             var eventId1 = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var eventId2 = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB2");
 
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
+
             var startTime = new DateTime(2024, 5, 24);
             var endTime = startTime.AddHours(2);
 
@@ -128,14 +151,18 @@ namespace ActiLink.UnitTests.EventTests
 
             var ogranizer = new User("TestUser", "test@example.com") { Id = userId };
 
-            var existingEvent1 = new Event(ogranizer, startTime, endTime, location, price, minUsers, maxUsers);
-            var existingEvent2 = new Event(ogranizer, startTime, endTime, location, price, minUsers, maxUsers);
+            var existingEvent1 = new Event(ogranizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
+            var existingEvent2 = new Event(ogranizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(existingEvent1, eventId1);
             Utils.SetupEventGuid(existingEvent2, eventId2);
 
-            _unitOfWorkMock
-                .Setup(u => u.EventRepository.GetAllAsync())
-                .ReturnsAsync([existingEvent1, existingEvent2]);
+            var events = new List<Event> { existingEvent1, existingEvent2 };
+
+            _mockRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<Event>(events));
+
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockRepository.Object);
 
             // When
             var resultEvents = await _eventService.GetAllEventsAsync();
@@ -151,9 +178,13 @@ namespace ActiLink.UnitTests.EventTests
         public async Task GetAllEventsAsync_EventsDoNotExist_ReturnsEmptyCollection()
         {
             // Given
-            _unitOfWorkMock
-                .Setup(u => u.EventRepository.GetAllAsync())
-                .ReturnsAsync([]);
+
+            _mockRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<Event>(new List<Event>()));
+
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockRepository.Object);
+
 
             // When
             var resultEvents = await _eventService.GetAllEventsAsync();
@@ -165,4 +196,6 @@ namespace ActiLink.UnitTests.EventTests
 
 
     }
+
+
 }

@@ -27,6 +27,8 @@ namespace ActiLink.MapperProfiles
                     
                     return new CreateEventObject(
                         organizerId,
+                        src.Title,
+                        src.Description,
                         src.StartTime,
                         src.EndTime,
                         src.Location,
@@ -70,7 +72,8 @@ namespace ActiLink.MapperProfiles
 
                     return new UpdateEventObject(
                         eventId,
-                        src.OrganizerId,
+                        src.Title,
+                        src.Description,
                         src.StartTime,
                         src.EndTime,
                         src.Location,
@@ -87,15 +90,6 @@ namespace ActiLink.MapperProfiles
                 .ForMember(dest => dest.RelatedHobbies, opt => opt.Ignore())
                  .AfterMap((src, dest, context) =>
                  {
-                     // Organizer
-                     if (context.Items.TryGetValue("Organizer", out var organizerObj) &&
-                         organizerObj is Organizer organizer)
-                     {
-                         typeof(Event)
-                             .GetProperty(nameof(Event.Organizer))?
-                             .SetValue(dest, organizer);
-                     }
-
                      // Hobbies
                      if (context.Items.TryGetValue("Hobbies", out var hobbiesObj) &&
                          hobbiesObj is IEnumerable<Hobby> hobbies)

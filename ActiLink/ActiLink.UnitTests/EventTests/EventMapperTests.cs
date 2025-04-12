@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,8 @@ namespace ActiLink.UnitTests.EventTests
         {
             // Given
             var userId = "TestUserId";
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
             var startTime = new DateTime(2024, 1, 1);
             var endTime = startTime.AddHours(2);
             var location = new Location(1, 2);
@@ -37,8 +40,8 @@ namespace ActiLink.UnitTests.EventTests
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var hobbyIds = new List<Guid>();
 
-            var ceoToMap = new CreateEventObject(userId, startTime, endTime, location, price, minUsers, maxUsers,hobbyIds);
-            var expectedEvent = new Event(organizer, startTime, endTime, location, price, minUsers, maxUsers);
+            var ceoToMap = new CreateEventObject(userId,eventTitle,eventDescription, startTime, endTime, location, price, minUsers, maxUsers,hobbyIds);
+            var expectedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
 
 
             // When
@@ -63,6 +66,8 @@ namespace ActiLink.UnitTests.EventTests
         {
             // Given
             var userId = "TestUserId";
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
             var startTime = new DateTime(2024, 1, 1);
             var endTime = startTime.AddHours(2);
             var location = new Location(1, 2);
@@ -71,8 +76,8 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 10;
             var hobbyIds = new List<Guid>();
 
-            var newEventDto = new NewEventDto(startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
-            var expectedCeo = new CreateEventObject(userId, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var expectedCeo = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
 
 
             // When
@@ -98,6 +103,8 @@ namespace ActiLink.UnitTests.EventTests
             // Given
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
             var startTime = new DateTime(2024, 1, 1);
             var endTime = startTime.AddHours(2);
             var location = new Location(1, 2);
@@ -106,9 +113,9 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 10;
 
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
-            var eventToMap = new Event(organizer, startTime, endTime, location, price, minUsers, maxUsers);
+            var eventToMap = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(eventToMap, eventId);
-            var expectedEventDto = new EventDto(eventId, userId, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var expectedEventDto = new EventDto(eventId, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
 
             // When
             var mappedEventDto = _mapper.Map<EventDto>(eventToMap);

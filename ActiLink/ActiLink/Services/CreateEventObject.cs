@@ -4,6 +4,8 @@ namespace ActiLink.Services
 {
     public record CreateEventObject(
         string OrganizerId,
+        string Title,
+        string Description,
         DateTime StartTime,
         DateTime EndTime,
         Location Location,

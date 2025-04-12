@@ -29,12 +29,15 @@ namespace ActiLink.IntegrationTests
             var organizer = new User("Organizer", "organizer@test.com");
             var eventData = new Event(
                 organizer,
+                "Event Title",
+                "Event Description",
                 _fixedDate.AddDays(1),
                 _fixedDate.AddDays(2),
                 new Location(51.1079, 17.0385),
                 50.00m,
                 10,
-                2);
+                2,
+                new List<Hobby>());
 
             // Act
             using (var context = new ApiContext(_options!))
@@ -68,12 +71,15 @@ namespace ActiLink.IntegrationTests
             var participant2 = new User("Participant2", "p2@test.com");
             var eventData = new Event(
                 organizer,
+                "Event Title",
+                "Event Description",
                 _fixedDate.AddDays(1),
                 _fixedDate.AddDays(2),
                 new Location(51.1079, 17.0385),
                 50.00m,
                 10,
-                2);
+                2,
+                new List<Hobby>());
 
             // Act
             using (var context = new ApiContext(_options!))
@@ -113,12 +119,15 @@ namespace ActiLink.IntegrationTests
             var hobby2 = new Hobby("Hiking");
             var eventData = new Event(
                 organizer,
+                "Event Title",
+                "Event Description",
                 _fixedDate.AddDays(1),
                 _fixedDate.AddDays(2),
                 new Location(51.1079, 17.0385),
                 50.00m,
                 10,
-                2);
+                2,
+                new List<Hobby>());
 
             // Act
             using (var context = new ApiContext(_options!))
@@ -157,12 +166,15 @@ namespace ActiLink.IntegrationTests
             var participant = new User("Participant", "participant@test.com");
             var eventData = new Event(
                 organizer,
+                "Event Title",
+                "Event Description",
                 _fixedDate.AddDays(1),
                 _fixedDate.AddDays(2),
                 new Location(51.1079, 17.0385),
                 50.00m,
                 10,
-                2);
+                2,
+                new List<Hobby>());
 
             // Act
             using (var context = new ApiContext(_options!))
@@ -207,12 +219,15 @@ namespace ActiLink.IntegrationTests
                 .ToList();
             var eventData = new Event(
                 organizer,
+                "Event Title",
+                "Event Description",
                 _fixedDate.AddDays(1),
                 _fixedDate.AddDays(2),
                 new Location(51.1079, 17.0385),
                 50.00m,
                 10,
-                2);
+                2,
+                new List<Hobby>());
 
             // Act - Part 1: Create event and add participants up to limit
             using (var context = new ApiContext(_options!))

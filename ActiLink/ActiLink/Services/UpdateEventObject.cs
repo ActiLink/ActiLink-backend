@@ -4,7 +4,8 @@ namespace ActiLink.Services
 {
     public record UpdateEventObject(
         Guid Id,
-        string OrganizerId,
+        string Title,
+        string Description,
         DateTime StartTime,
         DateTime EndTime,
         Location Location,
