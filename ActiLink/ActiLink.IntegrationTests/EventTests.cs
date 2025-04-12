@@ -1,4 +1,8 @@
-﻿using ActiLink.Model;
+﻿using ActiLink.Events;
+using ActiLink.Hobbies;
+using ActiLink.Organizers;
+using ActiLink.Organizers.Users;
+using ActiLink.Shared.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace ActiLink.IntegrationTests
@@ -7,7 +11,7 @@ namespace ActiLink.IntegrationTests
     public class EventTests
     {
         private DbContextOptions<ApiContext>? _options;
-        private static readonly DateTime _fixedDate = new DateTime(2024, 1, 1);
+        private static readonly DateTime _fixedDate = new(2024, 1, 1);
 
         [TestInitialize]
         public void Setup()
@@ -35,9 +39,9 @@ namespace ActiLink.IntegrationTests
                 _fixedDate.AddDays(2),
                 new Location(51.1079, 17.0385),
                 50.00m,
-                10,
                 2,
-                new List<Hobby>());
+                10,
+                []);
 
             // Act
             using (var context = new ApiContext(_options!))
@@ -77,9 +81,9 @@ namespace ActiLink.IntegrationTests
                 _fixedDate.AddDays(2),
                 new Location(51.1079, 17.0385),
                 50.00m,
-                10,
                 2,
-                new List<Hobby>());
+                10,
+                []);
 
             // Act
             using (var context = new ApiContext(_options!))
@@ -125,9 +129,9 @@ namespace ActiLink.IntegrationTests
                 _fixedDate.AddDays(2),
                 new Location(51.1079, 17.0385),
                 50.00m,
-                10,
                 2,
-                new List<Hobby>());
+                10,
+                []);
 
             // Act
             using (var context = new ApiContext(_options!))
@@ -172,9 +176,9 @@ namespace ActiLink.IntegrationTests
                 _fixedDate.AddDays(2),
                 new Location(51.1079, 17.0385),
                 50.00m,
-                10,
                 2,
-                new List<Hobby>());
+                10,
+                []);
 
             // Act
             using (var context = new ApiContext(_options!))
@@ -225,9 +229,9 @@ namespace ActiLink.IntegrationTests
                 _fixedDate.AddDays(2),
                 new Location(51.1079, 17.0385),
                 50.00m,
-                10,
                 2,
-                new List<Hobby>());
+                10,
+                []);
 
             // Act - Part 1: Create event and add participants up to limit
             using (var context = new ApiContext(_options!))
