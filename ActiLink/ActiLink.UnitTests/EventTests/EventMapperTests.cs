@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ActiLink.DTOs;
-using ActiLink.MapperProfiles;
-using ActiLink.Model;
-using ActiLink.Services;
+﻿using ActiLink.Events;
+using ActiLink.Events.DTOs;
+using ActiLink.Events.Infrastructure;
+using ActiLink.Events.Service;
+using ActiLink.Hobbies;
+using ActiLink.Organizers.Users;
+using ActiLink.Shared.Model;
 using AutoMapper;
-using Moq;
 
 namespace ActiLink.UnitTests.EventTests
 {
     [TestClass]
     public class EventMapperTests
     {
-        private IMapper _mapper = null!;
+        private Mapper _mapper = null!;
 
         [TestInitialize]
         public void Setup()
@@ -40,7 +36,7 @@ namespace ActiLink.UnitTests.EventTests
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var hobbyIds = new List<Guid>();
 
-            var ceoToMap = new CreateEventObject(userId,eventTitle,eventDescription, startTime, endTime, location, price, minUsers, maxUsers,hobbyIds);
+            var ceoToMap = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
             var expectedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
 
 
@@ -146,7 +142,7 @@ namespace ActiLink.UnitTests.EventTests
             var price = 150.00m;
             var minUsers = 3;
             var maxUsers = 15;
-            var hobbyIds = new List<Guid> { new Guid("44494479-076b-47e1-8004-399a5aa58156") };
+            var hobbyIds = new List<Guid> { new("44494479-076b-47e1-8004-399a5aa58156") };
 
             var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
             var expectedUpdateObject = new UpdateEventObject(eventId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
@@ -188,9 +184,9 @@ namespace ActiLink.UnitTests.EventTests
             var hobby = new Hobby("TestHobby");
             Utils.SetupHobbyGuid(hobby, hobbyId);
             var hobbies = new List<Hobby> { hobby };
-            
+
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
-            var existingEvent = new Event(organizer, "Old Title", "Old Description", new DateTime(2022,11,11), new DateTime(2022,11,12),
+            var existingEvent = new Event(organizer, "Old Title", "Old Description", new DateTime(2022, 11, 11), new DateTime(2022, 11, 12),
                                          new Location(0, 0), 50.0m, 2, 8, []);
             Utils.SetupEventGuid(existingEvent, eventId);
 

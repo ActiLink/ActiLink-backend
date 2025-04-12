@@ -1,4 +1,8 @@
-﻿using ActiLink.Model;
+﻿using ActiLink.Events;
+using ActiLink.Hobbies;
+using ActiLink.Organizers;
+using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.Users;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

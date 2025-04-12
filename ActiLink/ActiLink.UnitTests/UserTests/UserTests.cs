@@ -1,9 +1,11 @@
 ﻿using ActiLink.Configuration;
-using ActiLink.Controllers;
-using ActiLink.DTOs;
-using ActiLink.Model;
-using ActiLink.Repositories;
-using ActiLink.Services;
+using ActiLink.Organizers;
+using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.DTOs;
+using ActiLink.Organizers.Users;
+using ActiLink.Organizers.Users.DTOs;
+using ActiLink.Organizers.Users.Service;
+using ActiLink.Shared.Repositories;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

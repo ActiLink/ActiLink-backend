@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ActiLink.IntegrationTests
 {

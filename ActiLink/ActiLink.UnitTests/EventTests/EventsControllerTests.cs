@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using ActiLink.Controllers;
-using ActiLink.DTOs;
-using ActiLink.Model;
-using ActiLink.Services;
+﻿using System.Security.Claims;
+using ActiLink.Events;
+using ActiLink.Events.DTOs;
+using ActiLink.Events.Service;
+using ActiLink.Organizers.Users;
+using ActiLink.Shared.Model;
+using ActiLink.Shared.ServiceUtils;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Security.Claims;
-using System.ComponentModel;
 
 namespace ActiLink.UnitTests.EventTests
 {
@@ -76,7 +73,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userId)
+                new(ClaimTypes.NameIdentifier, userId)
             };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -126,7 +123,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userId)
+                new(ClaimTypes.NameIdentifier, userId)
             };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -180,7 +177,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userId)
+                new(ClaimTypes.NameIdentifier, userId)
             };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -329,7 +326,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var claims = new List<Claim>
     {
-        new Claim(ClaimTypes.NameIdentifier, userId)
+        new(ClaimTypes.NameIdentifier, userId)
     };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -357,7 +354,7 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
-                new Location(0, 0), 50m, 1, 10, new List<Guid>());
+                new Location(0, 0), 50m, 1, 10, []);
 
             var errors = new List<string> { "You are not authorized to update this event." };
             var serviceResult = GenericServiceResult<Event>.Failure(errors, ErrorCode.Forbidden);
@@ -368,7 +365,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var claims = new List<Claim>
     {
-        new Claim(ClaimTypes.NameIdentifier, userId)
+        new(ClaimTypes.NameIdentifier, userId)
     };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -389,7 +386,7 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
-                new Location(0, 0), 50m, 1, 10, new List<Guid>());
+                new Location(0, 0), 50m, 1, 10, []);
 
             var errors = new List<string> { "Event not found" };
             var serviceResult = GenericServiceResult<Event>.Failure(errors, ErrorCode.NotFound);
@@ -400,7 +397,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var claims = new List<Claim>
     {
-        new Claim(ClaimTypes.NameIdentifier, userId)
+        new(ClaimTypes.NameIdentifier, userId)
     };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -421,7 +418,7 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
-                new Location(0, 0), 50m, 1, 10, new List<Guid>());
+                new Location(0, 0), 50m, 1, 10, []);
 
             var errors = new List<string> { "Validation error" };
             var serviceResult = GenericServiceResult<Event>.Failure(errors);
@@ -432,7 +429,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var claims = new List<Claim>
     {
-        new Claim(ClaimTypes.NameIdentifier, userId)
+        new(ClaimTypes.NameIdentifier, userId)
     };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -467,7 +464,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var claims = new List<Claim>
     {
-        new Claim(ClaimTypes.NameIdentifier, userId)
+        new(ClaimTypes.NameIdentifier, userId)
     };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -491,7 +488,7 @@ namespace ActiLink.UnitTests.EventTests
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
 
             var errors = new List<string> { "Event not found" };
-            var serviceResult = ServiceResult.Failure(errors,ErrorCode.NotFound);
+            var serviceResult = ServiceResult.Failure(errors, ErrorCode.NotFound);
 
             _eventServiceMock
                 .Setup(es => es.DeleteEventByIdAsync(eventId, userId))
@@ -499,7 +496,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var claims = new List<Claim>
     {
-        new Claim(ClaimTypes.NameIdentifier, userId)
+        new(ClaimTypes.NameIdentifier, userId)
     };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -529,7 +526,7 @@ namespace ActiLink.UnitTests.EventTests
 
             var claims = new List<Claim>
     {
-        new Claim(ClaimTypes.NameIdentifier, userId)
+        new(ClaimTypes.NameIdentifier, userId)
     };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -570,7 +567,7 @@ namespace ActiLink.UnitTests.EventTests
             // Given
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
-                new Location(0, 0), 50m, 1, 10, new List<Guid>());
+                new Location(0, 0), 50m, 1, 10, []);
 
             // Setting up empty claims (no user ID)
             var claims = new List<Claim>();
