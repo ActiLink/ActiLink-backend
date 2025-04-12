@@ -181,9 +181,12 @@ namespace ActiLink.IntegrationTests
         [TestMethod]
         public async Task GetEventById_WithoutToken_ReturnsUnauthorized()
         {
+            // Arrange
             var id = "e869b0dd-91e9-4fce-9e53-8a15afac9ec5";
             var request = new HttpRequestMessage(HttpMethod.Get, $"/events/{id}");
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
         [TestMethod]

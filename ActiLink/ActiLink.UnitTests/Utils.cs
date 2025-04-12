@@ -15,5 +15,11 @@ namespace ActiLink.UnitTests
                 .GetProperty("Id")?
                 .SetValue(existingEvent, eventId);
         }
+        internal static void SetupHobbyGuid(Hobby existingHobby, Guid hobbyId)
+        {
+            existingHobby.GetType()
+                .GetProperty("Id")?
+                .SetValue(existingHobby, hobbyId);
+        }
     }
 }

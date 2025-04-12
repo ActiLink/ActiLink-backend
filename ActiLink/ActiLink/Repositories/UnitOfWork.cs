@@ -7,6 +7,7 @@ namespace ActiLink.Repositories
         private readonly ApiContext _context;
         private IRepository<User>? _userRepository;
         private IRepository<Event>? _eventRepository;
+        private IRepository<Hobby>? _hobbyRepository;
         private IRepository<RefreshToken>? _refreshTokenRepository;
 
         public UnitOfWork(ApiContext context)
@@ -16,6 +17,7 @@ namespace ActiLink.Repositories
 
         public IRepository<User> UserRepository => _userRepository ??= new Repository<User>(_context);
         public IRepository<Event> EventRepository => _eventRepository ??= new Repository<Event>(_context);
+        public IRepository<Hobby> HobbyRepository => _hobbyRepository ??= new Repository<Hobby>(_context);
         public IRepository<RefreshToken> RefreshTokenRepository => _refreshTokenRepository ??= new Repository<RefreshToken>(_context);
 
         public async Task<int> SaveChangesAsync()

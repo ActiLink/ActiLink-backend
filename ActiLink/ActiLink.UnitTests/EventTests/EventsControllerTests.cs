@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Security.Claims;
 
 namespace ActiLink.UnitTests.EventTests
 {
@@ -28,7 +29,16 @@ namespace ActiLink.UnitTests.EventTests
             _loggerMock = new Mock<ILogger<EventsController>>();
             _mapperMock = new Mock<IMapper>();
             _eventServiceMock = new Mock<IEventService>();
-            _controller = new EventsController(_loggerMock.Object, _eventServiceMock.Object, _mapperMock.Object);
+
+            var controllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+
+            _controller = new EventsController(_loggerMock.Object, _eventServiceMock.Object, _mapperMock.Object)
+            {
+                ControllerContext = controllerContext
+            };
         }
 
         [TestMethod]
@@ -43,8 +53,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 0m;
             var minUsers = 25_000;
             var maxUsers = 30_000;
+            var hobbyIds = new List<Guid>();
 
-            var newEventDto = new NewEventDto(userId, startTime, endTime, location, price, minUsers, maxUsers);
+            var newEventDto = new NewEventDto(startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var createdEvent = new Event(organizer, startTime, endTime, location, price, minUsers, maxUsers);
             Utils.SetupEventGuid(createdEvent, eventId);
@@ -59,6 +70,16 @@ namespace ActiLink.UnitTests.EventTests
             _mapperMock
                 .Setup(m => m.Map<EventDto>(It.IsAny<Event>()))
                 .Returns(eventDto);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId)
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
 
             // When
             var actionResult = await _controller.CreateEventAsync(newEventDto);
@@ -87,8 +108,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 0m;
             var minUsers = 25_000;
             var maxUsers = 30_000;
+            var hobbyIds = new List<Guid>();
 
-            var newEventDto = new NewEventDto(userId, startTime, endTime, location, price, minUsers, maxUsers);
+            var newEventDto = new NewEventDto( startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
 
             var errors = new List<string> { "Failed to create event" };
             var serviceResult = GenericServiceResult<Event>.Failure(errors);
@@ -96,6 +118,16 @@ namespace ActiLink.UnitTests.EventTests
             _eventServiceMock
                 .Setup(es => es.CreateEventAsync(It.IsAny<CreateEventObject>()))
                 .ReturnsAsync(serviceResult);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId)
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
 
             // When
             var actionResult = await _controller.CreateEventAsync(newEventDto);
@@ -138,6 +170,15 @@ namespace ActiLink.UnitTests.EventTests
             _mapperMock
                 .Setup(m => m.Map<EventDto>(foundEvent))
                 .Returns(expectedEventDto);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId)
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
 
             // When
             var actionResult = await _controller.GetEventByIdAsync(eventId);

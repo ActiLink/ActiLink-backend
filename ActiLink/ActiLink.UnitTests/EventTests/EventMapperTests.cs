@@ -35,8 +35,9 @@ namespace ActiLink.UnitTests.EventTests
             var minUsers = 5;
             var maxUsers = 10;
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
+            var hobbyIds = new List<Guid>();
 
-            var ceoToMap = new CreateEventObject(userId, startTime, endTime, location, price, minUsers, maxUsers);
+            var ceoToMap = new CreateEventObject(userId, startTime, endTime, location, price, minUsers, maxUsers,hobbyIds);
             var expectedEvent = new Event(organizer, startTime, endTime, location, price, minUsers, maxUsers);
 
 
@@ -68,13 +69,14 @@ namespace ActiLink.UnitTests.EventTests
             var price = 100.00m;
             var minUsers = 5;
             var maxUsers = 10;
+            var hobbyIds = new List<Guid>();
 
-            var newEventDto = new NewEventDto(userId, startTime, endTime, location, price, minUsers, maxUsers);
-            var expectedCeo = new CreateEventObject(userId, startTime, endTime, location, price, minUsers, maxUsers);
+            var newEventDto = new NewEventDto(startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var expectedCeo = new CreateEventObject(userId, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
 
 
             // When
-            var mappedCeo = _mapper.Map<CreateEventObject>(newEventDto);
+            var mappedCeo = _mapper.Map<CreateEventObject>(newEventDto, opts => opts.Items["OrganizerId"] = userId);
 
             // Then
             Assert.IsNotNull(mappedCeo);

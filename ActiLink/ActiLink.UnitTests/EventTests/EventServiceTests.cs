@@ -33,8 +33,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 50m;
             var minUsers = 1;
             var maxUsers = 100;
+            var hobbyIds = new List<Guid>();
 
-            var createEventObject = new CreateEventObject(userId, startTime, endTime, location, price, minUsers, maxUsers);
+            var createEventObject = new CreateEventObject(userId, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var createdEvent = new Event(organizer, startTime, endTime, location, price, minUsers, maxUsers);
 
