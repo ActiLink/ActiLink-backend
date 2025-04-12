@@ -2,8 +2,8 @@
 
 namespace ActiLink.Services
 {
-    public record CreateEventObject(
-        string OrganizerId,
+    public record UpdateEventObject(
+        Guid Id,
         string Title,
         string Description,
         DateTime StartTime,

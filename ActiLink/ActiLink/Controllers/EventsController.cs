@@ -4,6 +4,7 @@ using ActiLink.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ActiLink.Controllers
 {
@@ -41,7 +42,16 @@ namespace ActiLink.Controllers
             Event? newEvent = null;
             try
             {
-                var createEventObject = _mapper.Map<CreateEventObject>(newEventDto);
+                var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdFromToken is null)
+                {
+                    _logger.LogWarning("User ID not found in token");
+                    return Unauthorized("User ID not found in token");
+                }
+
+                var createEventObject = _mapper.Map<CreateEventObject>(
+                    newEventDto,
+                    opts => opts.Items["OrganizerId"] = userIdFromToken);
                 _logger.LogInformation("Creating event with details: {EventDetails}", createEventObject);
                 var result = await _eventService.CreateEventAsync(createEventObject);
                 if (!result.Succeeded)
@@ -63,6 +73,57 @@ namespace ActiLink.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Updates an existing event with the specified ID and details in the request body.
+        /// </summary>
+        /// <returns>
+        /// Returns Ok if the update was successful, or an error response if the event was not found or the user is not authorized.
+        /// </returns>
+        [HttpPut("{id}")]
+        [Authorize]
+        [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateEventAsync(Guid id, [FromBody] UpdateEventDto updateEventDto)
+        {
+            try
+            {
+                var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdFromToken is null)
+                {
+                    _logger.LogWarning("User ID not found in token");
+                    return Unauthorized("User ID not found in token");
+                }
+
+                var result = await _eventService.UpdateEventAsync(
+                    _mapper.Map<UpdateEventObject>(updateEventDto, opts => opts.Items["EventId"] = id),
+                    userIdFromToken);
+
+                if (!result.Succeeded)
+                {
+                    switch (result.ErrorCode)
+                    {
+                        case ErrorCode.Forbidden:
+                            return Forbid();
+                        case ErrorCode.NotFound:
+                            return NotFound();
+                        default:
+                            return BadRequest(result.Errors);
+                    }
+                }
+
+                return Ok(_mapper.Map<EventDto>(result.Data!));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while updating the event");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
+            }
+        }
+
         /// <summary>
         /// Fetches the event with the specified ID.
         /// </summary>
@@ -79,16 +140,24 @@ namespace ActiLink.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetEventByIdAsync(Guid id)
         {
-            _logger.LogInformation("Fetching event with ID {EventId}", id);
-            var @event = await _eventService.GetEventByIdAsync(id);
-            if (@event is null)
+            try
             {
-                _logger.LogWarning("Event with ID {EventId} not found", id);
-                return NotFound();
-            }
+                _logger.LogInformation("Fetching event with ID {EventId}", id);
+                var @event = await _eventService.GetEventByIdAsync(id);
+                if (@event is null)
+                {
+                    _logger.LogWarning("Event with ID {EventId} not found", id);
+                    return NotFound();
+                }
 
-            _logger.LogInformation("Event with ID {EventId} found", id);
-            return Ok(_mapper.Map<EventDto>(@event));
+                _logger.LogInformation("Event with ID {EventId} found", id);
+                return Ok(_mapper.Map<EventDto>(@event));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An unexpected error occurred while fetching the event {id}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
+            }
         }
 
         /// <summary>
@@ -103,10 +172,59 @@ namespace ActiLink.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IEnumerable<EventDto>> GetAllEventsAsync()
         {
-            _logger.LogInformation("Fetching all events");
-            var events = await _eventService.GetAllEventsAsync();
-            _logger.LogInformation("Returning {Count} events", events.Count());
-            return _mapper.Map<IEnumerable<EventDto>>(events);
+            try
+            {
+                _logger.LogInformation("Fetching all events");
+                var events = await _eventService.GetAllEventsAsync();
+                _logger.LogInformation("Returning {Count} events", events.Count());
+                return _mapper.Map<IEnumerable<EventDto>>(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while fetching all events");
+                return (IEnumerable<EventDto>)StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
+            }
+        }
+        /// <summary>
+        /// Deletes the event with the specified ID.
+        /// </summary>
+        /// 
+        [HttpDelete("{id}")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteEventAsync(Guid id)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId is null)
+                    return Unauthorized("User ID not found in token");
+
+                var result = await _eventService.DeleteEventByIdAsync(id, userId);
+
+                if (!result.Succeeded)
+                {
+                    switch (result.ErrorCode)
+                    {
+                        case ErrorCode.Forbidden:
+                            return Forbid();
+                        case ErrorCode.NotFound:
+                            return NotFound();
+                        default:
+                            return BadRequest(result.Errors);
+                    }
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An unexpected error occurred while deleting the event {id} ");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
+            }
         }
     }
 }

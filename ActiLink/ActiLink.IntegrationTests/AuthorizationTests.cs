@@ -181,9 +181,12 @@ namespace ActiLink.IntegrationTests
         [TestMethod]
         public async Task GetEventById_WithoutToken_ReturnsUnauthorized()
         {
+            // Arrange
             var id = "e869b0dd-91e9-4fce-9e53-8a15afac9ec5";
             var request = new HttpRequestMessage(HttpMethod.Get, $"/events/{id}");
+            // Act
             var response = await _client.SendAsync(request);
+            // Assert
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
         [TestMethod]
@@ -246,6 +249,135 @@ namespace ActiLink.IntegrationTests
             var response = await _client.SendAsync(request);
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+        [TestMethod]
+        public async Task UpdateEvent_WithoutToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            var id = "e869b0dd-91e9-4fce-9e53-8a15afac9ec5";
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/events/{id}")
+            {
+                Content = JsonContent.Create(new
+                {
+                    Title = "Updated Event",
+                    Description = "This is an updated event",
+                    StartTime = DateTime.UtcNow.AddDays(1),
+                    EndTime = DateTime.UtcNow.AddDays(2),
+                    Location = new { Latitude = 50.061, Longitude = 19.938 },
+                    Price = 20.5m,
+                    MinUsers = 3,
+                    MaxUsers = 15,
+                    RelatedHobbyIds = new List<Guid>()
+                })
+            };
+
+            // Act
+            var response = await _client.SendAsync(request);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task UpdateEvent_WithInvalidToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            var id = "e869b0dd-91e9-4fce-9e53-8a15afac9ec5";
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/events/{id}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "invalid.token.value");
+
+            request.Content = JsonContent.Create(new
+            {
+                Title = "Updated Event",
+                Description = "This is an updated event",
+                StartTime = DateTime.UtcNow.AddDays(1),
+                EndTime = DateTime.UtcNow.AddDays(2),
+                Location = new { Latitude = 50.061, Longitude = 19.938 },
+                Price = 20.5m,
+                MinUsers = 3,
+                MaxUsers = 15,
+                RelatedHobbyIds = new List<Guid>()
+            });
+
+            // Act
+            var response = await _client.SendAsync(request);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task UpdateEvent_WithValidToken_AcceptsToken()
+        {
+            // Arrange
+            var id = "e869b0dd-91e9-4fce-9e53-8a15afac9ec5";
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/events/{id}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+
+            request.Content = JsonContent.Create(new
+            {
+                Title = "Updated Event",
+                Description = "This is an updated event",
+                StartTime = DateTime.UtcNow.AddDays(1),
+                EndTime = DateTime.UtcNow.AddDays(2),
+                Location = new { Latitude = 50.061, Longitude = 19.938 },
+                Price = 20.5m,
+                MinUsers = 3,
+                MaxUsers = 15,
+                RelatedHobbyIds = new List<Guid>()
+            });
+
+            // Act
+            var response = await _client.SendAsync(request);
+
+            // Assert
+            Assert.AreNotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            Assert.IsTrue(response.StatusCode is HttpStatusCode.OK or HttpStatusCode.NotFound or HttpStatusCode.Forbidden or HttpStatusCode.BadRequest);
+        }
+
+        [TestMethod]
+        public async Task DeleteEvent_WithoutToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            var id = "e869b0dd-91e9-4fce-9e53-8a15afac9ec5";
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"/events/{id}");
+
+            // Act
+            var response = await _client.SendAsync(request);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task DeleteEvent_WithInvalidToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            var id = "e869b0dd-91e9-4fce-9e53-8a15afac9ec5";
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"/events/{id}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "invalid.token.value");
+
+            // Act
+            var response = await _client.SendAsync(request);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task DeleteEvent_WithValidToken_AcceptsToken()
+        {
+            // Arrange
+            var id = "e869b0dd-91e9-4fce-9e53-8a15afac9ec5";
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"/events/{id}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+
+            // Act
+            var response = await _client.SendAsync(request);
+
+            // Assert
+            Assert.AreNotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            Assert.IsTrue(response.StatusCode is HttpStatusCode.NoContent or HttpStatusCode.NotFound or HttpStatusCode.Forbidden or HttpStatusCode.BadRequest);
         }
     }
 }
