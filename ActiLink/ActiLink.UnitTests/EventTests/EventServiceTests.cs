@@ -159,11 +159,10 @@ namespace ActiLink.UnitTests.EventTests
             var minUsers = 1;
             var maxUsers = 100;
 
-            var ogranizer = new User("TestUser", "test@example.com") { Id = userId };
+            var organizer = new User("TestUser", "test@example.com") { Id = userId };
 
-            var existingEvent1 = new Event(ogranizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
-            var existingEvent2 = new Event(ogranizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
-            Utils.SetupEventGuid(existingEvent1, eventId1);
+            var existingEvent1 = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
+            var existingEvent2 = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(existingEvent2, eventId2);
 
             var events = new List<Event> { existingEvent1, existingEvent2 };
