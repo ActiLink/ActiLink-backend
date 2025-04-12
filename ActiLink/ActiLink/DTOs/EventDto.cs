@@ -7,6 +7,8 @@ namespace ActiLink.DTOs
     /// </summary>
     /// <param name="Id">Unique identifier of the event.</param>
     /// <param name="OrganizerId">Unique identifier of the organizer.</param>
+    /// <param name="Title"> Title of the event (max 100 characters).</param>
+    /// <param name="Description"> Description of the event.</param>
     /// <param name="StartTime">Start time of the event.</param>
     /// <param name="EndTime">End time of the event.</param>
     /// <param name="Location"> Location of the event</param>
@@ -18,6 +20,8 @@ namespace ActiLink.DTOs
     public record EventDto(
         Guid Id,
         string OrganizerId,
+        string Title,
+        string Description,
         DateTime StartTime,
         DateTime EndTime,
         Location Location,
@@ -31,6 +35,8 @@ namespace ActiLink.DTOs
         public EventDto()
             : this(
                 default,
+                string.Empty,
+                string.Empty,
                 string.Empty,
                 default,
                 default,

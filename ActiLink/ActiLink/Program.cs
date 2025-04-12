@@ -75,20 +75,21 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Input **Bearer &lt;your_token&gt;**. Example: `Bearer eyJhbGciOi...`"
     });
 
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+    //options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    //{
+    //    {
+    //        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    //        {
+    //            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+    //            {
+    //                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+    //                Id = "Bearer"
+    //            }
+    //        },
+    //        Array.Empty<string>()
+    //    }
+    //});
+    options.OperationFilter<AuthorizeOperationFilter>();
 });
 
 // Add Identity

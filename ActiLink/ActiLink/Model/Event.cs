@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace ActiLink.Model
 {
@@ -9,6 +10,10 @@ namespace ActiLink.Model
     {
         public Guid Id { get; private set; } = Guid.NewGuid();
         public Organizer Organizer { get; private set; } = null!;
+        [MaxLength(100)]
+        public string Title { get; private set; } = string.Empty;
+        [MaxLength(2000)]
+        public string Description { get; private set; } = string.Empty;
         public DateTime StartTime { get; private set; }
         public DateTime EndTime { get; private set; }
         public Location Location { get; private set; } = new Location(0, 0);
@@ -23,16 +28,19 @@ namespace ActiLink.Model
         /// Constructor for creating an event.
         /// </summary>
         private Event() { }
-        public Event(Organizer organizer, DateTime startTime, DateTime endTime, Location location,
-                     decimal price, int minUsers, int maxUsers)
+        public Event(Organizer organizer,string title,string description, DateTime startTime, DateTime endTime, Location location,
+                     decimal price, int minUsers, int maxUsers, IEnumerable<Hobby> relatedHobbies)
         {
             Organizer = organizer;
+            Title = title;
+            Description = description;
             StartTime = startTime;
             EndTime = endTime;
             Location = location;
             Price = price;
             MinUsers = minUsers;
             MaxUsers = maxUsers;
+            RelatedHobbies = relatedHobbies.ToList() ?? new List<Hobby>();
         }
     }
 }
