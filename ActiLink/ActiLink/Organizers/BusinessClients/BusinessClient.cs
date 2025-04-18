@@ -1,4 +1,6 @@
-﻿namespace ActiLink.Organizers.BusinessClients
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ActiLink.Organizers.BusinessClients
 {
     public class BusinessClient : Organizer
     {
@@ -7,6 +9,7 @@
             TaxId = taxId;
         }
 
+        [MaxLength(20)]
         public string TaxId { get; set; } = string.Empty;
 
     }
