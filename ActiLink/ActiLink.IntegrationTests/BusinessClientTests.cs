@@ -64,7 +64,7 @@ namespace ActiLink.IntegrationTests
                 var client = context.Users.Find(clientId);
                 Assert.IsNotNull(client);
                 client.UserName = updatedUserName;
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             // Verification of the update
