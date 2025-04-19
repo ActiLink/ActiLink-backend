@@ -2,6 +2,7 @@ using System.Text;
 using ActiLink;
 using ActiLink.Configuration;
 using ActiLink.Events.Service;
+using ActiLink.Hobbies.Service;
 using ActiLink.Organizers;
 using ActiLink.Organizers.Authentication;
 using ActiLink.Organizers.BusinessClients.Service;
@@ -49,8 +50,9 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 
 // Add services
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IBusinessClientService, BusinessClientService>();
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IHobbyService, HobbyService>();
 builder.Services.AddScoped<JwtTokenProvider>();
 
 
