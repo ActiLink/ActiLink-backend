@@ -50,6 +50,9 @@ namespace ActiLink.Hobbies
         /// with the <see cref="HobbyDto"/> object or an error response if the hobby was not found.
         /// </returns>
         [HttpGet("{id}")]
+        [Authorize]
+        [ProducesResponseType<HobbyDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetHobbyByIdAsync(Guid id)
         {
             var hobby = await _hobbyService.GetHobbyByIdAsync(id);
