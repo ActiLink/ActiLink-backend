@@ -32,7 +32,9 @@ namespace ActiLink.Organizers.BusinessClients.Service
             var businessClient = new BusinessClient(username, email, taxId);
             var result = await _userManager.CreateAsync(businessClient, password);
 
-            return result.Succeeded ? GenericServiceResult<BusinessClient>.Success(businessClient) : GenericServiceResult<BusinessClient>.Failure(result.Errors.Select(e => e.Description));
+            return result.Succeeded 
+                ? GenericServiceResult<BusinessClient>.Success(businessClient) 
+                : GenericServiceResult<BusinessClient>.Failure(result.Errors.Select(e => e.Description));
         }
 
         /// <summary>

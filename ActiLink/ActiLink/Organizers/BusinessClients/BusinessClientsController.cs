@@ -67,22 +67,31 @@ namespace ActiLink.Organizers.BusinessClients
         /// Fetches all business clients.
         /// </summary>
         /// <returns>
-        /// The <see cref="Task"/> that represents the asynchronous operation, 
-        /// containing an <see cref="IEnumerable{T}"/> of <see cref="BusinessClientDto"/> objects.
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing an <see cref="IActionResult"/> 
+        /// with the IEnumerable of <see cref="BusinessClientDto"/> objects.
         /// </returns>
         [HttpGet]
         [Authorize]
         [ProducesResponseType<IEnumerable<BusinessClientDto>>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IEnumerable<BusinessClientDto>> GetBusinessClientsAsync()
+        public async Task<IActionResult> GetBusinessClientsAsync()
         {
             _logger.LogInformation("Fetching all business clients");
             var businessClients = await _businessClientService.GetBusinessClientsAsync();
             _logger.LogInformation("Returning {businessClientsCount} business clients", businessClients.Count());
-            return _mapper.Map<IEnumerable<BusinessClientDto>>(businessClients);
+            return Ok(_mapper.Map<IEnumerable<BusinessClientDto>>(businessClients));
         }
 
 
+
+        /// <summary>
+        /// Fetches a business client by ID.
+        /// </summary>
+        /// <param name="id">The ID of the business client to fetch.</param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, 
+        /// containing an Ok result with the <see cref="BusinessClientDto"/> object if found, or a NotFound result.
+        /// </returns>
         [HttpGet("{id}")]
         [Authorize]
         [ActionName(nameof(GetBusinessClientByIdAsync))]
