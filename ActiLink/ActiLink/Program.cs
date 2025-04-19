@@ -5,6 +5,7 @@ using ActiLink.Events.Service;
 using ActiLink.Hobbies.Service;
 using ActiLink.Organizers;
 using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.BusinessClients.Service;
 using ActiLink.Organizers.Users.Service;
 using ActiLink.Shared.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -49,6 +50,7 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 
 // Add services
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBusinessClientService, BusinessClientService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IHobbyService, HobbyService>();
 builder.Services.AddScoped<JwtTokenProvider>();
