@@ -1,4 +1,6 @@
-﻿using ActiLink.Events;
+﻿using System.Linq;
+using System.Linq.Expressions;
+using ActiLink.Events;
 using ActiLink.Hobbies;
 using ActiLink.Organizers;
 using ActiLink.Organizers.BusinessClients;
@@ -98,7 +100,9 @@ namespace ActiLink
                     new("Fencing"),
                     new("Archery"),
                     new("Sport"),
-                    new("Art")
+                    new("Art"),
+                    new("Drinking"),
+                    new("Partying")
                 ];
 
             User[] users =
@@ -111,7 +115,8 @@ namespace ActiLink
                 new("Michał Zieliński", "michal.zielinski@gmail.com"),
                 new("Paweł Król", "pawel.krol@email.com"),
                 new("Grace Miller", "grace.miller@email.com"),
-                new("Dua Lipa", "dua.lipa@email.com")
+                new("Dua Lipa", "dua.lipa@email.com"),
+                new("Wojciech Kuna", "wojciech.kuna@email.com")
                 ];
 
             BusinessClient[] businessClients =
@@ -201,15 +206,16 @@ namespace ActiLink
                 CreateEvent(eventsToCreate[7], businessClients[2])
                 ];
 
-            AddHobbies(users[0], hobbies, ["Photography", "Cooking", "Gardening", "Painting", "Reading"]);                              // Emily Smith
-            AddHobbies(users[1], hobbies, ["Traveling", "Cycling", "Hiking", "Fishing", "Knitting"]);                                   // James Johnson 
-            AddHobbies(users[2], hobbies, ["Football", "Sport", "Crafting", "Woodworking", "Fishing"]);                                 // Diego Hernández
+            AddHobbies(users[0], hobbies, ["Photography", "Cooking", "Gardening", "Painting", "Reading"]);                             // Emily Smith
+            AddHobbies(users[1], hobbies, ["Traveling", "Cycling", "Hiking", "Fishing", "Knitting"]);                                  // James Johnson 
+            AddHobbies(users[2], hobbies, ["Football", "Sport", "Crafting", "Woodworking", "Fishing"]);                                // Diego Hernández
             AddHobbies(users[3], hobbies, ["Meditation", "Martial arts", "Video gaming", "Board gaming", "Collecting"]);               // Julien Moreau 
             AddHobbies(users[4], hobbies, ["Crafting", "Woodworking", "Pottery", "Sculpting", "Origami"]);                             // Sophie Lefèvre
             AddHobbies(users[5], hobbies, ["Calligraphy", "Journaling", "Blogging", "Podcasting", "Vlogging"]);                        // Michał Zieliński
-            AddHobbies(users[6], hobbies, ["Cosplaying", "Role-playing games", "Model building", "3D printing", "Electronics"]);        // Paweł Król
+            AddHobbies(users[6], hobbies, ["Cosplaying", "Role-playing games", "Model building", "3D printing", "Electronics"]);       // Paweł Król
             AddHobbies(users[7], hobbies, ["Photography", "Singing", "Dancing", "Fashion design", "Interior design"]);                 // Grace Miller
-            AddHobbies(users[8], hobbies, ["Singing", "Dancing", "Playing an instrument", "Yoga", "Meditation"]);                      // Dua Lipa             
+            AddHobbies(users[8], hobbies, ["Singing", "Dancing", "Playing an instrument", "Yoga", "Meditation"]);                      // Dua Lipa
+            AddHobbies(users[9], hobbies, ["Fitness training", "Weightlifting", "Partying", "Swimming", "Drinking"]);                  // Wojciech Kuna
 
             SignUpEvent(users[0], events[0]);
             SignUpEvent(users[1], events[6]);
@@ -220,21 +226,39 @@ namespace ActiLink
             SignUpEvent(users[6], events[1]);
             SignUpEvent(users[7], events[5]);
             SignUpEvent(users[8], events[4]);
+            SignUpEvent(users[9], events[4]);
+
 
             foreach (var user in users)
                 SignUpEvent(user, events[3]);
 
-            context.Set<User>().AddRange(users);
-            context.Set<BusinessClient>().AddRange(businessClients);
-            context.Set<Hobby>().AddRange(hobbies);
-            context.Set<Event>().AddRange(events);
+
+            SeedSet(users, user => x => x.UserName == user.UserName);
+            SeedSet(businessClients, client => x => x.UserName == client.UserName);
+            SeedSet(hobbies, hobby => x => x.Name == hobby.Name);
+            SeedSet(events, @event => x => x.Title == @event.Title);
+
+
+            void SeedSet<T>(IEnumerable<T> entities, Func<T, Expression<Func<T, bool>>> matchPredicateFactory) where T : class
+            {
+                var set = context.Set<T>();
+
+                foreach (var entity in entities)
+                {
+                    var matchPredicate = matchPredicateFactory(entity);
+                    if (!set.Any(matchPredicate))
+                        set.Add(entity);
+                }
+            }
         }
+
+
 
         private static IEnumerable<Hobby> GetHobbiesByNames(IEnumerable<Hobby> hobbies, IEnumerable<string> names) => hobbies.Where(h => names.Contains(h.Name));
         private static Event CreateEvent(CreateEventSeedObject seedEvent, Organizer organizer)
         {
-            var (name, description, startDate, endDate, location, price, minParticipants, maxParticipants, relatedHobbies) = seedEvent;
-            var createdEvent = new Event(organizer, name, description, startDate, endDate, location, price, minParticipants, maxParticipants, relatedHobbies);
+            var (title, description, startDate, endDate, location, price, minParticipants, maxParticipants, relatedHobbies) = seedEvent;
+            var createdEvent = new Event(organizer, title, description, startDate, endDate, location, price, minParticipants, maxParticipants, relatedHobbies);
             organizer.Events.Add(createdEvent);
             return createdEvent;
         }
@@ -254,6 +278,6 @@ namespace ActiLink
 
 
         private record CreateEventSeedObject
-            (string Name, string Description, DateTime StartDate, DateTime EndDate, Location Location, decimal Price, int MinParticipants, int MaxParticipants, IEnumerable<Hobby> RelatedHobbies);
+            (string Title, string Description, DateTime StartDate, DateTime EndDate, Location Location, decimal Price, int MinParticipants, int MaxParticipants, IEnumerable<Hobby> RelatedHobbies);
     }
 }
