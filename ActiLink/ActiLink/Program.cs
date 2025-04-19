@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading;
 using ActiLink;
 using ActiLink.Configuration;
 using ActiLink.Events.Service;
@@ -34,7 +35,9 @@ if (!env.IsEnvironment("Testing"))
 {
     // Add ApiContext with SQL Server database
     builder.Services.AddDbContext<ApiContext>(options =>
-        options.UseSqlServer(connectionString));
+        options.UseSqlServer(connectionString)
+        .UseSeeding((context, _) => SeedData.InitializeAndSave(context))
+        .UseAsyncSeeding(async (context, _, cancellationToken) => await SeedData.InitializeAndSaveAsync(context, cancellationToken)));
 }
 
 
