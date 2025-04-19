@@ -2,7 +2,6 @@
 using ActiLink.Organizers.BusinessClients.Service;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ActiLink.Organizers.BusinessClients

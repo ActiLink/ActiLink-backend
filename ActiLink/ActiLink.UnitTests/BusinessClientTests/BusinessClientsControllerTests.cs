@@ -13,20 +13,18 @@ using Moq;
 namespace ActiLink.UnitTests.BusinessClientTests
 {
     [TestClass]
-    public class EventControllerTests
+    public class BusinessClientsControllerTests
     {
         private Mock<UserManager<Organizer>> _mockUserManager = null!;
-        //private Mock<IUnitOfWork> _mockUnitOfWork = null!;
         private Mock<IBusinessClientService> _mockBusinessClientService = null!;
         private Mock<IMapper> _mockMapper = null!;
-        //private Mock<ILogger<BusinessClientsController>> _mockLogger = null!;
         private BusinessClientsController _businessClientsController = null!;
 
-        private string username = "testuser";
-        private string email = "testuser@email.com";
-        private string password = "TestPassword123!";
-        private string taxId = "106-00-00-062";
-        private string id = "030B4A82-1B7C-11CF-9D53-00AA003C9CB6";
+        private const string username = "testuser";
+        private const string email = "testuser@email.com";
+        private const string password = "TestPassword123!";
+        private const string taxId = "106-00-00-062";
+        private const string id = "030B4A82-1B7C-11CF-9D53-00AA003C9CB6";
 
         [TestInitialize]
         public void Setup()
@@ -35,7 +33,6 @@ namespace ActiLink.UnitTests.BusinessClientTests
             var store = new Mock<IUserStore<Organizer>>();
             _mockUserManager = new Mock<UserManager<Organizer>>(
                 store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
-            //_mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockBusinessClientService = new Mock<IBusinessClientService>();
             _mockMapper = new Mock<IMapper>();
 
