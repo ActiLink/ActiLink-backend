@@ -14,10 +14,12 @@ namespace ActiLink.Hobbies
     [ApiController]
     public class HobbiesController : ControllerBase
     {
+        private readonly ILogger<HobbiesController> _logger;
         private readonly IHobbyService _hobbyService;
         private readonly IMapper _mapper;
-        public HobbiesController(IHobbyService hobbyService, IMapper mapper)
+        public HobbiesController(ILogger<HobbiesController> logger, IHobbyService hobbyService, IMapper mapper)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _hobbyService = hobbyService ?? throw new ArgumentNullException(nameof(hobbyService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
