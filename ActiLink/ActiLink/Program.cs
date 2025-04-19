@@ -1,5 +1,4 @@
 using System.Text;
-using System.Threading;
 using ActiLink;
 using ActiLink.Configuration;
 using ActiLink.Events.Service;

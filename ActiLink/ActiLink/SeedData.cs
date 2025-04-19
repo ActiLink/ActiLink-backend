@@ -200,16 +200,16 @@ namespace ActiLink
                 CreateEvent(eventsToCreate[6], users[0]),
                 CreateEvent(eventsToCreate[7], businessClients[2])
                 ];
-                
+
             AddHobbies(users[0], hobbies, ["Photography", "Cooking", "Gardening", "Painting", "Reading"]);                              // Emily Smith
             AddHobbies(users[1], hobbies, ["Traveling", "Cycling", "Hiking", "Fishing", "Knitting"]);                                   // James Johnson 
             AddHobbies(users[2], hobbies, ["Football", "Sport", "Crafting", "Woodworking", "Fishing"]);                                 // Diego Hernández
-            AddHobbies(users[3], hobbies,  ["Meditation", "Martial arts", "Video gaming", "Board gaming", "Collecting"]);               // Julien Moreau 
-            AddHobbies(users[4], hobbies,  ["Crafting", "Woodworking", "Pottery", "Sculpting", "Origami"]);                             // Sophie Lefèvre
-            AddHobbies(users[5], hobbies,  ["Calligraphy", "Journaling", "Blogging", "Podcasting", "Vlogging"]);                        // Michał Zieliński
+            AddHobbies(users[3], hobbies, ["Meditation", "Martial arts", "Video gaming", "Board gaming", "Collecting"]);               // Julien Moreau 
+            AddHobbies(users[4], hobbies, ["Crafting", "Woodworking", "Pottery", "Sculpting", "Origami"]);                             // Sophie Lefèvre
+            AddHobbies(users[5], hobbies, ["Calligraphy", "Journaling", "Blogging", "Podcasting", "Vlogging"]);                        // Michał Zieliński
             AddHobbies(users[6], hobbies, ["Cosplaying", "Role-playing games", "Model building", "3D printing", "Electronics"]);        // Paweł Król
-            AddHobbies(users[7], hobbies,  ["Photography", "Singing", "Dancing", "Fashion design", "Interior design"]);                 // Grace Miller
-            AddHobbies(users[8], hobbies,  ["Singing", "Dancing", "Playing an instrument", "Yoga", "Meditation"]);                      // Dua Lipa             
+            AddHobbies(users[7], hobbies, ["Photography", "Singing", "Dancing", "Fashion design", "Interior design"]);                 // Grace Miller
+            AddHobbies(users[8], hobbies, ["Singing", "Dancing", "Playing an instrument", "Yoga", "Meditation"]);                      // Dua Lipa             
 
             SignUpEvent(users[0], events[0]);
             SignUpEvent(users[1], events[6]);
@@ -242,7 +242,7 @@ namespace ActiLink
         private static void AddHobbies(User user, Hobby[] hobbies, IEnumerable<string> hobbyNames)
         {
             var hobbiesToAdd = GetHobbiesByNames(hobbies, hobbyNames);
-            foreach(var  hobby in hobbiesToAdd)
+            foreach (var hobby in hobbiesToAdd)
                 user.Hobbies.Add(hobby);
         }
 
