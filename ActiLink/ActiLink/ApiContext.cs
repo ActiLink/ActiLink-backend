@@ -2,6 +2,7 @@
 using ActiLink.Hobbies;
 using ActiLink.Organizers;
 using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.Users;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,8 @@ namespace ActiLink
 
             modelBuilder.Entity<Organizer>()
                 .HasDiscriminator<string>("OrganizerType")
-                .HasValue<User>("User");
+                .HasValue<User>("User")
+                .HasValue<BusinessClient>("BusinessClient");
         }
     }
 }
