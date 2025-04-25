@@ -7,9 +7,9 @@ using ActiLink.Organizers.BusinessClients;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ActiLink.Organizers.Authentication
+namespace ActiLink.Organizers.Authentication.Tokens
 {
-    public class JwtTokenProvider
+    public class JwtTokenProvider : IJwtTokenProvider
     {
         private readonly string _jwtSecret;
         private readonly string _jwtIssuer;

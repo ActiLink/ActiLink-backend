@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using ActiLink.Organizers;
-using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.Authentication.Tokens;
 using ActiLink.Organizers.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +24,7 @@ namespace ActiLink.IntegrationTests
 
             using var scope = factory.TestServices.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Organizer>>();
-            var tokenProvider = scope.ServiceProvider.GetRequiredService<JwtTokenProvider>();
+            var tokenProvider = scope.ServiceProvider.GetRequiredService<IJwtTokenProvider>();
 
             var user = new User("TestUser", "testuser@example.com");
             var result = userManager.CreateAsync(user, "Test_password123!").Result;

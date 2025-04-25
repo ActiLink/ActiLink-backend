@@ -1,6 +1,7 @@
 ﻿using ActiLink.Configuration;
 using ActiLink.Organizers;
 using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.Authentication.Tokens;
 using ActiLink.Organizers.DTOs;
 using ActiLink.Organizers.Users;
 using ActiLink.Organizers.Users.DTOs;

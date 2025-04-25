@@ -1,6 +1,7 @@
 ﻿using ActiLink.Configuration;
 using ActiLink.Organizers.Authentication;
 using ActiLink.Organizers.Authentication.Extensions;
+using ActiLink.Organizers.Authentication.Tokens;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
 using Microsoft.AspNetCore.Identity;
@@ -14,9 +15,9 @@ namespace ActiLink.Organizers.Users.Service
         private readonly UserManager<Organizer> _userManager;
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] FailedRefreshTokenSave = ["Failed to save the refresh token."];
-        private readonly JwtTokenProvider _tokenProvider;
+        private readonly IJwtTokenProvider _tokenProvider;
         private readonly JwtSettings _jwtSettings;
-        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, JwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
+        public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, IJwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));

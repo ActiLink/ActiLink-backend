@@ -3,19 +3,20 @@ using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
 using ActiLink.Organizers.Authentication.Extensions;
 using Microsoft.Extensions.Options;
+using ActiLink.Organizers.Authentication.Tokens;
 
 namespace ActiLink.Organizers.Authentication.Service
 {
     public class AuthService: IAuthService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly JwtTokenProvider _tokenProvider;
+        private readonly IJwtTokenProvider _tokenProvider;
         private readonly JwtSettings _jwtSettings;
 
         private static readonly string[] InvalidRefreshTokenError = ["Invalid refresh token."];
         private static readonly string[] FailedRefreshTokenUpdate = ["Failed to update the refresh token."];
 
-        public AuthService(IUnitOfWork unitOfWork, JwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
+        public AuthService(IUnitOfWork unitOfWork, IJwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _jwtSettings = jwtOptions.Value ?? throw new ArgumentNullException(nameof(jwtOptions));
