@@ -5,6 +5,7 @@ using ActiLink.Events.Service;
 using ActiLink.Hobbies.Service;
 using ActiLink.Organizers;
 using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.Authentication.Service;
 using ActiLink.Organizers.BusinessClients.Service;
 using ActiLink.Organizers.Users.Service;
 using ActiLink.Shared.Repositories;
@@ -55,6 +56,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBusinessClientService, BusinessClientService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IHobbyService, HobbyService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtTokenProvider>();
 
 

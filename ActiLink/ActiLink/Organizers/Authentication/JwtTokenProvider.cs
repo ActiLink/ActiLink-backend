@@ -2,6 +2,8 @@
 using System.Security.Claims;
 using System.Text;
 using ActiLink.Configuration;
+using ActiLink.Organizers.Users;
+using ActiLink.Organizers.BusinessClients;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -27,13 +29,23 @@ namespace ActiLink.Organizers.Authentication
             var key = Encoding.ASCII.GetBytes(_jwtSecret);
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim("token_type", "access"),
                 new Claim(ClaimTypes.NameIdentifier, user.Id ?? ""),
                 new Claim(ClaimTypes.Email, user.Email ?? ""),
                 new Claim(ClaimTypes.Name, user.UserName ?? "")
             };
+
+            var userType = user.GetType(); // skull emoji
+            if (userType == typeof(User))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "User"));
+            }
+            else if (userType == typeof(BusinessClient))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "BusinessClient"));
+            }
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -56,7 +68,7 @@ namespace ActiLink.Organizers.Authentication
             var claims = new[]
             {
                 new Claim("token_type", "refresh"),
-                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.NameIdentifier, userId)
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor

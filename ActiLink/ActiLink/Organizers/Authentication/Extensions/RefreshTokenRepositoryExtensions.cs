@@ -1,7 +1,7 @@
 ﻿using ActiLink.Shared.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace ActiLink.Organizers.Authentication
+namespace ActiLink.Organizers.Authentication.Extensions
 {
     public static class RefreshTokenRepositoryExtensions
     {

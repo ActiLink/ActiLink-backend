@@ -97,37 +97,6 @@ namespace ActiLink.Organizers.Users
         }
 
         /// <summary>
-        /// Refreshes JWT access token using a valid refresh token.
-        /// </summary>
-        /// <param name="refreshDto">DTO containing refresh token</param>
-        /// <returns>New access token and refresh token</returns>
-        [HttpPost("token")]
-        [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenDto refreshDto)
-        {
-            try
-            {
-                var result = await _userService.RefreshTokenAsync(refreshDto.RefreshToken);
-
-                if (!result.Succeeded)
-                {
-                    _logger.LogWarning("Token refresh failed: {errors}", result.Errors);
-                    return BadRequest(result.Errors);
-                }
-
-                (string accessToken, string refreshToken) = result.Data!;
-                _logger.LogInformation("Token refresh successful");
-                return Ok(new TokenResponseDto(accessToken, refreshToken));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred during token refresh");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        /// <summary>
         /// Fetches all users.
         /// </summary>
         /// <returns>
