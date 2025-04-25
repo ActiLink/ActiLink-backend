@@ -36,16 +36,7 @@ namespace ActiLink.Organizers.Authentication
                 new Claim(ClaimTypes.Email, user.Email ?? ""),
                 new Claim(ClaimTypes.Name, user.UserName ?? "")
             };
-
-            var userType = user.GetType(); // skull emoji
-            if (userType == typeof(User))
-            {
-                claims.Add(new Claim(ClaimTypes.Role, "User"));
-            }
-            else if (userType == typeof(BusinessClient))
-            {
-                claims.Add(new Claim(ClaimTypes.Role, "BusinessClient"));
-            }
+            AddRoleClaim(user, claims);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -82,6 +73,19 @@ namespace ActiLink.Organizers.Authentication
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+        private void AddRoleClaim(Organizer user, List<Claim> claims)
+        {
+            var userType = user.GetType(); //skull emoji
+
+            if (userType == typeof(User))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, _jwtSettings.Roles.UserRole));
+            }
+            else if (userType == typeof(BusinessClient))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, _jwtSettings.Roles.BusinessClientRole));
+            }
         }
     }
 }
