@@ -15,9 +15,9 @@ namespace ActiLink.Organizers.Users
         public ICollection<Event> SignedUpEvents { get; private set; } = [];
 
         public User(string userName, string email) : base(userName, email) { }
-        public override void AcceptRoleVisitor(IRoleVisitor visitor, List<Claim> claims)
+        public override void AcceptRoleVisitor(IRoleVisitor visitor)
         {
-            visitor.VisitUser(this, claims);
+            visitor.VisitUser(this);
         }
     }
 }

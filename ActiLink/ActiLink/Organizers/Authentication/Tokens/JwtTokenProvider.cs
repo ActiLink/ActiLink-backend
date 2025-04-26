@@ -16,7 +16,6 @@ namespace ActiLink.Organizers.Authentication.Tokens
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
         private readonly JwtSettings _jwtSettings;
-        private readonly JwtRoleVisitor _jwtRoleVisitor;
 
         public JwtTokenProvider(IOptions<JwtSettings> jwtOptions)
         {
@@ -24,7 +23,6 @@ namespace ActiLink.Organizers.Authentication.Tokens
             _jwtIssuer = Environment.GetEnvironmentVariable("JWT_VALID_ISSUER") ?? throw new ArgumentNullException("JWT_VALID_ISSUER environment variable is not set.");
             _jwtAudience = Environment.GetEnvironmentVariable("JWT_VALID_AUDIENCE") ?? throw new ArgumentNullException("JWT_VALID_AUDIENCE environment variable is not set.");
             _jwtSettings = jwtOptions.Value;
-            _jwtRoleVisitor = new JwtRoleVisitor(_jwtSettings);
         }
 
         public string GenerateAccessToken(Organizer user)
@@ -39,7 +37,10 @@ namespace ActiLink.Organizers.Authentication.Tokens
                 new Claim(ClaimTypes.Email, user.Email ?? ""),
                 new Claim(ClaimTypes.Name, user.UserName ?? "")
             };
-            user.AcceptRoleVisitor(_jwtRoleVisitor, claims);
+
+            var roleVisitor = new JwtRoleVisitor(_jwtSettings);
+            user.AcceptRoleVisitor(roleVisitor);
+            claims.AddRange(roleVisitor.Claims);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

@@ -15,6 +15,6 @@ namespace ActiLink.Organizers
         {
             Email = email;
         }
-        public abstract void AcceptRoleVisitor(IRoleVisitor visitor, List<Claim> claims);
+        public abstract void AcceptRoleVisitor(IRoleVisitor visitor);
     }
 }

@@ -8,17 +8,18 @@ namespace ActiLink.Organizers.Authentication.Roles
     public class JwtRoleVisitor: IRoleVisitor
     {
         private readonly JwtSettings _jwtSettings;
+        public List<Claim> Claims { get; } = new();
         public JwtRoleVisitor(JwtSettings jwtSettings)
         {
             _jwtSettings = jwtSettings;
         }
-        public void VisitBuisnessClient(BusinessClient businessClient, List<Claim> claims)
+        public void VisitBuisnessClient(BusinessClient businessClient)
         {
-            claims.Add(new Claim(ClaimTypes.Role, _jwtSettings.Roles.BusinessClientRole));
+            Claims.Add(new Claim(ClaimTypes.Role, _jwtSettings.Roles.BusinessClientRole));
         }
-        public void VisitUser(User user, List<Claim> claims)
+        public void VisitUser(User user)
         {
-            claims.Add(new Claim(ClaimTypes.Role, _jwtSettings.Roles.UserRole));
+            Claims.Add(new Claim(ClaimTypes.Role, _jwtSettings.Roles.UserRole));
         }
     }
 }

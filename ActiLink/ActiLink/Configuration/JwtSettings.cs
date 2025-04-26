@@ -8,8 +8,8 @@
 
         public class RoleNames
         {
-            public string UserRole { get; set; } = "User";
-            public string BusinessClientRole { get; set; } = "BusinessClient";
+            public string UserRole { get; set; } = string.Empty;
+            public string BusinessClientRole { get; set; } = string.Empty;
         }
     }
 }

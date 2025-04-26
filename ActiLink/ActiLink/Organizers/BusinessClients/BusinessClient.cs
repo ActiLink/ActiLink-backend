@@ -13,9 +13,9 @@ namespace ActiLink.Organizers.BusinessClients
 
         [MaxLength(20)]
         public string TaxId { get; set; } = string.Empty;
-        public override void AcceptRoleVisitor(IRoleVisitor visitor, List<Claim> claims)
+        public override void AcceptRoleVisitor(IRoleVisitor visitor)
         {
-            visitor.VisitBuisnessClient(this, claims);
+            visitor.VisitBuisnessClient(this);
         }
 
     }
