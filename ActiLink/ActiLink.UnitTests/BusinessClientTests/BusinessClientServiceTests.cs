@@ -1,8 +1,14 @@
-﻿using ActiLink.Organizers;
+﻿using ActiLink.Configuration;
+using ActiLink.Organizers;
+using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.Authentication.Tokens;
 using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.BusinessClients.Service;
 using ActiLink.Shared.Repositories;
+using ActiLink.Shared.ServiceUtils;
+using Azure.Core;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace ActiLink.UnitTests.BusinessClientTests
@@ -12,6 +18,7 @@ namespace ActiLink.UnitTests.BusinessClientTests
     {
         private Mock<UserManager<Organizer>> _mockUserManager = null!;
         private Mock<IUnitOfWork> _mockUnitOfWork = null!;
+        private Mock<IJwtTokenProvider> _mockTokenProvider = null!;
         private BusinessClientService _businessClientService = null!;
 
         private const string username = "testuser";
@@ -19,6 +26,8 @@ namespace ActiLink.UnitTests.BusinessClientTests
         private const string password = "TestPassword123!";
         private const string taxId = "106-00-00-062";
         private const string id = "030B4A82-1B7C-11CF-9D53-00AA003C9CB6";
+        private const string accessToken = "test.access.token";
+        private const string refreshToken = "test.refresh.token";
 
         [TestInitialize]
         public void Setup()
@@ -28,9 +37,28 @@ namespace ActiLink.UnitTests.BusinessClientTests
             _mockUserManager = new Mock<UserManager<Organizer>>(
                 store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
             _mockUnitOfWork = new Mock<IUnitOfWork>();
+            _mockTokenProvider = new Mock<IJwtTokenProvider>();
+            _mockTokenProvider
+                .Setup(t => t.GenerateAccessToken(It.IsAny<Organizer>()))
+                .Returns(accessToken);
+            _mockTokenProvider
+                .Setup(t => t.GenerateRefreshToken(It.IsAny<string>()))
+                .Returns(refreshToken);
+
+            var jwtSettings = new JwtSettings
+            {
+                AccessTokenExpiryMinutes = 60,
+                RefreshTokenExpiryDays = 30,
+                Roles = new JwtSettings.RoleNames
+                {
+                    UserRole = "User",
+                    BusinessClientRole = "BuisnessClient"
+                }
+            };
+            var jwtOptions = Options.Create(jwtSettings);
 
             // Initialize the BusinessClientService with mocked dependencies
-            _businessClientService = new BusinessClientService(_mockUnitOfWork.Object, _mockUserManager.Object);
+            _businessClientService = new BusinessClientService(_mockUnitOfWork.Object, _mockUserManager.Object,_mockTokenProvider.Object, jwtOptions);
         }
 
         [TestMethod]
@@ -100,6 +128,134 @@ namespace ActiLink.UnitTests.BusinessClientTests
             Assert.AreEqual(Shared.ServiceUtils.ErrorCode.GeneralError, result.ErrorCode);
             Assert.AreEqual("Email already exists.", result.Errors.First());
             _mockUserManager.Verify(x => x.CreateAsync(It.IsAny<BusinessClient>(), password), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task LoginAsync_ValidCredentials_ReturnsTokens()
+        {
+            // Given
+            var businessClient = new BusinessClient(username, email, taxId) { Id = id };
+
+            _mockUserManager.Setup(x => x.FindByEmailAsync(email))
+                .ReturnsAsync(businessClient);
+
+            _mockUserManager.Setup(x => x.CheckPasswordAsync(businessClient, password))
+                .ReturnsAsync(true);
+
+            var mockRefreshTokenRepo = new Mock<IRepository<RefreshToken>>();
+            mockRefreshTokenRepo.Setup(r => r.AddAsync(It.IsAny<RefreshToken>()))
+                .Returns(Task.CompletedTask);
+            _mockUnitOfWork.Setup(u => u.RefreshTokenRepository)
+                .Returns(mockRefreshTokenRepo.Object);
+
+            _mockUnitOfWork.Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            // When
+            var result = await _businessClientService.LoginAsync(email, password);
+
+            // Then
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNotNull(result.Data);
+            Assert.AreEqual(accessToken, result.Data.AccessToken);
+            Assert.AreEqual(refreshToken, result.Data.RefreshToken);
+            Assert.AreEqual(ErrorCode.None, result.ErrorCode);
+
+            _mockUserManager.Verify(x => x.FindByEmailAsync(email), Times.Once);
+            _mockUserManager.Verify(x => x.CheckPasswordAsync(businessClient, password), Times.Once);
+            _mockTokenProvider.Verify(t => t.GenerateAccessToken(businessClient), Times.Once);
+            _mockTokenProvider.Verify(t => t.GenerateRefreshToken(id), Times.Once);
+            _mockUnitOfWork.Verify(u => u.SaveChangesAsync(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task LoginAsync_InvalidEmail_ReturnsFailure()
+        {
+            // Given
+            _mockUserManager.Setup(x => x.FindByEmailAsync(email))
+                .ReturnsAsync((BusinessClient?)null);
+
+            // When
+            var result = await _businessClientService.LoginAsync(email, password);
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(1, result.Errors.Count());
+            Assert.AreEqual("Invalid email or password.", result.Errors.First());
+            Assert.AreEqual(ErrorCode.GeneralError, result.ErrorCode);
+
+            _mockUserManager.Verify(x => x.FindByEmailAsync(email), Times.Once);
+            _mockUserManager.Verify(x => x.CheckPasswordAsync(It.IsAny<Organizer>(), It.IsAny<string>()), Times.Never);
+            _mockTokenProvider.Verify(t => t.GenerateAccessToken(It.IsAny<Organizer>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task LoginAsync_InvalidPassword_ReturnsFailure()
+        {
+            // Given
+            var businessClient = new BusinessClient(username, email, taxId) { Id = id };
+
+            _mockUserManager.Setup(x => x.FindByEmailAsync(email))
+                .ReturnsAsync(businessClient);
+
+            _mockUserManager.Setup(x => x.CheckPasswordAsync(businessClient, password))
+                .ReturnsAsync(false);
+
+            var mockRefreshTokenRepo = new Mock<IRepository<RefreshToken>>();
+            mockRefreshTokenRepo.Setup(r => r.AddAsync(It.IsAny<RefreshToken>()))
+                .Returns(Task.CompletedTask);
+            _mockUnitOfWork.Setup(u => u.RefreshTokenRepository)
+                .Returns(mockRefreshTokenRepo.Object);
+
+            // When
+            var result = await _businessClientService.LoginAsync(email, password);
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(1, result.Errors.Count());
+            Assert.AreEqual("Invalid email or password.", result.Errors.First());
+            Assert.AreEqual(ErrorCode.GeneralError, result.ErrorCode);
+
+            _mockUserManager.Verify(x => x.FindByEmailAsync(email), Times.Once);
+            _mockUserManager.Verify(x => x.CheckPasswordAsync(businessClient, password), Times.Once);
+            _mockTokenProvider.Verify(t => t.GenerateAccessToken(It.IsAny<Organizer>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task LoginAsync_FailedSaveChanges_ReturnsFailure()
+        {
+            // Given
+            var businessClient = new BusinessClient(username, email, taxId) { Id = id };
+
+            _mockUserManager.Setup(x => x.FindByEmailAsync(email))
+                .ReturnsAsync(businessClient);
+
+            _mockUserManager.Setup(x => x.CheckPasswordAsync(businessClient, password))
+                .ReturnsAsync(true);
+
+            var mockRefreshTokenRepo = new Mock<IRepository<RefreshToken>>();
+            mockRefreshTokenRepo.Setup(r => r.AddAsync(It.IsAny<RefreshToken>()))
+                .Returns(Task.CompletedTask);
+            _mockUnitOfWork.Setup(u => u.RefreshTokenRepository)
+                .Returns(mockRefreshTokenRepo.Object);
+
+            _mockUnitOfWork.Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(0); 
+
+            // When
+            var result = await _businessClientService.LoginAsync(email, password);
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(1, result.Errors.Count());
+            Assert.AreEqual("Failed to save the refresh token.", result.Errors.First());
+            Assert.AreEqual(ErrorCode.GeneralError, result.ErrorCode);
+
+            _mockUserManager.Verify(x => x.FindByEmailAsync(email), Times.Once);
+            _mockUserManager.Verify(x => x.CheckPasswordAsync(businessClient, password), Times.Once);
+            _mockTokenProvider.Verify(t => t.GenerateAccessToken(businessClient), Times.Once);
+            _mockTokenProvider.Verify(t => t.GenerateRefreshToken(id), Times.Once);
+            _mockUnitOfWork.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
         [TestMethod]

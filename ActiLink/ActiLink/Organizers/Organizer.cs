@@ -1,5 +1,7 @@
 ﻿using ActiLink.Events;
 using Microsoft.AspNetCore.Identity;
+using ActiLink.Organizers.Authentication.Roles;
+using System.Security.Claims;
 
 namespace ActiLink.Organizers
 {
@@ -13,5 +15,6 @@ namespace ActiLink.Organizers
         {
             Email = email;
         }
+        public abstract void AcceptRoleVisitor(IRoleVisitor visitor);
     }
 }

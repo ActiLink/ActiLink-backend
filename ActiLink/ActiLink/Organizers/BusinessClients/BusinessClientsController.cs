@@ -1,5 +1,6 @@
 ﻿using ActiLink.Organizers.BusinessClients.DTOs;
 using ActiLink.Organizers.BusinessClients.Service;
+using ActiLink.Organizers.DTOs;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +60,39 @@ namespace ActiLink.Organizers.BusinessClients
                     _logger.LogError("Business client {businessClientId} creation failed", businessClient.Id);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
+            }
+        }
+
+        /// <summary>
+        /// Logs in a user with the specified email and password.
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns>Returns a JWT token which can be used for authentication on other endpoints</returns>
+        [HttpPost("login")]
+        [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginDto loginDto)
+        {
+            try
+            {
+                var (email, password) = loginDto;
+                _logger.LogInformation("Attempting login for email: {Email}", loginDto.Email);
+                var result = await _businessClientService.LoginAsync(email, password);
+
+                if (!result.Succeeded)
+                {
+                    _logger.LogWarning("BuisnessClient login failed: {errors}", result.Errors);
+                    return BadRequest(result.Errors);
+                }
+
+                var (accessToken, refreshToken) = result.Data!;
+                _logger.LogInformation("Login successful for email: {Email}", loginDto.Email);
+                return Ok(new TokenResponseDto(accessToken, refreshToken));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred during login");
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
