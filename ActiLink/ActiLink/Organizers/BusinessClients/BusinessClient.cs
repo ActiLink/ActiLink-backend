@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ActiLink.Organizers.Authentication.Roles;
+using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace ActiLink.Organizers.BusinessClients
 {
@@ -11,6 +13,10 @@ namespace ActiLink.Organizers.BusinessClients
 
         [MaxLength(20)]
         public string TaxId { get; set; } = string.Empty;
+        public override void AcceptRoleVisitor(IRoleVisitor visitor, List<Claim> claims)
+        {
+            visitor.VisitBuisnessClient(this, claims);
+        }
 
     }
 

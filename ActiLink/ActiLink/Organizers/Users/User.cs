@@ -1,5 +1,7 @@
 ﻿using ActiLink.Events;
 using ActiLink.Hobbies;
+using ActiLink.Organizers.Authentication.Roles;
+using System.Security.Claims;
 
 namespace ActiLink.Organizers.Users
 {
@@ -13,5 +15,9 @@ namespace ActiLink.Organizers.Users
         public ICollection<Event> SignedUpEvents { get; private set; } = [];
 
         public User(string userName, string email) : base(userName, email) { }
+        public override void AcceptRoleVisitor(IRoleVisitor visitor, List<Claim> claims)
+        {
+            visitor.VisitUser(this, claims);
+        }
     }
 }
