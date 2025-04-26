@@ -38,9 +38,8 @@ namespace ActiLink.Organizers.Authentication.Tokens
                 new Claim(ClaimTypes.Name, user.UserName ?? "")
             };
 
-            var roleVisitor = new JwtRoleVisitor(_jwtSettings);
+            var roleVisitor = new JwtRoleVisitor(_jwtSettings, claims);
             user.AcceptRoleVisitor(roleVisitor);
-            claims.AddRange(roleVisitor.Claims);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

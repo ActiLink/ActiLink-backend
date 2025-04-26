@@ -100,7 +100,7 @@ namespace ActiLink.UnitTests.AuthenticationTests
             Assert.IsTrue(jsonToken.Claims.Any(c => c.Type == "nameid" && c.Value == user.Id), "Token powinien zawierać identyfikator użytkownika");
             Assert.IsTrue(jsonToken.Claims.Any(c => c.Type == "email" && c.Value == user.Email), "Token powinien zawierać email użytkownika");
             Assert.IsTrue(jsonToken.Claims.Any(c => c.Type == "unique_name" && c.Value == user.UserName), "Token powinien zawierać nazwę użytkownika");
-            Assert.IsTrue(jsonToken.Claims.Any(c => c.Type == "role" && c.Value == _jwtSettings.Roles.UserRole), "Token powinien zawierać rolę użytkownika");
+            Assert.IsTrue(jsonToken.Claims.Any(c => c.Type == "role" && c.Value == "User"), "Token powinien zawierać rolę użytkownika");
 
         }
     }
