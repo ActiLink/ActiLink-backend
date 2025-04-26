@@ -1,6 +1,10 @@
-﻿using ActiLink.Shared.Repositories;
+﻿using ActiLink.Configuration;
+using ActiLink.Organizers.Authentication;
+using ActiLink.Organizers.Authentication.Tokens;
+using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace ActiLink.Organizers.BusinessClients.Service
 {
@@ -8,11 +12,18 @@ namespace ActiLink.Organizers.BusinessClients.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<Organizer> _userManager;
+        private readonly IJwtTokenProvider _tokenProvider;
+        private readonly JwtSettings _jwtSettings;
 
-        public BusinessClientService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager)
+        private static readonly string[] InvalidLoginError = ["Invalid email or password."];
+        private static readonly string[] FailedRefreshTokenSave = ["Failed to save the refresh token."];
+
+        public BusinessClientService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, IJwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _tokenProvider = provider ?? throw new ArgumentNullException(nameof(provider));
+            _jwtSettings = jwtOptions.Value ?? throw new ArgumentNullException(nameof(jwtOptions));
         }
 
 
@@ -35,6 +46,45 @@ namespace ActiLink.Organizers.BusinessClients.Service
             return result.Succeeded 
                 ? GenericServiceResult<BusinessClient>.Success(businessClient) 
                 : GenericServiceResult<BusinessClient>.Failure(result.Errors.Select(e => e.Description));
+        }
+
+        /// <summary>
+        /// Authenticates a user with the specified <paramref name="email"/> and <paramref name="password"/>.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="GenericServiceResult{T}"/> of the operation 
+        /// with the access and refresh tokens or null and error messages if the authentication failed.
+        /// </returns>
+        public async Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> LoginAsync(string email, string password)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
+
+            var result = await _userManager.CheckPasswordAsync(user, password);
+
+            if (!result)
+                return GenericServiceResult<(string, string)>.Failure(InvalidLoginError);
+
+            var accessToken = _tokenProvider.GenerateAccessToken(user);
+            var refreshToken = _tokenProvider.GenerateRefreshToken(user.Id);
+
+            var refreshTokenEntity = new RefreshToken
+            {
+                Token = refreshToken,
+                ExpiryTimeUtc = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
+                TokenOwner = user
+            };
+
+            await _unitOfWork.RefreshTokenRepository.AddAsync(refreshTokenEntity);
+            var saveResult = await _unitOfWork.SaveChangesAsync();
+            if (saveResult == 0)
+                return GenericServiceResult<(string, string)>.Failure(FailedRefreshTokenSave);
+
+            return GenericServiceResult<(string, string)>.Success((accessToken, refreshToken));
         }
 
         /// <summary>
