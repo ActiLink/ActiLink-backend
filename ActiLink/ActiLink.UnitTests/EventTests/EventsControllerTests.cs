@@ -2,6 +2,7 @@
 using ActiLink.Events;
 using ActiLink.Events.DTOs;
 using ActiLink.Events.Service;
+using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.Users;
 using ActiLink.Shared.Model;
 using ActiLink.Shared.ServiceUtils;
@@ -40,7 +41,7 @@ namespace ActiLink.UnitTests.EventTests
         }
 
         [TestMethod]
-        public async Task CreateEventAsync_Success_ReturnsCreatedAtAction()
+        public async Task CreateEventByUserAsync_Success_ReturnsCreatedAtAction()
         {
             // Given
             var userId = "TestUserId";
@@ -97,7 +98,7 @@ namespace ActiLink.UnitTests.EventTests
         }
 
         [TestMethod]
-        public async Task CreateEventAsync_Failure_ReturnsBadRequest()
+        public async Task CreateEventByUserAsync_Failure_ReturnsBadRequest()
         {
             // Given
             var userId = "TestUserId";
@@ -293,7 +294,7 @@ namespace ActiLink.UnitTests.EventTests
             Assert.IsFalse(resultEvents.Any());
         }
         [TestMethod]
-        public async Task UpdateEventAsync_Success_ReturnsOkResult()
+        public async Task UpdateEventByUserAsync_Success_ReturnsOkResult()
         {
             // Given
             var userId = "TestUserId";
@@ -582,6 +583,118 @@ namespace ActiLink.UnitTests.EventTests
             Assert.IsInstanceOfType<UnauthorizedObjectResult>(actionResult);
             var unauthorizedResult = (UnauthorizedObjectResult)actionResult;
             Assert.AreEqual("User ID not found in token", unauthorizedResult.Value);
+        }
+
+        [TestMethod]
+        public async Task CreateEventByBusinessClientAsync_Success_ReturnsCreatedAtAction()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var eventTitle = "Test Event";
+            var eventDescription = "This is a test event.";
+            var startTime = new DateTime(1410, 7, 15);
+            var endTime = startTime.AddHours(24);
+            var location = new Location(53.483413, 20.095220);
+            var price = 0m;
+            var minUsers = 25_000;
+            var maxUsers = 30_000;
+            var hobbyIds = new List<Guid>();
+
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
+            var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
+            Utils.SetupEventGuid(createdEvent, eventId);
+            var eventDto = new EventDto(eventId, eventTitle, eventDescription, userId, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+
+            var serviceResult = GenericServiceResult<Event>.Success(createdEvent);
+
+            _eventServiceMock
+                .Setup(es => es.CreateEventAsync(It.IsAny<CreateEventObject>()))
+                .ReturnsAsync(serviceResult);
+
+            _mapperMock
+                .Setup(m => m.Map<EventDto>(It.IsAny<Event>()))
+                .Returns(eventDto);
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, userId)
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+
+            // When
+            var actionResult = await _controller.CreateEventAsync(newEventDto);
+
+            // Then
+            Assert.IsInstanceOfType<CreatedAtActionResult>(actionResult);
+            var createdAtActionResult = (CreatedAtActionResult)actionResult;
+            Assert.IsNotNull(createdAtActionResult);
+            Assert.AreEqual(StatusCodes.Status201Created, createdAtActionResult.StatusCode);
+            Assert.AreEqual(nameof(_controller.GetEventByIdAsync), createdAtActionResult.ActionName);
+            Assert.IsNotNull(createdAtActionResult.Value as EventDto);
+            Assert.AreEqual(eventDto, createdAtActionResult.Value);
+            Assert.IsNotNull(createdAtActionResult.RouteValues);
+            Assert.AreEqual(eventId, createdAtActionResult.RouteValues["id"]);
+        }
+
+        [TestMethod]
+        public async Task UpdateEventByBusinessClientAsync_Success_ReturnsOkResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var eventTitle = "Updated Event";
+            var eventDescription = "This is an updated test event.";
+            var startTime = new DateTime(2024, 8, 15);
+            var endTime = startTime.AddHours(3);
+            var location = new Location(53.483413, 20.095220);
+            var price = 75.5m;
+            var minUsers = 5;
+            var maxUsers = 50;
+            var hobbyIds = new List<Guid>();
+
+            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
+            var updatedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
+            Utils.SetupEventGuid(updatedEvent, eventId);
+
+            var eventDto = new EventDto(eventId, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var serviceResult = GenericServiceResult<Event>.Success(updatedEvent);
+
+            _eventServiceMock
+                .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
+                .ReturnsAsync(serviceResult);
+
+            _mapperMock
+                .Setup(m => m.Map<EventDto>(updatedEvent))
+                .Returns(eventDto);
+
+            var claims = new List<Claim>
+    {
+        new(ClaimTypes.NameIdentifier, userId)
+    };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.UpdateEventAsync(eventId, updateEventDto);
+
+            // Then
+            Assert.IsInstanceOfType<OkObjectResult>(actionResult);
+            var okResult = (OkObjectResult)actionResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(StatusCodes.Status200OK, okResult.StatusCode);
+            Assert.IsNotNull(okResult.Value);
+            Assert.IsInstanceOfType<EventDto>(okResult.Value);
+            var returnedEventDto = (EventDto)okResult.Value;
+            Assert.AreEqual(eventDto, returnedEventDto);
         }
     }
 }
