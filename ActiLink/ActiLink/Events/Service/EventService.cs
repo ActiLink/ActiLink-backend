@@ -30,7 +30,7 @@ namespace ActiLink.Events.Service
         public async Task<GenericServiceResult<Event>> CreateEventAsync(CreateEventObject ceo)
         {
             // Check if organizer exists
-            var organizer = await _unitOfWork.UserRepository.GetByIdAsync(ceo.OrganizerId);
+            var organizer = await _unitOfWork.OrganizerRepository.GetByIdAsync(ceo.OrganizerId);
             if (organizer is null)
                 return GenericServiceResult<Event>.Failure(["Organizer not found"]);
 
