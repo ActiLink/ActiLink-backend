@@ -52,7 +52,7 @@ namespace ActiLink.UnitTests.BusinessClientTests
                 Roles = new JwtSettings.RoleNames
                 {
                     UserRole = "User",
-                    BusinessClientRole = "BuisnessClient"
+                    BusinessClientRole = "BusinessClient"
                 }
             };
             var jwtOptions = Options.Create(jwtSettings);
