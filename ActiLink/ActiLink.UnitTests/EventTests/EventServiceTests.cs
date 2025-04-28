@@ -44,12 +44,10 @@ namespace ActiLink.UnitTests.EventTests
             var price = 50m;
             var minUsers = 1;
             var maxUsers = 100;
-            var hobbyIds = new List<Guid>();
-            var hobby1 = new Hobby("Tenis");
-            var hobby2 = new Hobby("Piłka nożna");
-            var hobbies = new List<Hobby> { hobby1, hobby2 };
+            var hobbyNames = new List<string>() { "Tenis, Piłka nożna" };
+            var hobbies = hobbyNames.Select(name => new Hobby(name));
 
-            var createEventObject = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var createEventObject = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
 
@@ -218,10 +216,10 @@ namespace ActiLink.UnitTests.EventTests
             var price = 75m;
             var minUsers = 2;
             var maxUsers = 50;
-            var hobbyIds = new List<Guid>();
+            var hobbyNames = new List<string>();
 
             var updateEventObject = new UpdateEventObject(eventId, eventTitle, eventDescription, startTime, endTime,
-                                                        location, price, minUsers, maxUsers, hobbyIds);
+                                                        location, price, minUsers, maxUsers, hobbyNames);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var existingEvent = new Event(organizer, "Old Title", "Old Description", new DateTime(2024, 2, 6), new DateTime(2024, 2, 6).AddHours(3),
                                          new Location(0, 0), 50.0m, 1, 10, []);
@@ -364,12 +362,10 @@ namespace ActiLink.UnitTests.EventTests
             var price = 50m;
             var minUsers = 1;
             var maxUsers = 100;
-            var hobbyIds = new List<Guid>();
-            var hobby1 = new Hobby("Tenis");
-            var hobby2 = new Hobby("Piłka nożna");
-            var hobbies = new List<Hobby> { hobby1, hobby2 };
+            var hobbyNames = new List<string>() { "Tenis, Piłka nożna" };
+            var hobbies = hobbyNames.Select(name => new Hobby(name));
 
-            var createEventObject = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var createEventObject = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
 
@@ -421,10 +417,10 @@ namespace ActiLink.UnitTests.EventTests
             var price = 75m;
             var minUsers = 2;
             var maxUsers = 50;
-            var hobbyIds = new List<Guid>();
+            var hobbyNames = new List<string>();
 
             var updateEventObject = new UpdateEventObject(eventId, eventTitle, eventDescription, startTime, endTime,
-                                                        location, price, minUsers, maxUsers, hobbyIds);
+                                                        location, price, minUsers, maxUsers, hobbyNames);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
             var existingEvent = new Event(organizer, "Old Title", "Old Description", new DateTime(2024, 2, 6), new DateTime(2024, 2, 6).AddHours(3),
                                          new Location(0, 0), 50.0m, 1, 10, []);

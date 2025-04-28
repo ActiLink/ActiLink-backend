@@ -1,4 +1,5 @@
-﻿using ActiLink.Shared.Repositories;
+﻿using ActiLink.Hobbies.Infrastructure;
+using ActiLink.Shared.Repositories;
 
 namespace ActiLink.Hobbies.Service
 {
@@ -14,11 +15,5 @@ namespace ActiLink.Hobbies.Service
         {
             return await _unitOfWork.HobbyRepository.GetAllAsync();
         }
-
-        public async Task<Hobby?> GetHobbyByIdAsync(Guid id)
-        {
-            return await _unitOfWork.HobbyRepository.GetByIdAsync(id);
-        }
-
     }
 }

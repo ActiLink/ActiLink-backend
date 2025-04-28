@@ -34,7 +34,7 @@ namespace ActiLink.Events.Infrastructure
                         src.Price,
                         src.MinUsers,
                         src.MaxUsers,
-                        src.RelatedHobbyIds);
+                        src.RelatedHobbyNames);
                 });
 
             // Map CreateEventObject to Event
@@ -79,7 +79,7 @@ namespace ActiLink.Events.Infrastructure
                         src.Price,
                         src.MinUsers,
                         src.MaxUsers,
-                        src.RelatedHobbyIds);
+                        src.RelatedHobbyNames);
                 });
 
             // Map UpdateEventObject to Event

@@ -54,9 +54,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 0m;
             var minUsers = 25_000;
             var maxUsers = 30_000;
-            var hobbyIds = new List<Guid>();
+            var hobbyNames = new List<string>();
 
-            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(createdEvent, eventId);
@@ -111,9 +111,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 0m;
             var minUsers = 25_000;
             var maxUsers = 30_000;
-            var hobbyIds = new List<Guid>();
+            var hobbyNames = new List<string>();
 
-            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
 
             var errors = new List<string> { "Failed to create event" };
             var serviceResult = GenericServiceResult<Event>.Failure(errors);
@@ -307,9 +307,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 75.5m;
             var minUsers = 5;
             var maxUsers = 50;
-            var hobbyIds = new List<Guid>();
+            var hobbyNames = new List<string>();
 
-            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var updatedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(updatedEvent, eventId);
@@ -599,9 +599,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 0m;
             var minUsers = 25_000;
             var maxUsers = 30_000;
-            var hobbyIds = new List<Guid>();
+            var hobbyNames = new List<string>();
 
-            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(createdEvent, eventId);
@@ -656,9 +656,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 75.5m;
             var minUsers = 5;
             var maxUsers = 50;
-            var hobbyIds = new List<Guid>();
+            var hobbyNames = new List<string>();
 
-            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyIds);
+            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
             var updatedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(updatedEvent, eventId);

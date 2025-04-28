@@ -20,7 +20,6 @@ namespace ActiLink.UnitTests.HobbyTests
         private Mock<IMapper> _mockMapper = null!;
         private HobbiesController _hobbiesController = null!;
 
-        private readonly Guid id = new("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
 
         [TestInitialize]
         public void Setup()
@@ -45,13 +44,10 @@ namespace ActiLink.UnitTests.HobbyTests
                 new(name2)
             };
 
-            Utils.SetupHobbyGuid(hobbies[0], id);
-            Utils.SetupHobbyGuid(hobbies[1], id);
-
             var expectedHobbyDtos = new List<HobbyDto>()
             {
-                new(id, name1),
-                new(id, name2)
+                new(name1),
+                new(name2)
             };
 
             _mockHobbyService.Setup(uow => uow.GetHobbiesAsync())
@@ -70,9 +66,7 @@ namespace ActiLink.UnitTests.HobbyTests
             Assert.AreEqual(200, okResult.StatusCode);
             var hobbyDtos = okResult.Value as IEnumerable<HobbyDto>;
             Assert.IsNotNull(hobbyDtos);
-            Assert.AreEqual(expectedHobbyDtos.Count, hobbyDtos.Count());
-            Assert.AreEqual(expectedHobbyDtos.First(), hobbyDtos.First());
-            Assert.AreEqual(expectedHobbyDtos.Last(), hobbyDtos.Last());
+            CollectionAssert.AreEqual(expectedHobbyDtos.ToList(), hobbyDtos.ToList());
             _mockHobbyService.Verify(uow => uow.GetHobbiesAsync(), Times.Once);
             _mockMapper.Verify(m => m.Map<IEnumerable<HobbyDto>>(hobbies), Times.Once);
 
@@ -95,51 +89,6 @@ namespace ActiLink.UnitTests.HobbyTests
             var hobbyDtos = okResult.Value as IEnumerable<HobbyDto>;
             Assert.IsNotNull(hobbyDtos);
             Assert.AreEqual(0, hobbyDtos.Count());
-        }
-
-        [TestMethod]
-        public async Task GetHobbyByIdAsync_ShouldReturnHobby()
-        {
-            // Given
-            string name = "Hobby1";
-            var hobby = new Hobby(name);
-            Utils.SetupHobbyGuid(hobby, id);
-            var expectedHobbyDto = new HobbyDto(id, name);
-
-            _mockHobbyService.Setup(uow => uow.GetHobbyByIdAsync(id))
-                .ReturnsAsync(hobby);
-
-            _mockMapper.Setup(m => m.Map<HobbyDto>(hobby))
-                .Returns(expectedHobbyDto);
-
-
-            // When
-            var result = await _hobbiesController.GetHobbyByIdAsync(id);
-
-
-            // Then
-            var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            var hobbyDto = okResult.Value as HobbyDto;
-            Assert.IsNotNull(hobbyDto);
-            Assert.AreEqual(expectedHobbyDto, hobbyDto);
-        }
-
-        [TestMethod]
-        public async Task GetHobbyByIdAsync_ShouldReturnNotFound()
-        {
-            // Given
-            _mockHobbyService.Setup(uow => uow.GetHobbyByIdAsync(id))
-                .ReturnsAsync((Hobby?)null);
-
-            // When
-            var result = await _hobbiesController.GetHobbyByIdAsync(id);
-
-            // Then
-            var notFoundResult = result as NotFoundResult;
-            Assert.IsNotNull(notFoundResult);
-            Assert.AreEqual(404, notFoundResult.StatusCode);
         }
     }
 }

@@ -34,7 +34,7 @@ namespace ActiLink.Events.Service
             if (organizer is null)
                 return GenericServiceResult<Event>.Failure(["Organizer not found"]);
 
-            var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByIdsAsync(ceo.RelatedHobbyIds);
+            var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByNamesAsync(ceo.RelatedHobbyNames);
 
             // Map CreateEventObject to Event
             var newEvent = _mapper.Map<Event>(ceo, opts =>
@@ -70,7 +70,7 @@ namespace ActiLink.Events.Service
             if (existingEvent.Organizer.Id != requestingUserId)
                 return GenericServiceResult<Event>.Failure(["You are not authorized to update this event."], ErrorCode.Forbidden);
 
-            var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByIdsAsync(eventToUpdate.RelatedHobbyIds);
+            var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByNamesAsync(eventToUpdate.RelatedHobbyNames);
 
             // Map updated properties
             _mapper.Map(

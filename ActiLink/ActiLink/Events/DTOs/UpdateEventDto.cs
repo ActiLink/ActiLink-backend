@@ -10,8 +10,9 @@
 /// <param name="EndTime">End time of the event.</param>
 /// <param name="Location"> Location of the event</param>"
 /// <param name="Price">Price of the event.</param>
-/// <param name="MaxUsers">Maximum number of participants.</param>
 /// <param name="MinUsers">Minimum number of participants.</param>
+/// <param name="MaxUsers">Maximum number of participants.</param>
+/// <param name="RelatedHobbyNames">Hobbies related to the event.</param>
 
 namespace ActiLink.Events.DTOs
 {
@@ -24,6 +25,6 @@ namespace ActiLink.Events.DTOs
     decimal Price,
     int MinUsers,
     int MaxUsers,
-    IEnumerable<Guid> RelatedHobbyIds // Could be names too idk
+    IEnumerable<string> RelatedHobbyNames // Could be names too idk
 );
 }
