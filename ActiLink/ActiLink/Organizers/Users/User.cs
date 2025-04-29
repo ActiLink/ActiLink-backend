@@ -11,7 +11,7 @@ namespace ActiLink.Organizers.Users
     public class User : Organizer
     {
 
-        public ICollection<Hobby> Hobbies { get; } = [];
+        public ICollection<Hobby> Hobbies { get; set; } = [];
         public ICollection<Event> SignedUpEvents { get; private set; } = [];
 
         public User(string userName, string email) : base(userName, email) { }

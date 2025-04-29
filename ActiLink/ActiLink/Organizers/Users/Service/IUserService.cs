@@ -10,5 +10,6 @@ namespace ActiLink.Organizers.Users.Service
         public Task<User?> GetUserByIdAsync(string id);
         public Task<User?> GetUserWithHobbiesByIdAsync(string id);
         public Task<ServiceResult> DeleteUserAsync(User user);
+        public Task<GenericServiceResult<User>> UpdateUserAsync(string id, UpdateUserObject updateUserObject);
     }
 }

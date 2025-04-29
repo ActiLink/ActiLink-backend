@@ -1,4 +1,7 @@
-﻿using ActiLink.Organizers.Users.DTOs;
+﻿using ActiLink.Events;
+using ActiLink.Hobbies;
+using ActiLink.Organizers.Users.DTOs;
+using ActiLink.Organizers.Users.Service;
 using AutoMapper;
 
 namespace ActiLink.Organizers.Users.Infrastructure
@@ -19,6 +22,8 @@ namespace ActiLink.Organizers.Users.Infrastructure
             CreateMap<User, UserDetailsDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.UserName));
 
+            CreateMap<UpdateUserDto, UpdateUserObject>()
+                .ForMember(dest => dest.HobbyNames, opt => opt.MapFrom(src => src.Hobbies.Select(h => h.Name).ToList()));
         }
     }
 }

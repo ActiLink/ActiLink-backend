@@ -1,9 +1,12 @@
 ﻿using ActiLink.Configuration;
+using ActiLink.Hobbies.Infrastructure;
 using ActiLink.Organizers.Authentication;
 using ActiLink.Organizers.Authentication.Extensions;
 using ActiLink.Organizers.Authentication.Tokens;
+using ActiLink.Organizers.Users.Infrastructure;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
@@ -129,6 +132,41 @@ namespace ActiLink.Organizers.Users.Service
             var result = await _userManager.DeleteAsync(user);
 
             return result.Succeeded ? ServiceResult.Success() : ServiceResult.Failure(result.Errors.Select(e => e.Description));
+        }
+
+
+        /// <summary>
+        /// Updates an existing user with the specified <paramref name="id"/> and details in the request body.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updateUserObject"></param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation.
+        /// </returns>
+        public async Task<GenericServiceResult<User>> UpdateUserAsync(string id, UpdateUserObject updateUserObject)
+        {
+            var user = await GetUserByIdAsync(id);
+            if (user is null)
+                return GenericServiceResult<User>.Failure(["User not found."], ErrorCode.NotFound);
+
+            var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByNamesAsync(updateUserObject.HobbyNames);
+
+            if (hobbies.Count != updateUserObject.HobbyNames.Count)
+                return GenericServiceResult<User>.Failure(["Some hobbies not found."], ErrorCode.ValidationError);
+
+            var result = await _userManager.SetUserNameAsync(user, updateUserObject.Name);
+            if(!result.Succeeded)
+                return GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description), ErrorCode.ValidationError);
+
+            result = await _userManager.SetEmailAsync(user, updateUserObject.Email);
+            if (!result.Succeeded)
+                return GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description), ErrorCode.ValidationError);
+
+
+            user.Hobbies = hobbies;
+            result = await _userManager.UpdateAsync(user);
+
+            return result.Succeeded ? GenericServiceResult<User>.Success(user) : GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description));
         }
 
     }
