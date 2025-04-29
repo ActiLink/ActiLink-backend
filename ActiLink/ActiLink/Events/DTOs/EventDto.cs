@@ -1,4 +1,5 @@
 ﻿using ActiLink.Hobbies.DTOs;
+using ActiLink.Organizers;
 using ActiLink.Organizers.Users.DTOs;
 using ActiLink.Shared.Model;
 
@@ -8,7 +9,6 @@ namespace ActiLink.Events.DTOs
     /// Data transfer object for an event.
     /// </summary>
     /// <param name="Id">Unique identifier of the event.</param>
-    /// <param name="OrganizerId">Unique identifier of the organizer.</param>
     /// <param name="Title"> Title of the event (max 100 characters).</param>
     /// <param name="Description"> Description of the event.</param>
     /// <param name="StartTime">Start time of the event.</param>
@@ -18,10 +18,10 @@ namespace ActiLink.Events.DTOs
     /// <param name="MaxUsers">Maximum number of participants.</param>
     /// <param name="MinUsers">Minimum number of participants.</param>
     /// <param name="Participants">List of Participants.</param>
+    /// <param name="Organizer">Organizer of the event.</param>
     /// <param name="Hobbies">List of Hobbies related to this event.</param>
     public record EventDto(
         Guid Id,
-        string OrganizerId,
         string Title,
         string Description,
         DateTime StartTime,
@@ -30,14 +30,14 @@ namespace ActiLink.Events.DTOs
         decimal Price,
         int MinUsers,
         int MaxUsers,
-        List<UserDto> Participants,
-        List<HobbyDto> Hobbies
+        List<HobbyDto> Hobbies,
+        OrganizerDto Organizer,
+        List<UserDto> Participants
     )
     {
         public EventDto()
             : this(
                 default,
-                string.Empty,
                 string.Empty,
                 string.Empty,
                 default,
@@ -47,6 +47,7 @@ namespace ActiLink.Events.DTOs
                 default,
                 default,
                 [],
+                default!,
                 [])
         { }
     }

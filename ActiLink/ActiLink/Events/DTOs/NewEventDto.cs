@@ -1,4 +1,5 @@
-﻿using ActiLink.Shared.Model;
+﻿using ActiLink.Hobbies.DTOs;
+using ActiLink.Shared.Model;
 
 namespace ActiLink.Events.DTOs
 {
@@ -13,7 +14,7 @@ namespace ActiLink.Events.DTOs
     /// <param name="Price">Price of the event.</param>
     /// <param name="MinUsers">Minimum number of participants.</param>
     /// <param name="MaxUsers">Maximum number of participants.</param>
-    /// <param name="RelatedHobbyNames">Hobbies related to the event.</param>
+    /// <param name="RelatedHobbies">Hobbies related to the event.</param>
     public record NewEventDto(
         string Title,
         string Description,
@@ -23,6 +24,6 @@ namespace ActiLink.Events.DTOs
         decimal Price,
         int MinUsers,
         int MaxUsers,
-        IEnumerable<string> RelatedHobbyNames
+        IEnumerable<HobbyDto> RelatedHobbies
     );
 }

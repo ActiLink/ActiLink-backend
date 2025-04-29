@@ -79,7 +79,7 @@ namespace ActiLink.UnitTests.UserTests
             // Arrange
             var newUserDto = new NewUserDto("JanBachalski", "JB123@gmail.com", "Kuna123!");
             var user = new User(newUserDto.Name, newUserDto.Email) { Id = "123" };
-            var userDto = new UserDto("123", newUserDto.Name, newUserDto.Email);
+            var userDto = new UserDto("123", newUserDto.Name);
 
             // Mockowanie UserManager.CreateAsync
             _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))

@@ -2,6 +2,8 @@
 using ActiLink.Events;
 using ActiLink.Events.DTOs;
 using ActiLink.Events.Service;
+using ActiLink.Hobbies.DTOs;
+using ActiLink.Organizers;
 using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.Users;
 using ActiLink.Shared.Model;
@@ -54,13 +56,14 @@ namespace ActiLink.UnitTests.EventTests
             var price = 0m;
             var minUsers = 25_000;
             var maxUsers = 30_000;
-            var hobbyNames = new List<string>();
+            var hobbies = new List<HobbyDto>();
 
-            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
+            var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(createdEvent, eventId);
-            var eventDto = new EventDto(eventId, eventTitle, eventDescription, userId, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var eventDto = new EventDto(eventId, eventTitle, eventDescription,  startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
 
             var serviceResult = GenericServiceResult<Event>.Success(createdEvent);
 
@@ -111,9 +114,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 0m;
             var minUsers = 25_000;
             var maxUsers = 30_000;
-            var hobbyNames = new List<string>();
+            var hobbies = new List<HobbyDto>();
 
-            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
 
             var errors = new List<string> { "Failed to create event" };
             var serviceResult = GenericServiceResult<Event>.Failure(errors);
@@ -164,9 +167,11 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 30_000;
 
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
+            var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
+
             var foundEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(foundEvent, eventId);
-            var expectedEventDto = new EventDto(eventId, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var expectedEventDto = new EventDto(eventId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
 
             _eventServiceMock
                 .Setup(es => es.GetEventByIdAsync(eventId))
@@ -238,15 +243,16 @@ namespace ActiLink.UnitTests.EventTests
             var minUsers = 1;
             var maxUsers = 100;
 
-            var ogranizer = new User("TestUser", "test@example.com") { Id = userId };
+            var organizer = new User("TestUser", "test@example.com") { Id = userId };
+            var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
 
-            var existingEvent1 = new Event(ogranizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
-            var existingEvent2 = new Event(ogranizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
+            var existingEvent1 = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
+            var existingEvent2 = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(existingEvent1, eventId1);
             Utils.SetupEventGuid(existingEvent2, eventId2);
 
-            var expectedEventDto1 = new EventDto(eventId1, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
-            var expectedEventDto2 = new EventDto(eventId2, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var expectedEventDto1 = new EventDto(eventId1,eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
+            var expectedEventDto2 = new EventDto(eventId2,eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
 
             _eventServiceMock
                 .Setup(es => es.GetAllEventsAsync())
@@ -266,15 +272,18 @@ namespace ActiLink.UnitTests.EventTests
             Assert.AreEqual(2, resultEvents.Count());
             Assert.IsTrue(resultEvents.Any(e => e.Id == eventId1));
             Assert.IsTrue(resultEvents.Any(e => e.Id == eventId2));
-            Assert.IsTrue(resultEvents.All(e => e.OrganizerId == userId));
+            Assert.IsTrue(resultEvents.All(e => e.Title == eventTitle));
+            Assert.IsTrue(resultEvents.All(e => e.Description == eventDescription));
             Assert.IsTrue(resultEvents.All(e => e.StartTime == startTime));
             Assert.IsTrue(resultEvents.All(e => e.EndTime == endTime));
             Assert.IsTrue(resultEvents.All(e => e.Location == location));
             Assert.IsTrue(resultEvents.All(e => e.Price == price));
             Assert.IsTrue(resultEvents.All(e => e.MinUsers == minUsers));
             Assert.IsTrue(resultEvents.All(e => e.MaxUsers == maxUsers));
-            Assert.IsTrue(resultEvents.All(e => e.Participants.Count == 0));
             Assert.IsTrue(resultEvents.All(e => e.Hobbies.Count == 0));
+            Assert.IsTrue(resultEvents.All(e => e.Organizer.Id == userId));
+            Assert.IsTrue(resultEvents.All(e => e.Organizer.Name == organizer.UserName));
+            Assert.IsTrue(resultEvents.All(e => e.Participants.Count == 0));
         }
 
         [TestMethod]
@@ -311,10 +320,11 @@ namespace ActiLink.UnitTests.EventTests
 
             var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
+            var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var updatedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(updatedEvent, eventId);
 
-            var eventDto = new EventDto(eventId, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var eventDto = new EventDto(eventId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
             var serviceResult = GenericServiceResult<Event>.Success(updatedEvent);
 
             _eventServiceMock
@@ -599,13 +609,14 @@ namespace ActiLink.UnitTests.EventTests
             var price = 0m;
             var minUsers = 25_000;
             var maxUsers = 30_000;
-            var hobbyNames = new List<string>();
+            var hobbies= new List<HobbyDto>();
 
-            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
+            var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(createdEvent, eventId);
-            var eventDto = new EventDto(eventId, eventTitle, eventDescription, userId, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var eventDto = new EventDto(eventId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
 
             var serviceResult = GenericServiceResult<Event>.Success(createdEvent);
 
@@ -660,10 +671,11 @@ namespace ActiLink.UnitTests.EventTests
 
             var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
+            var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var updatedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(updatedEvent, eventId);
 
-            var eventDto = new EventDto(eventId, userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], []);
+            var eventDto = new EventDto(eventId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
             var serviceResult = GenericServiceResult<Event>.Success(updatedEvent);
 
             _eventServiceMock

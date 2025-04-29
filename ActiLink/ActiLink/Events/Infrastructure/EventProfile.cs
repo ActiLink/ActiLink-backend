@@ -13,7 +13,7 @@ namespace ActiLink.Events.Infrastructure
         {
             // Map Event to EventDto
             CreateMap<Event, EventDto>()
-                .ForMember(dest => dest.OrganizerId, opt => opt.MapFrom(src => src.Organizer.Id))
+                //.ForMember(dest => dest.Organizer, opt => opt.MapFrom(src => src.Organizer.Id))
                 .ForMember(dest => dest.Participants, opt => opt.MapFrom(src => src.SignUpList))
                 .ForMember(dest => dest.Hobbies, opt => opt.MapFrom(src => src.RelatedHobbies));
 
@@ -34,7 +34,7 @@ namespace ActiLink.Events.Infrastructure
                         src.Price,
                         src.MinUsers,
                         src.MaxUsers,
-                        src.RelatedHobbyNames);
+                        src.RelatedHobbies.Select(h => h.Name));
                 });
 
             // Map CreateEventObject to Event

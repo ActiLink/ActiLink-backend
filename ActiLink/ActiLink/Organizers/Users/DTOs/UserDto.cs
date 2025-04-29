@@ -6,8 +6,8 @@
     /// <param name="Id"></param>
     /// <param name="Name"></param>
     /// <param name="Email"></param>
-    public record UserDto(string Id, string Name, string Email)
+    public record UserDto(string Id, string Name)
     {
-        public UserDto() : this(default!, default!, default!) { }
+        public UserDto() : this(default!, default!) { }
     }
 }
