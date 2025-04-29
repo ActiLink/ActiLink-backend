@@ -106,6 +106,18 @@ namespace ActiLink.Organizers.Users.Service
         }
 
         /// <summary>
+        /// Finds and returns a user, if any, who has the specified <paramref name="id"/> and includes their hobbies.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the user matching the specified <paramref name="id"/> if it exists.
+        /// </returns>
+        public async Task<User?> GetUserWithHobbiesByIdAsync(string id)
+        {
+            return await _unitOfWork.UserRepository.GetUserWithHobbiesByIdAsync(id);
+        }
+
+        /// <summary>
         /// Deletes a <paramref name="user"/> if exists
         /// </summary>
         /// <param name="user"></param>

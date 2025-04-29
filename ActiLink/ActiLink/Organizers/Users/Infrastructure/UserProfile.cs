@@ -15,6 +15,10 @@ namespace ActiLink.Organizers.Users.Infrastructure
 
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.UserName));
+
+            CreateMap<User, UserDetailsDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.UserName));
+
         }
     }
 }

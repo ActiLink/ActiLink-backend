@@ -8,6 +8,7 @@ namespace ActiLink.Organizers.Users.Service
         public Task<GenericServiceResult<(string AccessToken, string RefreshToken)>> LoginAsync(string email, string password);
         public Task<IEnumerable<User>> GetUsersAsync();
         public Task<User?> GetUserByIdAsync(string id);
+        public Task<User?> GetUserWithHobbiesByIdAsync(string id);
         public Task<ServiceResult> DeleteUserAsync(User user);
     }
 }

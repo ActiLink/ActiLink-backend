@@ -124,13 +124,27 @@ namespace ActiLink.Organizers.Users
         [HttpGet("{id}")]
         [Authorize]
         [ActionName(nameof(GetUserByIdAsync))]
-        [ProducesResponseType<UserDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType<UserDetailsDto>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetUserByIdAsync([FromRoute] string id)
         {
+            var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdFromToken is null)
+            {
+                _logger.LogWarning("User ID not found in token");
+                return Unauthorized("User ID not found in token");
+            }
+
+            if (userIdFromToken != id)
+            {
+                _logger.LogWarning("User ID from token ({idFromToken}) does not match the requested user ID ({id})", userIdFromToken, id);
+                return Forbid();
+            }
+
             _logger.LogInformation("Fetching user with ID: {UserId}", id);
-            var user = await _userService.GetUserByIdAsync(id);
+            var user = await _userService.GetUserWithHobbiesByIdAsync(id);
 
             if (user is null)
             {
@@ -139,7 +153,7 @@ namespace ActiLink.Organizers.Users
             }
 
             _logger.LogInformation("User with ID {UserId} found", id);
-            return Ok(_mapper.Map<UserDto>(user));
+            return Ok(_mapper.Map<UserDetailsDto>(user));
         }
     }
 }
