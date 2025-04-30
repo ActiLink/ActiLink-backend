@@ -35,7 +35,7 @@ namespace ActiLink.Events.DTOs
         List<UserDto> Participants
     )
     {
-        public EventDto()
+        private EventDto()
             : this(
                 default,
                 string.Empty,
