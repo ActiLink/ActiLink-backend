@@ -1,4 +1,5 @@
-﻿using ActiLink.Shared.Model;
+﻿using ActiLink.Hobbies.DTOs;
+using ActiLink.Shared.Model;
 
 /// <summary>
 /// Data transfer object for updating events
@@ -25,6 +26,6 @@ namespace ActiLink.Events.DTOs
     decimal Price,
     int MinUsers,
     int MaxUsers,
-    IEnumerable<string> RelatedHobbyNames // Could be names too idk
+    IEnumerable<HobbyDto> RelatedHobbies // Could be names too idk
 );
 }

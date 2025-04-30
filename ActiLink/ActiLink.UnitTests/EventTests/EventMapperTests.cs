@@ -156,16 +156,16 @@ namespace ActiLink.UnitTests.EventTests
             var minUsers = 3;
             var maxUsers = 15;
             var hobbyNames = new List<string> { new("Hobby1") };
+            var hobbies = hobbyNames.Select(n => new HobbyDto(n));
 
-            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
-            var expectedUpdateObject = new UpdateEventObject(eventId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
+            var expectedUpdateObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
 
             // When
             var mappedUpdateObject = _mapper.Map<UpdateEventObject>(updateEventDto, opts => opts.Items["EventId"] = eventId);
 
             // Then
             Assert.IsNotNull(mappedUpdateObject);
-            Assert.AreEqual(expectedUpdateObject.Id, mappedUpdateObject.Id);
             Assert.AreEqual(expectedUpdateObject.Title, mappedUpdateObject.Title);
             Assert.AreEqual(expectedUpdateObject.Description, mappedUpdateObject.Description);
             Assert.AreEqual(expectedUpdateObject.StartTime, mappedUpdateObject.StartTime);
@@ -202,13 +202,12 @@ namespace ActiLink.UnitTests.EventTests
                                          new Location(0, 0), 50.0m, 2, 8, []);
             Utils.SetupEventGuid(existingEvent, eventId);
 
-            var updateEventObject = new UpdateEventObject(eventId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+            var updateEventObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
 
             // When
             _mapper.Map(updateEventObject, existingEvent, opts => opts.Items["Hobbies"] = hobbies);
 
             // Then
-            Assert.AreEqual(eventId, existingEvent.Id);
             Assert.AreEqual(eventTitle, existingEvent.Title);
             Assert.AreEqual(eventDescription, existingEvent.Description);
             Assert.AreEqual(startTime, existingEvent.StartTime);

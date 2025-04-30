@@ -316,9 +316,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 75.5m;
             var minUsers = 5;
             var maxUsers = 50;
-            var hobbyNames = new List<string>();
+            var hobbies = new List<HobbyDto>();
 
-            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var updatedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
@@ -328,7 +328,7 @@ namespace ActiLink.UnitTests.EventTests
             var serviceResult = GenericServiceResult<Event>.Success(updatedEvent);
 
             _eventServiceMock
-                .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
+                .Setup(es => es.UpdateEventAsync(eventId, It.IsAny<UpdateEventObject>(), userId))
                 .ReturnsAsync(serviceResult);
 
             _mapperMock
@@ -371,7 +371,7 @@ namespace ActiLink.UnitTests.EventTests
             var serviceResult = GenericServiceResult<Event>.Failure(errors, ErrorCode.Forbidden);
 
             _eventServiceMock
-                .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
+                .Setup(es => es.UpdateEventAsync(eventId, It.IsAny<UpdateEventObject>(), userId))
                 .ReturnsAsync(serviceResult);
 
             var claims = new List<Claim>
@@ -403,7 +403,7 @@ namespace ActiLink.UnitTests.EventTests
             var serviceResult = GenericServiceResult<Event>.Failure(errors, ErrorCode.NotFound);
 
             _eventServiceMock
-                .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
+                .Setup(es => es.UpdateEventAsync(eventId, It.IsAny<UpdateEventObject>(), userId))
                 .ReturnsAsync(serviceResult);
 
             var claims = new List<Claim>
@@ -435,7 +435,7 @@ namespace ActiLink.UnitTests.EventTests
             var serviceResult = GenericServiceResult<Event>.Failure(errors);
 
             _eventServiceMock
-                .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
+                .Setup(es => es.UpdateEventAsync(eventId, It.IsAny<UpdateEventObject>(), userId))
                 .ReturnsAsync(serviceResult);
 
             var claims = new List<Claim>
@@ -667,9 +667,9 @@ namespace ActiLink.UnitTests.EventTests
             var price = 75.5m;
             var minUsers = 5;
             var maxUsers = 50;
-            var hobbyNames = new List<string>();
+            var hobbies = new List<HobbyDto>();
 
-            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
             var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var updatedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
@@ -679,7 +679,7 @@ namespace ActiLink.UnitTests.EventTests
             var serviceResult = GenericServiceResult<Event>.Success(updatedEvent);
 
             _eventServiceMock
-                .Setup(es => es.UpdateEventAsync(It.IsAny<UpdateEventObject>(), userId))
+                .Setup(es => es.UpdateEventAsync(eventId, It.IsAny<UpdateEventObject>(), userId))
                 .ReturnsAsync(serviceResult);
 
             _mapperMock

@@ -64,27 +64,11 @@ namespace ActiLink.Events.Infrastructure
 
             // Map UpdateEventDto to UpdateEventObject 
             CreateMap<UpdateEventDto, UpdateEventObject>()
-                .ConstructUsing((src, context) =>
-                {
-                    var eventId = context.Items["EventId"] as Guid?
-                        ?? throw new InvalidOperationException("EventId must be provided in context items");
-
-                    return new UpdateEventObject(
-                        eventId,
-                        src.Title,
-                        src.Description,
-                        src.StartTime,
-                        src.EndTime,
-                        src.Location,
-                        src.Price,
-                        src.MinUsers,
-                        src.MaxUsers,
-                        src.RelatedHobbyNames);
-                });
+                .ForMember(dest => dest.RelatedHobbyNames, 
+                opt => opt.MapFrom(src => src.RelatedHobbies.Select(h => h.Name).ToList()));
 
             // Map UpdateEventObject to Event
-            CreateMap<UpdateEventObject, Event>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Id is not changed
+            CreateMap<UpdateEventObject, Event>()                
                 .ForMember(dest => dest.Organizer, opt => opt.Ignore())
                 .ForMember(dest => dest.RelatedHobbies, opt => opt.Ignore())
                  .AfterMap((src, dest, context) =>

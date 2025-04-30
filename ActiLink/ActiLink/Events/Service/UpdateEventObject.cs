@@ -3,7 +3,6 @@
 namespace ActiLink.Events.Service
 {
     public record UpdateEventObject(
-        Guid Id,
         string Title,
         string Description,
         DateTime StartTime,
@@ -13,5 +12,19 @@ namespace ActiLink.Events.Service
         int MinUsers,
         int MaxUsers,
         IEnumerable<string> RelatedHobbyNames
-    );
+    )
+    {
+        private UpdateEventObject() : this(
+            default!,
+            default!,
+            default,
+            default,
+            default!,
+            default,
+            default,
+            default,
+            default!)
+        {
+        }
+    }
 }

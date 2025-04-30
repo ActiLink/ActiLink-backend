@@ -36,6 +36,9 @@ namespace ActiLink.Events.Service
 
             var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByNamesAsync(ceo.RelatedHobbyNames);
 
+            if (hobbies.Count != ceo.RelatedHobbyNames.Count())
+                return GenericServiceResult<Event>.Failure(["Some hobbies not found"], ErrorCode.ValidationError);
+
             // Map CreateEventObject to Event
             var newEvent = _mapper.Map<Event>(ceo, opts =>
             {
@@ -60,10 +63,10 @@ namespace ActiLink.Events.Service
         /// <returns>
         /// Returns a <see cref="GenericServiceResult{T}"/> containing the updated <see cref="Event"/> object or null and error messages if the update failed.
         /// </returns>
-        public async Task<GenericServiceResult<Event>> UpdateEventAsync(UpdateEventObject eventToUpdate, string requestingUserId)
+        public async Task<GenericServiceResult<Event>> UpdateEventAsync(Guid eventId, UpdateEventObject eventToUpdate, string requestingUserId)
         {
             // Check if the event exists
-            var existingEvent = await _unitOfWork.EventRepository.GetByIdWithOrganizerAsync(eventToUpdate.Id);
+            var existingEvent = await _unitOfWork.EventRepository.GetByIdWithOrganizerAsync(eventId);
             if (existingEvent is null)
                 return GenericServiceResult<Event>.Failure(["Event not found"], ErrorCode.NotFound);
 
@@ -71,6 +74,9 @@ namespace ActiLink.Events.Service
                 return GenericServiceResult<Event>.Failure(["You are not authorized to update this event."], ErrorCode.Forbidden);
 
             var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByNamesAsync(eventToUpdate.RelatedHobbyNames);
+
+            if (hobbies.Count != eventToUpdate.RelatedHobbyNames.Count())
+                return GenericServiceResult<Event>.Failure(["Some hobbies not found"], ErrorCode.ValidationError);
 
             // Map updated properties
             _mapper.Map(
