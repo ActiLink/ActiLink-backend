@@ -18,7 +18,9 @@ namespace ActiLink.Organizers.Users.Service
         private readonly UserManager<Organizer> _userManager;
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] FailedRefreshTokenSave = ["Failed to save the refresh token."];
-        private readonly IJwtTokenProvider _tokenProvider;
+        private static readonly string[] UserNotFoundError = ["User not found."];
+		private static readonly string[] SomeHobbiesNotFoundError = ["Some hobbies not found."];
+		private readonly IJwtTokenProvider _tokenProvider;
         private readonly JwtSettings _jwtSettings;
         public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, IJwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
         {
@@ -147,12 +149,12 @@ namespace ActiLink.Organizers.Users.Service
         {
             var user = await GetUserByIdAsync(id);
             if (user is null)
-                return GenericServiceResult<User>.Failure(["User not found."], ErrorCode.NotFound);
+                return GenericServiceResult<User>.Failure(UserNotFoundError, ErrorCode.NotFound);
 
             var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByNamesAsync(updateUserObject.HobbyNames);
 
             if (hobbies.Count != updateUserObject.HobbyNames.Count)
-                return GenericServiceResult<User>.Failure(["Some hobbies not found."], ErrorCode.ValidationError);
+                return GenericServiceResult<User>.Failure(SomeHobbiesNotFoundError, ErrorCode.ValidationError);
 
             var result = await _userManager.SetUserNameAsync(user, updateUserObject.Name);
             if(!result.Succeeded)

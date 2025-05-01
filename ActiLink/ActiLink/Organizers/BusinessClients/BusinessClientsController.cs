@@ -1,9 +1,11 @@
 ﻿using ActiLink.Organizers.BusinessClients.DTOs;
 using ActiLink.Organizers.BusinessClients.Service;
 using ActiLink.Organizers.DTOs;
+using ActiLink.Shared.ServiceUtils;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ActiLink.Organizers.BusinessClients
 {
@@ -145,5 +147,49 @@ namespace ActiLink.Organizers.BusinessClients
             _logger.LogInformation("Business client with ID {id} found", id);
             return Ok(_mapper.Map<BusinessClientDto>(businessClient));
         }
-    }
+        [HttpPut("{id}")]
+		[Authorize]
+		[ProducesResponseType(typeof(BusinessClientDto), StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateBusinessClientAsync([FromRoute] string id, [FromBody] UpdateBusinessClientDto updateBusinessClientDto)
+		{
+			try
+			{
+				var businessCLientIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if(businessCLientIdFromToken is null)
+				{
+					_logger.LogWarning("Business client ID not found in token");
+					return Unauthorized("Business client ID not found in token");
+				}
+				if (businessCLientIdFromToken != id)
+				{
+					_logger.LogWarning("Business client ID from token ({idFromToken}) does not match the requested business client ID ({id})", businessCLientIdFromToken, id);
+					return Forbid();
+				}
+				_logger.LogInformation("Updating business client with ID: {BusinessClientId}", id);
+                var updateBusinessClientObject = _mapper.Map<UpdateBusinessClientObject>(updateBusinessClientDto);
+				var result = await _businessClientService.UpdateBusinessClientAsync(id, updateBusinessClientObject);
+				if (!result.Succeeded)
+				{
+					_logger.LogWarning("Business client update failed: {errors}", result.Errors);
+					return result.ErrorCode switch
+					{
+						ErrorCode.NotFound => NotFound(result.Errors),
+						ErrorCode.Forbidden => Forbid(),
+						_ => BadRequest(result.Errors)
+					};
+				}
+                return Ok(_mapper.Map<BusinessClientDto>(result.Data!));
+
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An unexpected error occurred while updating the business client");
+				return StatusCode(StatusCodes.Status500InternalServerError);
+			}
+		}
+		
+	}
 }
