@@ -3,8 +3,6 @@ using System.Security.Claims;
 using System.Text;
 using ActiLink.Configuration;
 using ActiLink.Organizers.Authentication.Roles;
-using ActiLink.Organizers.Users;
-using ActiLink.Organizers.BusinessClients;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 

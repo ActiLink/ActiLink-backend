@@ -13,7 +13,7 @@ namespace ActiLink.Events.Infrastructure
         {
             // Map Event to EventDto
             CreateMap<Event, EventDto>()
-                .ForMember(dest => dest.OrganizerId, opt => opt.MapFrom(src => src.Organizer.Id))
+                //.ForMember(dest => dest.Organizer, opt => opt.MapFrom(src => src.Organizer.Id))
                 .ForMember(dest => dest.Participants, opt => opt.MapFrom(src => src.SignUpList))
                 .ForMember(dest => dest.Hobbies, opt => opt.MapFrom(src => src.RelatedHobbies));
 
@@ -34,7 +34,7 @@ namespace ActiLink.Events.Infrastructure
                         src.Price,
                         src.MinUsers,
                         src.MaxUsers,
-                        src.RelatedHobbyIds);
+                        src.RelatedHobbies.Select(h => h.Name));
                 });
 
             // Map CreateEventObject to Event
@@ -64,27 +64,11 @@ namespace ActiLink.Events.Infrastructure
 
             // Map UpdateEventDto to UpdateEventObject 
             CreateMap<UpdateEventDto, UpdateEventObject>()
-                .ConstructUsing((src, context) =>
-                {
-                    var eventId = context.Items["EventId"] as Guid?
-                        ?? throw new InvalidOperationException("EventId must be provided in context items");
-
-                    return new UpdateEventObject(
-                        eventId,
-                        src.Title,
-                        src.Description,
-                        src.StartTime,
-                        src.EndTime,
-                        src.Location,
-                        src.Price,
-                        src.MinUsers,
-                        src.MaxUsers,
-                        src.RelatedHobbyIds);
-                });
+                .ForMember(dest => dest.RelatedHobbyNames,
+                opt => opt.MapFrom(src => src.RelatedHobbies.Select(h => h.Name).ToList()));
 
             // Map UpdateEventObject to Event
             CreateMap<UpdateEventObject, Event>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Id is not changed
                 .ForMember(dest => dest.Organizer, opt => opt.Ignore())
                 .ForMember(dest => dest.RelatedHobbies, opt => opt.Ignore())
                  .AfterMap((src, dest, context) =>

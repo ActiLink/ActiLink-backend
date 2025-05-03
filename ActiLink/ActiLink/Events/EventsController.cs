@@ -98,9 +98,9 @@ namespace ActiLink.Events
                     return Unauthorized("User ID not found in token");
                 }
 
-                var result = await _eventService.UpdateEventAsync(
-                    _mapper.Map<UpdateEventObject>(updateEventDto, opts => opts.Items["EventId"] = id),
-                    userIdFromToken);
+                var result = await _eventService.UpdateEventAsync(id,
+                                                                  _mapper.Map<UpdateEventObject>(updateEventDto),
+                                                                  userIdFromToken);
 
                 if (!result.Succeeded)
                 {

@@ -1,15 +1,9 @@
-﻿using ActiLink.Configuration;
+﻿using System.IdentityModel.Tokens.Jwt;
+using ActiLink.Configuration;
 using ActiLink.Organizers.Authentication.Tokens;
-using ActiLink.Organizers.Users;
 using ActiLink.Organizers.BusinessClients;
+using ActiLink.Organizers.Users;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ActiLink.UnitTests.AuthenticationTests
 {

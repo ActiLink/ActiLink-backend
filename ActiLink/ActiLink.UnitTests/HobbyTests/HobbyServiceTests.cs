@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ActiLink.Hobbies;
-using ActiLink.Hobbies.DTOs;
+﻿using ActiLink.Hobbies;
 using ActiLink.Hobbies.Service;
 using ActiLink.Shared.Repositories;
 using Moq;
@@ -16,7 +10,7 @@ namespace ActiLink.UnitTests.HobbyTests
     {
         private Mock<IUnitOfWork> _mockUnitOfWork = null!;
         private HobbyService _hobbyService = null!;
-        private readonly Guid id = new("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+        //private readonly Guid id = new("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
 
         [TestInitialize]
         public void Setup()
@@ -68,41 +62,6 @@ namespace ActiLink.UnitTests.HobbyTests
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count());
             _mockUnitOfWork.Verify(uow => uow.HobbyRepository.GetAllAsync(), Times.Once);
-        }
-
-        [TestMethod]
-        public async Task GetHobbyById_ShouldReturnHobby()
-        {
-            // Given
-            var hobby = new Hobby("Hobby1");
-            Utils.SetupHobbyGuid(hobby, id);
-
-            _mockUnitOfWork.Setup(uow => uow.HobbyRepository.GetByIdAsync(id))
-                .ReturnsAsync(hobby);
-
-
-            // When
-            var result = await _hobbyService.GetHobbyByIdAsync(id);
-
-            // Then
-            Assert.IsNotNull(result);
-            Assert.AreEqual(hobby, result);
-            _mockUnitOfWork.Verify(uow => uow.HobbyRepository.GetByIdAsync(id), Times.Once);
-        }
-
-        [TestMethod]
-        public async Task GetHobbyById_ShouldReturnNull()
-        {
-            // Given
-            _mockUnitOfWork.Setup(uow => uow.HobbyRepository.GetByIdAsync(id))
-                .ReturnsAsync((Hobby?)null);
-
-            // When
-            var result = await _hobbyService.GetHobbyByIdAsync(id);
-
-            // Then
-            Assert.IsNull(result);
-            _mockUnitOfWork.Verify(uow => uow.HobbyRepository.GetByIdAsync(id), Times.Once);
         }
     }
 }
