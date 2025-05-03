@@ -1,7 +1,6 @@
 ﻿using ActiLink.Events;
 using ActiLink.Hobbies;
 using ActiLink.Organizers.Authentication.Roles;
-using System.Security.Claims;
 
 namespace ActiLink.Organizers.Users
 {

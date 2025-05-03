@@ -63,7 +63,7 @@ namespace ActiLink.UnitTests.EventTests
             var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
             Utils.SetupEventGuid(createdEvent, eventId);
-            var eventDto = new EventDto(eventId, eventTitle, eventDescription,  startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
+            var eventDto = new EventDto(eventId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
 
             var serviceResult = GenericServiceResult<Event>.Success(createdEvent);
 
@@ -251,8 +251,8 @@ namespace ActiLink.UnitTests.EventTests
             Utils.SetupEventGuid(existingEvent1, eventId1);
             Utils.SetupEventGuid(existingEvent2, eventId2);
 
-            var expectedEventDto1 = new EventDto(eventId1,eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
-            var expectedEventDto2 = new EventDto(eventId2,eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
+            var expectedEventDto1 = new EventDto(eventId1, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
+            var expectedEventDto2 = new EventDto(eventId2, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], organizerDto, []);
 
             _eventServiceMock
                 .Setup(es => es.GetAllEventsAsync())
@@ -609,7 +609,7 @@ namespace ActiLink.UnitTests.EventTests
             var price = 0m;
             var minUsers = 25_000;
             var maxUsers = 30_000;
-            var hobbies= new List<HobbyDto>();
+            var hobbies = new List<HobbyDto>();
 
             var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };

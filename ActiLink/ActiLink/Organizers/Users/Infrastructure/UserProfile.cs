@@ -1,6 +1,4 @@
-﻿using ActiLink.Events;
-using ActiLink.Hobbies;
-using ActiLink.Organizers.Users.DTOs;
+﻿using ActiLink.Organizers.Users.DTOs;
 using ActiLink.Organizers.Users.Service;
 using AutoMapper;
 

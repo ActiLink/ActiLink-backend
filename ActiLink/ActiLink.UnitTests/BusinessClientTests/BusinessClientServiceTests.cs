@@ -6,7 +6,6 @@ using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.BusinessClients.Service;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
-using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -58,7 +57,7 @@ namespace ActiLink.UnitTests.BusinessClientTests
             var jwtOptions = Options.Create(jwtSettings);
 
             // Initialize the BusinessClientService with mocked dependencies
-            _businessClientService = new BusinessClientService(_mockUnitOfWork.Object, _mockUserManager.Object,_mockTokenProvider.Object, jwtOptions);
+            _businessClientService = new BusinessClientService(_mockUnitOfWork.Object, _mockUserManager.Object, _mockTokenProvider.Object, jwtOptions);
         }
 
         [TestMethod]
@@ -240,7 +239,7 @@ namespace ActiLink.UnitTests.BusinessClientTests
                 .Returns(mockRefreshTokenRepo.Object);
 
             _mockUnitOfWork.Setup(u => u.SaveChangesAsync())
-                .ReturnsAsync(0); 
+                .ReturnsAsync(0);
 
             // When
             var result = await _businessClientService.LoginAsync(email, password);
@@ -350,111 +349,111 @@ namespace ActiLink.UnitTests.BusinessClientTests
             _mockUserManager.Verify(x => x.DeleteAsync(businessClient), Times.Once);
         }
 
-		public async Task UpdateBusinessClient_ValidData_ReturnsSuccess()
-		{
-			// Given
-			var businessClient = new BusinessClient(username, email, taxId) { Id = id };
-			var updatedName = "updateduser";
-			var updatedEmail = "updated@email.com";
-			var updatedTaxId = "123-45-67-890";
-			var updateObject = new UpdateBusinessClientObject(updatedName, updatedEmail, updatedTaxId);
+        public async Task UpdateBusinessClient_ValidData_ReturnsSuccess()
+        {
+            // Given
+            var businessClient = new BusinessClient(username, email, taxId) { Id = id };
+            var updatedName = "updateduser";
+            var updatedEmail = "updated@email.com";
+            var updatedTaxId = "123-45-67-890";
+            var updateObject = new UpdateBusinessClientObject(updatedName, updatedEmail, updatedTaxId);
 
-			_mockUserManager.Setup(m => m.FindByIdAsync(id))
-				.ReturnsAsync(businessClient);
+            _mockUserManager.Setup(m => m.FindByIdAsync(id))
+                .ReturnsAsync(businessClient);
 
-			_mockUserManager.Setup(m => m.SetUserNameAsync(businessClient, updatedName))
-				.ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(m => m.SetUserNameAsync(businessClient, updatedName))
+                .ReturnsAsync(IdentityResult.Success);
 
-			_mockUserManager.Setup(m => m.SetEmailAsync(businessClient, updatedEmail))
-				.ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(m => m.SetEmailAsync(businessClient, updatedEmail))
+                .ReturnsAsync(IdentityResult.Success);
 
-			_mockUserManager.Setup(m => m.UpdateAsync(businessClient))
-				.ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(m => m.UpdateAsync(businessClient))
+                .ReturnsAsync(IdentityResult.Success);
 
-			// When
-			var result = await _businessClientService.UpdateBusinessClientAsync(id, updateObject);
+            // When
+            var result = await _businessClientService.UpdateBusinessClientAsync(id, updateObject);
 
-			// Then
-			Assert.IsTrue(result.Succeeded);
-			Assert.IsNotNull(result.Data);
-			Assert.AreEqual(updatedName, businessClient.UserName);
-			Assert.AreEqual(updatedEmail, businessClient.Email);
-			Assert.AreEqual(updatedTaxId, businessClient.TaxId);
-			Assert.AreEqual(ErrorCode.None, result.ErrorCode);
+            // Then
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNotNull(result.Data);
+            Assert.AreEqual(updatedName, businessClient.UserName);
+            Assert.AreEqual(updatedEmail, businessClient.Email);
+            Assert.AreEqual(updatedTaxId, businessClient.TaxId);
+            Assert.AreEqual(ErrorCode.None, result.ErrorCode);
 
-			_mockUserManager.Verify(m => m.FindByIdAsync(id), Times.Once);
-			_mockUserManager.Verify(m => m.SetUserNameAsync(businessClient, updatedName), Times.Once);
-			_mockUserManager.Verify(m => m.SetEmailAsync(businessClient, updatedEmail), Times.Once);
-			_mockUserManager.Verify(m => m.UpdateAsync(businessClient), Times.Once);
-		}
+            _mockUserManager.Verify(m => m.FindByIdAsync(id), Times.Once);
+            _mockUserManager.Verify(m => m.SetUserNameAsync(businessClient, updatedName), Times.Once);
+            _mockUserManager.Verify(m => m.SetEmailAsync(businessClient, updatedEmail), Times.Once);
+            _mockUserManager.Verify(m => m.UpdateAsync(businessClient), Times.Once);
+        }
 
 
-		[TestMethod]
-		public async Task UpdateBusinessClient_UsernameUpdateFails_ReturnsValidationError()
-		{
-			// Given
-			var businessClient = new BusinessClient(username, email, taxId) { Id = id };
-			var updatedName = "updateduser";
-			var updatedEmail = "updated@email.com";
-			var updatedTaxId = "123-45-67-890";
-			var updateObject = new UpdateBusinessClientObject(updatedName, updatedEmail, updatedTaxId);
-			var identityErrors = new[] { new IdentityError { Description = "Nazwa użytkownika już istnieje" } };
+        [TestMethod]
+        public async Task UpdateBusinessClient_UsernameUpdateFails_ReturnsValidationError()
+        {
+            // Given
+            var businessClient = new BusinessClient(username, email, taxId) { Id = id };
+            var updatedName = "updateduser";
+            var updatedEmail = "updated@email.com";
+            var updatedTaxId = "123-45-67-890";
+            var updateObject = new UpdateBusinessClientObject(updatedName, updatedEmail, updatedTaxId);
+            var identityErrors = new[] { new IdentityError { Description = "Nazwa użytkownika już istnieje" } };
 
-			_mockUserManager.Setup(m => m.FindByIdAsync(id))
-				.ReturnsAsync(businessClient);
+            _mockUserManager.Setup(m => m.FindByIdAsync(id))
+                .ReturnsAsync(businessClient);
 
-			_mockUserManager.Setup(m => m.SetUserNameAsync(businessClient, updatedName))
-				.ReturnsAsync(IdentityResult.Failed(identityErrors));
+            _mockUserManager.Setup(m => m.SetUserNameAsync(businessClient, updatedName))
+                .ReturnsAsync(IdentityResult.Failed(identityErrors));
 
-			// When
-			var result = await _businessClientService.UpdateBusinessClientAsync(id, updateObject);
+            // When
+            var result = await _businessClientService.UpdateBusinessClientAsync(id, updateObject);
 
-			// Then
-			Assert.IsFalse(result.Succeeded);
-			Assert.IsNull(result.Data);
-			Assert.AreEqual(ErrorCode.ValidationError, result.ErrorCode);
-			Assert.AreEqual("Nazwa użytkownika już istnieje", result.Errors.First());
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.Data);
+            Assert.AreEqual(ErrorCode.ValidationError, result.ErrorCode);
+            Assert.AreEqual("Nazwa użytkownika już istnieje", result.Errors.First());
 
-			_mockUserManager.Verify(m => m.FindByIdAsync(id), Times.Once);
-			_mockUserManager.Verify(m => m.SetUserNameAsync(businessClient, updatedName), Times.Once);
-			_mockUserManager.Verify(m => m.SetEmailAsync(It.IsAny<BusinessClient>(), It.IsAny<string>()), Times.Never);
-			_mockUserManager.Verify(m => m.UpdateAsync(It.IsAny<BusinessClient>()), Times.Never);
-		}
+            _mockUserManager.Verify(m => m.FindByIdAsync(id), Times.Once);
+            _mockUserManager.Verify(m => m.SetUserNameAsync(businessClient, updatedName), Times.Once);
+            _mockUserManager.Verify(m => m.SetEmailAsync(It.IsAny<BusinessClient>(), It.IsAny<string>()), Times.Never);
+            _mockUserManager.Verify(m => m.UpdateAsync(It.IsAny<BusinessClient>()), Times.Never);
+        }
 
-		[TestMethod]
-		public async Task UpdateBusinessClient_EmailUpdateFails_ReturnsValidationError()
-		{
-			// Given
-			var businessClient = new BusinessClient(username, email, taxId) { Id = id };
-			var updatedName = "updateduser";
-			var updatedEmail = "updated@email.com";
-			var updatedTaxId = "123-45-67-890";
-			var updateObject = new UpdateBusinessClientObject(updatedName, updatedEmail, updatedTaxId);
-			var identityErrors = new[] { new IdentityError { Description = "Email jest już zajęty" } };
+        [TestMethod]
+        public async Task UpdateBusinessClient_EmailUpdateFails_ReturnsValidationError()
+        {
+            // Given
+            var businessClient = new BusinessClient(username, email, taxId) { Id = id };
+            var updatedName = "updateduser";
+            var updatedEmail = "updated@email.com";
+            var updatedTaxId = "123-45-67-890";
+            var updateObject = new UpdateBusinessClientObject(updatedName, updatedEmail, updatedTaxId);
+            var identityErrors = new[] { new IdentityError { Description = "Email jest już zajęty" } };
 
-			_mockUserManager.Setup(m => m.FindByIdAsync(id))
-				.ReturnsAsync(businessClient);
+            _mockUserManager.Setup(m => m.FindByIdAsync(id))
+                .ReturnsAsync(businessClient);
 
-			_mockUserManager.Setup(m => m.SetUserNameAsync(businessClient, updatedName))
-				.ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(m => m.SetUserNameAsync(businessClient, updatedName))
+                .ReturnsAsync(IdentityResult.Success);
 
-			_mockUserManager.Setup(m => m.SetEmailAsync(businessClient, updatedEmail))
-				.ReturnsAsync(IdentityResult.Failed(identityErrors));
+            _mockUserManager.Setup(m => m.SetEmailAsync(businessClient, updatedEmail))
+                .ReturnsAsync(IdentityResult.Failed(identityErrors));
 
-			// When
-			var result = await _businessClientService.UpdateBusinessClientAsync(id, updateObject);
+            // When
+            var result = await _businessClientService.UpdateBusinessClientAsync(id, updateObject);
 
-			// Then
-			Assert.IsFalse(result.Succeeded);
-			Assert.IsNull(result.Data);
-			Assert.AreEqual(ErrorCode.ValidationError, result.ErrorCode);
-			Assert.AreEqual("Email jest już zajęty", result.Errors.First());
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.Data);
+            Assert.AreEqual(ErrorCode.ValidationError, result.ErrorCode);
+            Assert.AreEqual("Email jest już zajęty", result.Errors.First());
 
-			_mockUserManager.Verify(m => m.FindByIdAsync(id), Times.Once);
-			_mockUserManager.Verify(m => m.SetUserNameAsync(businessClient, updatedName), Times.Once);
-			_mockUserManager.Verify(m => m.SetEmailAsync(businessClient, updatedEmail), Times.Once);
-			_mockUserManager.Verify(m => m.UpdateAsync(It.IsAny<BusinessClient>()), Times.Never);
-		}
+            _mockUserManager.Verify(m => m.FindByIdAsync(id), Times.Once);
+            _mockUserManager.Verify(m => m.SetUserNameAsync(businessClient, updatedName), Times.Once);
+            _mockUserManager.Verify(m => m.SetEmailAsync(businessClient, updatedEmail), Times.Once);
+            _mockUserManager.Verify(m => m.UpdateAsync(It.IsAny<BusinessClient>()), Times.Never);
+        }
 
-	}
+    }
 }

@@ -1,5 +1,4 @@
-﻿using ActiLink.Hobbies.Infrastructure;
-using ActiLink.Shared.Repositories;
+﻿using ActiLink.Shared.Repositories;
 
 namespace ActiLink.Hobbies.Service
 {

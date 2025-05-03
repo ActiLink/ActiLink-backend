@@ -11,5 +11,5 @@ namespace ActiLink.Organizers.BusinessClients.Service
         public Task<BusinessClient?> GetBusinessClientByIdAsync(string id);
         public Task<ServiceResult> DeleteBusinessClientAsync(BusinessClient businessClient);
         public Task<GenericServiceResult<BusinessClient>> UpdateBusinessClientAsync(string id, UpdateBusinessClientObject updateBusinessClientObject);
-	}
+    }
 }

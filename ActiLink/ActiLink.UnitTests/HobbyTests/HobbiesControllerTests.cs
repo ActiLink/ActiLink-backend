@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ActiLink.Hobbies;
+﻿using ActiLink.Hobbies;
 using ActiLink.Hobbies.DTOs;
 using ActiLink.Hobbies.Service;
 using AutoMapper;

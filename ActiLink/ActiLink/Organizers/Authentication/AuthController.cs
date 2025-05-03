@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ActiLink.Organizers.Authentication.Service;
+﻿using ActiLink.Organizers.Authentication.Service;
 using ActiLink.Organizers.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ActiLink.Organizers.Authentication
 {
@@ -10,7 +10,7 @@ namespace ActiLink.Organizers.Authentication
 
     [ApiController]
     [Route("[controller]")]
-    public class AuthController: Controller
+    public class AuthController : Controller
     {
         private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;

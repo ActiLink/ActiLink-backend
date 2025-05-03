@@ -57,7 +57,7 @@ builder.Services.AddScoped<IBusinessClientService, BusinessClientService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IHobbyService, HobbyService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IJwtTokenProvider,JwtTokenProvider>();
+builder.Services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
 
 
 builder.Services.AddControllers();

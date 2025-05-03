@@ -64,11 +64,11 @@ namespace ActiLink.Events.Infrastructure
 
             // Map UpdateEventDto to UpdateEventObject 
             CreateMap<UpdateEventDto, UpdateEventObject>()
-                .ForMember(dest => dest.RelatedHobbyNames, 
+                .ForMember(dest => dest.RelatedHobbyNames,
                 opt => opt.MapFrom(src => src.RelatedHobbies.Select(h => h.Name).ToList()));
 
             // Map UpdateEventObject to Event
-            CreateMap<UpdateEventObject, Event>()                
+            CreateMap<UpdateEventObject, Event>()
                 .ForMember(dest => dest.Organizer, opt => opt.Ignore())
                 .ForMember(dest => dest.RelatedHobbies, opt => opt.Ignore())
                  .AfterMap((src, dest, context) =>

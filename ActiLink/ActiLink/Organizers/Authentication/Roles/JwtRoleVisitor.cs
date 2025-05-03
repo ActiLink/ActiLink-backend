@@ -5,10 +5,10 @@ using ActiLink.Organizers.Users;
 
 namespace ActiLink.Organizers.Authentication.Roles
 {
-    public class JwtRoleVisitor: IRoleVisitor
+    public class JwtRoleVisitor : IRoleVisitor
     {
         private readonly JwtSettings _jwtSettings;
-        public List<Claim> Claims { get; } 
+        public List<Claim> Claims { get; }
         public JwtRoleVisitor(JwtSettings jwtSettings, List<Claim> claims)
         {
             _jwtSettings = jwtSettings;
