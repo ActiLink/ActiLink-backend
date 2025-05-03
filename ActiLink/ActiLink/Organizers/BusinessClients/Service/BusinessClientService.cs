@@ -17,6 +17,7 @@ namespace ActiLink.Organizers.BusinessClients.Service
 
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] FailedRefreshTokenSave = ["Failed to save the refresh token."];
+        private static readonly string[] BusinessCLientNotFoundError = ["Business client not found."];
 
         public BusinessClientService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, IJwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
         {
@@ -43,8 +44,8 @@ namespace ActiLink.Organizers.BusinessClients.Service
             var businessClient = new BusinessClient(username, email, taxId);
             var result = await _userManager.CreateAsync(businessClient, password);
 
-            return result.Succeeded 
-                ? GenericServiceResult<BusinessClient>.Success(businessClient) 
+            return result.Succeeded
+                ? GenericServiceResult<BusinessClient>.Success(businessClient)
                 : GenericServiceResult<BusinessClient>.Failure(result.Errors.Select(e => e.Description));
         }
 
@@ -125,6 +126,35 @@ namespace ActiLink.Organizers.BusinessClients.Service
             return result.Succeeded
                 ? ServiceResult.Success()
                 : ServiceResult.Failure(result.Errors.Select(e => e.Description));
+        }
+
+        /// <summary>
+        /// Seeks and updates buisness client based on the specified <paramref name="id"/> and <paramref name="updateBusinessClientObject"/>.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updateBusinessClientObject"></param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="GenericServiceResult{T}"/> of the operation
+        /// </returns>
+        public async Task<GenericServiceResult<BusinessClient>> UpdateBusinessClientAsync(string id, UpdateBusinessClientObject updateBusinessClientObject)
+        {
+            var businessClient = await GetBusinessClientByIdAsync(id);
+            if (businessClient == null)
+                return GenericServiceResult<BusinessClient>.Failure(BusinessCLientNotFoundError);
+
+            var result = await _userManager.SetUserNameAsync(businessClient, updateBusinessClientObject.Name);
+            if (!result.Succeeded)
+                return GenericServiceResult<BusinessClient>.Failure(result.Errors.Select(e => e.Description), ErrorCode.ValidationError);
+
+            result = await _userManager.SetEmailAsync(businessClient, updateBusinessClientObject.Email);
+            if (!result.Succeeded)
+                return GenericServiceResult<BusinessClient>.Failure(result.Errors.Select(e => e.Description), ErrorCode.ValidationError);
+
+
+            businessClient.TaxId = updateBusinessClientObject.TaxId;
+            result = await _userManager.UpdateAsync(businessClient);
+
+            return result.Succeeded ? GenericServiceResult<BusinessClient>.Success(businessClient) : GenericServiceResult<BusinessClient>.Failure(result.Errors.Select(e => e.Description));
         }
     }
 }

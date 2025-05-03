@@ -1,7 +1,8 @@
 ﻿using ActiLink.Configuration;
+using ActiLink.Hobbies.Infrastructure;
 using ActiLink.Organizers.Authentication;
-using ActiLink.Organizers.Authentication.Extensions;
 using ActiLink.Organizers.Authentication.Tokens;
+using ActiLink.Organizers.Users.Infrastructure;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
 using Microsoft.AspNetCore.Identity;
@@ -15,6 +16,8 @@ namespace ActiLink.Organizers.Users.Service
         private readonly UserManager<Organizer> _userManager;
         private static readonly string[] InvalidLoginError = ["Invalid email or password."];
         private static readonly string[] FailedRefreshTokenSave = ["Failed to save the refresh token."];
+        private static readonly string[] UserNotFoundError = ["User not found."];
+        private static readonly string[] SomeHobbiesNotFoundError = ["Some hobbies not found."];
         private readonly IJwtTokenProvider _tokenProvider;
         private readonly JwtSettings _jwtSettings;
         public UserService(IUnitOfWork unitOfWork, UserManager<Organizer> userManager, IJwtTokenProvider provider, IOptions<JwtSettings> jwtOptions)
@@ -106,6 +109,18 @@ namespace ActiLink.Organizers.Users.Service
         }
 
         /// <summary>
+        /// Finds and returns a user, if any, who has the specified <paramref name="id"/> and includes their hobbies.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the user matching the specified <paramref name="id"/> if it exists.
+        /// </returns>
+        public async Task<User?> GetUserWithHobbiesByIdAsync(string id)
+        {
+            return await _unitOfWork.UserRepository.GetUserWithHobbiesByIdAsync(id);
+        }
+
+        /// <summary>
         /// Deletes a <paramref name="user"/> if exists
         /// </summary>
         /// <param name="user"></param>
@@ -117,6 +132,41 @@ namespace ActiLink.Organizers.Users.Service
             var result = await _userManager.DeleteAsync(user);
 
             return result.Succeeded ? ServiceResult.Success() : ServiceResult.Failure(result.Errors.Select(e => e.Description));
+        }
+
+
+        /// <summary>
+        /// Updates an existing user with the specified <paramref name="id"/> and details in the request body.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updateUserObject"></param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="ServiceResult"/> of the operation.
+        /// </returns>
+        public async Task<GenericServiceResult<User>> UpdateUserAsync(string id, UpdateUserObject updateUserObject)
+        {
+            var user = await GetUserByIdAsync(id);
+            if (user is null)
+                return GenericServiceResult<User>.Failure(UserNotFoundError, ErrorCode.NotFound);
+
+            var hobbies = await _unitOfWork.HobbyRepository.GetHobbiesByNamesAsync(updateUserObject.HobbyNames);
+
+            if (hobbies.Count != updateUserObject.HobbyNames.Count)
+                return GenericServiceResult<User>.Failure(SomeHobbiesNotFoundError, ErrorCode.ValidationError);
+
+            var result = await _userManager.SetUserNameAsync(user, updateUserObject.Name);
+            if (!result.Succeeded)
+                return GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description), ErrorCode.ValidationError);
+
+            result = await _userManager.SetEmailAsync(user, updateUserObject.Email);
+            if (!result.Succeeded)
+                return GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description), ErrorCode.ValidationError);
+
+
+            user.Hobbies = hobbies;
+            result = await _userManager.UpdateAsync(user);
+
+            return result.Succeeded ? GenericServiceResult<User>.Success(user) : GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description));
         }
 
     }

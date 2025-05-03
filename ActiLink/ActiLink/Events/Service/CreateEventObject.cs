@@ -12,6 +12,6 @@ namespace ActiLink.Events.Service
         decimal Price,
         int MinUsers,
         int MaxUsers,
-        IEnumerable<Guid> RelatedHobbyIds
+        IEnumerable<string> RelatedHobbyNames
     );
 }

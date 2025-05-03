@@ -1,7 +1,6 @@
 ﻿using ActiLink.Events;
-using Microsoft.AspNetCore.Identity;
 using ActiLink.Organizers.Authentication.Roles;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace ActiLink.Organizers
 {

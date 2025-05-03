@@ -14,11 +14,5 @@ namespace ActiLink.Hobbies.Service
         {
             return await _unitOfWork.HobbyRepository.GetAllAsync();
         }
-
-        public async Task<Hobby?> GetHobbyByIdAsync(Guid id)
-        {
-            return await _unitOfWork.HobbyRepository.GetByIdAsync(id);
-        }
-
     }
 }

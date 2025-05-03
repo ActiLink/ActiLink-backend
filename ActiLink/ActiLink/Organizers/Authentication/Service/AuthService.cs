@@ -1,13 +1,13 @@
 ﻿using ActiLink.Configuration;
+using ActiLink.Organizers.Authentication.Extensions;
+using ActiLink.Organizers.Authentication.Tokens;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
-using ActiLink.Organizers.Authentication.Extensions;
 using Microsoft.Extensions.Options;
-using ActiLink.Organizers.Authentication.Tokens;
 
 namespace ActiLink.Organizers.Authentication.Service
 {
-    public class AuthService: IAuthService
+    public class AuthService : IAuthService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IJwtTokenProvider _tokenProvider;

@@ -57,7 +57,7 @@ builder.Services.AddScoped<IBusinessClientService, BusinessClientService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IHobbyService, HobbyService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IJwtTokenProvider,JwtTokenProvider>();
+builder.Services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
 
 
 builder.Services.AddControllers();
@@ -133,6 +133,9 @@ builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
+
+// Configure the endpoints prefix
+app.UsePathBase("/api/v1");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
