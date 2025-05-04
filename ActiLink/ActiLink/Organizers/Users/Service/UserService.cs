@@ -145,7 +145,7 @@ namespace ActiLink.Organizers.Users.Service
         /// </returns>
         public async Task<GenericServiceResult<User>> UpdateUserAsync(string id, UpdateUserObject updateUserObject)
         {
-            var user = await GetUserByIdAsync(id);
+            var user = await GetUserWithHobbiesByIdAsync(id);
             if (user is null)
                 return GenericServiceResult<User>.Failure(UserNotFoundError, ErrorCode.NotFound);
 
@@ -163,7 +163,8 @@ namespace ActiLink.Organizers.Users.Service
                 return GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description), ErrorCode.ValidationError);
 
 
-            user.Hobbies = hobbies;
+            user.Hobbies.Clear();
+            hobbies.ForEach(user.Hobbies.Add);
             result = await _userManager.UpdateAsync(user);
 
             return result.Succeeded ? GenericServiceResult<User>.Success(user) : GenericServiceResult<User>.Failure(result.Errors.Select(e => e.Description));
