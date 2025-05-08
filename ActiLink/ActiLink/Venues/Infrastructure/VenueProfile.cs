@@ -11,28 +11,25 @@ namespace ActiLink.Venues.Infrastructure
         public VenueProfile()
         {
             CreateMap<NewVenueDto, CreateVenueObject>()
-                .AfterMap((src, dest, context) =>
+                .ForMember(dest => dest.OwnerId, opt => opt.MapFrom((src, dest, _, context) =>
                 {
-                    var ownerId = context.Items["OwnerId"] as string
-                        ?? throw new InvalidOperationException("OwnerId must be provided in context items");
+                    if(!context.Items.TryGetValue("OwnerId", out var ownerId))
+                        throw new InvalidOperationException("OwnerId must be provided in context items");
 
-                    dest.OwnerId = ownerId;
-                });
+                    return ownerId as string
+                        ?? throw new InvalidOperationException("OwnerId must be of type string");
+                }));
 
             CreateMap<CreateVenueObject, Venue>()
-                .ForMember(dest => dest.Owner, opt => opt.Ignore())
-                .ForMember(dest => dest.Events, opt => opt.Ignore())
-                .AfterMap((src, dest, context) =>
+                .ForMember(dest => dest.Owner, opt => opt.MapFrom((src, dest, _, context) =>
                 {
-                    // Owner
-                    if (context.Items.TryGetValue("Owner", out var ownerObj) &&
-                        ownerObj is BusinessClient owner)
-                    {
-                        typeof(Venue)
-                            .GetProperty(nameof(Venue.Owner))?
-                            .SetValue(dest, owner);
-                    }
-                });
+                    if(!context.Items.TryGetValue("Owner", out var owner))
+                        throw new InvalidOperationException("Owner must be provided in context items");
+
+                    return owner as BusinessClient
+                        ?? throw new InvalidOperationException("Owner must be of type BusinessClient");
+                }))
+                .ForMember(dest => dest.Events, opt => opt.Ignore());
 
             CreateMap<Venue, VenueDto>();
 

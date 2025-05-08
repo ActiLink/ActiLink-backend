@@ -10,7 +10,6 @@ namespace ActiLink.Venues.Service
         string Address
         )
     {
-        public string OwnerId { get; set; } = OwnerId;
         private CreateVenueObject() : this(
             default!,
             string.Empty,
