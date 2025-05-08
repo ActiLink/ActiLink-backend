@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ActiLink.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20250508105302_Venues")]
+    [Migration("20250508121707_Venues")]
     partial class Venues
     {
         /// <inheritdoc />
@@ -420,7 +420,7 @@ namespace ActiLink.Migrations
                         .WithMany("Events")
                         .HasForeignKey("OrganizerId");
 
-                    b.HasOne("ActiLink.Venues.Venue", null)
+                    b.HasOne("ActiLink.Venues.Venue", "Venue")
                         .WithMany("Events")
                         .HasForeignKey("VenueId");
 
@@ -447,6 +447,8 @@ namespace ActiLink.Migrations
                         .IsRequired();
 
                     b.Navigation("Organizer");
+
+                    b.Navigation("Venue");
                 });
 
             modelBuilder.Entity("ActiLink.Organizers.Authentication.RefreshToken", b =>
