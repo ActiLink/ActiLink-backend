@@ -4,6 +4,7 @@ using ActiLink.Organizers;
 using ActiLink.Organizers.Authentication;
 using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.Users;
+using ActiLink.Venues;
 
 namespace ActiLink.Shared.Repositories
 {
@@ -20,6 +21,7 @@ namespace ActiLink.Shared.Repositories
         IRepository<Organizer> OrganizerRepository { get; }
         IRepository<Event> EventRepository { get; }
         IRepository<Hobby> HobbyRepository { get; }
+        IRepository<Venue> VenueRepository { get; }
         IRepository<RefreshToken> RefreshTokenRepository { get; }
 
         /// <summary>

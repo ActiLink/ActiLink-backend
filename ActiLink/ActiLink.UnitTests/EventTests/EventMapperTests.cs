@@ -5,6 +5,7 @@ using ActiLink.Events.Service;
 using ActiLink.Hobbies;
 using ActiLink.Hobbies.DTOs;
 using ActiLink.Organizers;
+using ActiLink.Organizers.DTOs;
 using ActiLink.Organizers.Infrastructure;
 using ActiLink.Organizers.Users;
 using ActiLink.Shared.Model;
@@ -217,6 +218,37 @@ namespace ActiLink.UnitTests.EventTests
             Assert.AreEqual(minUsers, existingEvent.MinUsers);
             Assert.AreEqual(maxUsers, existingEvent.MaxUsers);
             Assert.AreEqual(1, existingEvent.RelatedHobbies.Count);
+        }
+
+
+        [TestMethod]
+        public void MapEventToReducedEventDto_ShouldMapCorrectly()
+        {
+            // Given
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var userId = "TestUserId";
+            var eventTitle = "Test Event";
+            var eventDescription = "This is an updated test event.";
+            var startTime = new DateTime(2024, 2, 1);
+            var endTime = startTime.AddHours(3);
+            var location = new Location(3, 4);
+            var price = 150.00m;
+            var minUsers = 3;
+            var maxUsers = 15;
+
+            var organizer = new User("TestUser", "test@example.com") { Id = userId };
+            var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
+            var eventToMap = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
+            Utils.SetupEventGuid(eventToMap, eventId);
+
+            var expectedReducedEventDto = new ReducedEventDto(eventId, eventTitle, organizerDto, startTime);
+
+            // When
+            var mappedReducedEventDto = _mapper.Map<ReducedEventDto>(eventToMap);
+
+            // Then
+            Assert.IsNotNull(mappedReducedEventDto);
+            Assert.AreEqual(expectedReducedEventDto, mappedReducedEventDto);
         }
 
     }

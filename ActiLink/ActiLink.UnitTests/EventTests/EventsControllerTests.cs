@@ -5,6 +5,7 @@ using ActiLink.Events.Service;
 using ActiLink.Hobbies.DTOs;
 using ActiLink.Organizers;
 using ActiLink.Organizers.BusinessClients;
+using ActiLink.Organizers.DTOs;
 using ActiLink.Organizers.Users;
 using ActiLink.Shared.Model;
 using ActiLink.Shared.ServiceUtils;

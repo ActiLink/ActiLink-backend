@@ -83,6 +83,7 @@ namespace ActiLink.Events.Infrastructure
                      }
                  });
 
+            CreateMap<Event, ReducedEventDto>();
         }
     }
 }

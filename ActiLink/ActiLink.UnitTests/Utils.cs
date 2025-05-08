@@ -1,5 +1,6 @@
 ﻿using ActiLink.Events;
 using ActiLink.Hobbies;
+using ActiLink.Venues;
 
 namespace ActiLink.UnitTests
 {
@@ -16,6 +17,13 @@ namespace ActiLink.UnitTests
             existingHobby.GetType()
                 .GetProperty("Id")?
                 .SetValue(existingHobby, hobbyId);
+        }
+
+        internal static void SetupVenueId(Venue existingVenue, Guid venueId)
+        {
+            existingVenue.GetType()
+                .GetProperty("Id")?
+                .SetValue(existingVenue, venueId);
         }
     }
 }
