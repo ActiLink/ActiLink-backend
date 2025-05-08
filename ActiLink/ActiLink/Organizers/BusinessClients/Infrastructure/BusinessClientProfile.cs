@@ -13,7 +13,10 @@ namespace ActiLink.Organizers.BusinessClients.Infrastructure
 			CreateMap<BusinessClient, BusinessClientDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.UserName));
             CreateMap<UpdateBusinessClientDto, UpdateBusinessClientObject>();
-				
-		}
+
+            CreateMap<BusinessClient, VenueOwnerDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.UserName));
+
+        }
     }
 }

@@ -4,6 +4,7 @@ using ActiLink.Organizers;
 using ActiLink.Organizers.Authentication;
 using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.Users;
+using ActiLink.Venues;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,7 @@ namespace ActiLink
         //DbSet<Organizer> Organizers { get; set; }
         DbSet<Event> Events { get; set; }  // Added DbSet for Event
         DbSet<Hobby> Hobbies { get; set; }
+        DbSet<Venue> Venues { get; set; }
         DbSet<RefreshToken> RefreshTokens { get; set; } // Added DbSet for RefreshToken
 
         public ApiContext(DbContextOptions<ApiContext> options) : base(options) { }
