@@ -1,5 +1,5 @@
 ﻿using ActiLink.Hobbies.DTOs;
-using ActiLink.Organizers;
+using ActiLink.Organizers.DTOs;
 using ActiLink.Organizers.Users.DTOs;
 using ActiLink.Shared.Model;
 

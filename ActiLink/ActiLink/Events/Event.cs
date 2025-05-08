@@ -3,6 +3,7 @@ using ActiLink.Hobbies;
 using ActiLink.Organizers;
 using ActiLink.Organizers.Users;
 using ActiLink.Shared.Model;
+using ActiLink.Venues;
 using Microsoft.EntityFrameworkCore;
 
 namespace ActiLink.Events
@@ -27,13 +28,14 @@ namespace ActiLink.Events
         public int MaxUsers { get; private set; }
         public ICollection<User> SignUpList { get; private set; } = [];
         public ICollection<Hobby> RelatedHobbies { get; private set; } = [];
+        public Venue? Venue { get; private set; }
 
         /// <summary>
         /// Constructor for creating an event.
         /// </summary>
         private Event() { }
         public Event(Organizer organizer, string title, string description, DateTime startTime, DateTime endTime, Location location,
-                     decimal price, int minUsers, int maxUsers, IEnumerable<Hobby> relatedHobbies)
+                     decimal price, int minUsers, int maxUsers, IEnumerable<Hobby> relatedHobbies, Venue? venue = null)
         {
             Organizer = organizer;
             Title = title;
@@ -45,6 +47,7 @@ namespace ActiLink.Events
             MinUsers = minUsers;
             MaxUsers = maxUsers;
             RelatedHobbies = relatedHobbies.ToList() ?? [];
+            Venue = venue;
         }
     }
 }

@@ -4,6 +4,7 @@ using ActiLink.Organizers;
 using ActiLink.Organizers.Authentication;
 using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.Users;
+using ActiLink.Venues;
 
 namespace ActiLink.Shared.Repositories
 {
@@ -15,6 +16,7 @@ namespace ActiLink.Shared.Repositories
         private IRepository<Organizer>? _organizerRepository;
         private IRepository<Event>? _eventRepository;
         private IRepository<Hobby>? _hobbyRepository;
+        private IRepository<Venue>? _venueRepository;
         private IRepository<RefreshToken>? _refreshTokenRepository;
 
         public UnitOfWork(ApiContext context)
@@ -27,6 +29,7 @@ namespace ActiLink.Shared.Repositories
         public IRepository<Organizer> OrganizerRepository => _organizerRepository ??= new Repository<Organizer>(_context);
         public IRepository<Event> EventRepository => _eventRepository ??= new Repository<Event>(_context);
         public IRepository<Hobby> HobbyRepository => _hobbyRepository ??= new Repository<Hobby>(_context);
+        public IRepository<Venue> VenueRepository => _venueRepository ??= new Repository<Venue>(_context);
         public IRepository<RefreshToken> RefreshTokenRepository => _refreshTokenRepository ??= new Repository<RefreshToken>(_context);
 
         public async Task<int> SaveChangesAsync()

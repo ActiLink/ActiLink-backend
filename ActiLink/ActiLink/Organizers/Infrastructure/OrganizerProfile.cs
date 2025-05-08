@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using ActiLink.Organizers.DTOs;
+using AutoMapper;
 
 namespace ActiLink.Organizers.Infrastructure
 {
