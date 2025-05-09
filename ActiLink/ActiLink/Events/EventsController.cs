@@ -293,7 +293,7 @@ namespace ActiLink.Events
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UnsignFromEventAsync(Guid id)
+        public async Task<IActionResult> WithdrawFromEventAsync(Guid id)
         {
             try
             {
@@ -317,7 +317,7 @@ namespace ActiLink.Events
                     return Forbid("User is not authorized to enroll in events");
                 }
 
-                var result = await _eventService.UnsignFromEventAsync(id, userId);
+                var result = await _eventService.WithdrawFromEventAsync(id, userId);
                 if (!result.Succeeded)
                 {
                     return result.ErrorCode switch

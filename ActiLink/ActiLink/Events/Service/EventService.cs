@@ -207,7 +207,7 @@ namespace ActiLink.Events.Service
         /// <param name="eventId"></param>
         /// <param name="userIdFromToken"></param>
         /// <returns></returns>
-        public async Task<GenericServiceResult<Event>> UnsignFromEventAsync(Guid eventId, string userIdFromToken)
+        public async Task<GenericServiceResult<Event>> WithdrawFromEventAsync(Guid eventId, string userIdFromToken)
         {
             var eventToUnsign = await _unitOfWork.EventRepository.GetByIdWithOrganizerAsync(eventId);
 

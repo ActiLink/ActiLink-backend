@@ -797,7 +797,7 @@ namespace ActiLink.UnitTests.EventTests
 
             // Mocking the service result
             _eventServiceMock
-                .Setup(es => es.UnsignFromEventAsync(eventId, userId))
+                .Setup(es => es.WithdrawFromEventAsync(eventId, userId))
                 .ReturnsAsync(GenericServiceResult<Event>.Success(eventToUnsign));
 
             _mapperMock
@@ -815,7 +815,7 @@ namespace ActiLink.UnitTests.EventTests
             _controller.ControllerContext.HttpContext.User = principal;
 
             // When
-            var actionResult = await _controller.UnsignFromEventAsync(eventId);
+            var actionResult = await _controller.WithdrawFromEventAsync(eventId);
 
             // Then
             var okObjectResult = actionResult as OkObjectResult;
@@ -844,7 +844,7 @@ namespace ActiLink.UnitTests.EventTests
             _controller.ControllerContext.HttpContext.User = principal;
 
             // When
-            var actionResult = await _controller.UnsignFromEventAsync(eventId);
+            var actionResult = await _controller.WithdrawFromEventAsync(eventId);
 
             // Then
             Assert.IsInstanceOfType<ForbidResult>(actionResult);

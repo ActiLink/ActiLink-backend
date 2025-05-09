@@ -715,7 +715,7 @@ namespace ActiLink.UnitTests.EventTests
                 .ReturnsAsync(1);
 
             // When
-            var result = await _eventService.UnsignFromEventAsync(eventId, userId);
+            var result = await _eventService.WithdrawFromEventAsync(eventId, userId);
 
             // Then
             Assert.IsTrue(result.Succeeded);
@@ -749,7 +749,7 @@ namespace ActiLink.UnitTests.EventTests
             _unitOfWorkMock.Setup(u => u.UserRepository).Returns(_mockUserRepository.Object);
 
             // When
-            var result = await _eventService.UnsignFromEventAsync(eventId, userId);
+            var result = await _eventService.WithdrawFromEventAsync(eventId, userId);
 
             // Then
             Assert.IsFalse(result.Succeeded);
