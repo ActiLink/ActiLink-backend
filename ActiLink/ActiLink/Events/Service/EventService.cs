@@ -168,6 +168,12 @@ namespace ActiLink.Events.Service
             return await _unitOfWork.EventRepository.GetAllEventsAsync();
         }
 
+        /// <summary>
+        /// Signs up the user for the specified event.
+        /// </summary>
+        /// <param name="eventId"></param>
+        /// <param name="userIdFromToken"></param>
+        /// <returns></returns>
         public async Task<GenericServiceResult<Event>> SignUpForEventAsync(Guid eventId, string userIdFromToken)
         {
             var eventToSignUp = await _unitOfWork.EventRepository.GetByIdWithOrganizerAsync(eventId);
@@ -192,6 +198,36 @@ namespace ActiLink.Events.Service
             return result > 0
                 ? GenericServiceResult<Event>.Success(eventToSignUp)
                 : GenericServiceResult<Event>.Failure(["Failed to sign up for event"]);
+        }
+
+
+        /// <summary>
+        /// Unsigns the user from the specified event.
+        /// </summary>
+        /// <param name="eventId"></param>
+        /// <param name="userIdFromToken"></param>
+        /// <returns></returns>
+        public async Task<GenericServiceResult<Event>> WithdrawFromEventAsync(Guid eventId, string userIdFromToken)
+        {
+            var eventToUnsign = await _unitOfWork.EventRepository.GetByIdWithOrganizerAsync(eventId);
+
+            if (eventToUnsign is null)
+                return GenericServiceResult<Event>.Failure(["Event not found"], ErrorCode.NotFound);
+
+            if(eventToUnsign.SignUpList.All(u => u.Id != userIdFromToken))
+                return GenericServiceResult<Event>.Failure(["You are not signed up for this event."], ErrorCode.ValidationError);
+
+            var user = await _unitOfWork.UserRepository.GetUserWithSignedUpEventsByIdAsync(userIdFromToken);
+            if (user is null)
+                return GenericServiceResult<Event>.Failure(["User not found"], ErrorCode.NotFound);
+
+            eventToUnsign.SignUpList.Remove(user);
+            user.SignedUpEvents.Remove(eventToUnsign);
+
+            var result = await _unitOfWork.SaveChangesAsync();
+            return result > 0
+                ? GenericServiceResult<Event>.Success(eventToUnsign)
+                : GenericServiceResult<Event>.Failure(["Failed to unsign from event"]);
         }
     }
 }

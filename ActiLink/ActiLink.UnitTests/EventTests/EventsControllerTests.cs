@@ -7,6 +7,7 @@ using ActiLink.Organizers;
 using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.DTOs;
 using ActiLink.Organizers.Users;
+using ActiLink.Organizers.Users.DTOs;
 using ActiLink.Shared.Model;
 using ActiLink.Shared.ServiceUtils;
 using AutoMapper;
@@ -718,9 +719,11 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var user = new User("Test User", "testuser@email.com") { Id = userId };
+            var userDto = new UserDto(user.Id, user.UserName!);
             var eventToSignUp = new Event(null!, "Test Event", "Description", DateTime.Now, DateTime.Now.AddHours(2), new Location(0, 0), 0m, 1, 10, []);
             Utils.SetupEventGuid(eventToSignUp, eventId);
-            var expectedEventDto = new EventDto(eventId, "Test Event", "Description", DateTime.Now, DateTime.Now.AddHours(2), new Location(0, 0), 0m, 1, 10, [], null!, []);
+            eventToSignUp.SignUpList.Add(user);
+            var expectedEventDto = new EventDto(eventId, "Test Event", "Description", DateTime.Now, DateTime.Now.AddHours(2), new Location(0, 0), 0m, 1, 10, [], null!, [userDto]);
 
             // Mocking the service result
             _eventServiceMock
@@ -775,6 +778,73 @@ namespace ActiLink.UnitTests.EventTests
 
             // When
             var actionResult = await _controller.SignUpForEventAsync(eventId);
+
+            // Then
+            Assert.IsInstanceOfType<ForbidResult>(actionResult);
+        }
+
+        [TestMethod]
+        public async Task WithdrawEventByUser_Success_ReturnsOkResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var user = new User("Test User", "testuser@email.com") { Id = userId };
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var eventToUnsign = new Event(null!, "Test Event", "Description", DateTime.Now, DateTime.Now.AddHours(2), new Location(0, 0), 0m, 1, 10, []);
+            Utils.SetupEventGuid(eventToUnsign, eventId);
+            eventToUnsign.SignUpList.Add(user);
+            var expectedEventDto = new EventDto(eventId, "Test Event", "Description", DateTime.Now, DateTime.Now.AddHours(2), new Location(0, 0), 0m, 1, 10, [], null!, []);
+
+            // Mocking the service result
+            _eventServiceMock
+                .Setup(es => es.WithdrawFromEventAsync(eventId, userId))
+                .ReturnsAsync(GenericServiceResult<Event>.Success(eventToUnsign));
+
+            _mapperMock
+                .Setup(m => m.Map<EventDto>(eventToUnsign))
+                .Returns(expectedEventDto);
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, userId),
+                new(ClaimTypes.Role, "User")
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.WithdrawFromEventAsync(eventId);
+
+            // Then
+            var okObjectResult = actionResult as OkObjectResult;
+            Assert.IsNotNull(okObjectResult);
+            Assert.AreEqual(StatusCodes.Status200OK, okObjectResult.StatusCode);
+            Assert.IsNotNull(okObjectResult.Value);
+            var enrolledEventDto = okObjectResult.Value as EventDto;
+            Assert.IsNotNull(enrolledEventDto);
+            Assert.AreEqual(expectedEventDto, enrolledEventDto);
+        }
+
+        [TestMethod]
+        public async Task WithdrawEventByBusinessClient_Forbidden_Returns()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, userId),
+                new(ClaimTypes.Role, "BusinessClient")
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.WithdrawFromEventAsync(eventId);
 
             // Then
             Assert.IsInstanceOfType<ForbidResult>(actionResult);
