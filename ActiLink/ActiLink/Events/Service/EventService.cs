@@ -1,5 +1,6 @@
 ﻿using ActiLink.Events.Infrastructure;
 using ActiLink.Hobbies.Infrastructure;
+using ActiLink.Organizers.Users.Infrastructure;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
 using AutoMapper;
@@ -165,6 +166,32 @@ namespace ActiLink.Events.Service
         public async Task<IEnumerable<Event>> GetAllEventsAsync()
         {
             return await _unitOfWork.EventRepository.GetAllEventsAsync();
+        }
+
+        public async Task<GenericServiceResult<Event>> SignUpForEventAsync(Guid eventId, string userIdFromToken)
+        {
+            var eventToSignUp = await _unitOfWork.EventRepository.GetByIdWithOrganizerAsync(eventId);
+
+            if (eventToSignUp is null)
+                return GenericServiceResult<Event>.Failure(["Event not found"], ErrorCode.NotFound);
+
+            if (eventToSignUp.SignUpList.Any(u => u.Id == userIdFromToken))
+                return GenericServiceResult<Event>.Failure(["You are already signed up for this event."], ErrorCode.ValidationError);
+
+            if (eventToSignUp.MaxUsers > 0 && eventToSignUp.SignUpList.Count >= eventToSignUp.MaxUsers)
+                return GenericServiceResult<Event>.Failure(["Event is full"], ErrorCode.ValidationError);
+
+            var user = await _unitOfWork.UserRepository.GetUserWithSignedUpEventsByIdAsync(userIdFromToken);
+            if (user is null)
+                return GenericServiceResult<Event>.Failure(["User not found"], ErrorCode.NotFound);
+
+            eventToSignUp.SignUpList.Add(user);
+            user.SignedUpEvents.Add(eventToSignUp);
+
+            var result = await _unitOfWork.SaveChangesAsync();
+            return result > 0
+                ? GenericServiceResult<Event>.Success(eventToSignUp)
+                : GenericServiceResult<Event>.Failure(["Failed to sign up for event"]);
         }
     }
 }
