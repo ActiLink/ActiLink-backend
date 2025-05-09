@@ -235,7 +235,7 @@ namespace ActiLink.Events
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> EnrollEventAsync(Guid id)
+        public async Task<IActionResult> SignUpForEventAsync(Guid id)
         {
             try
             {

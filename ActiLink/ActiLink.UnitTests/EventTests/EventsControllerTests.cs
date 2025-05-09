@@ -744,7 +744,7 @@ namespace ActiLink.UnitTests.EventTests
 
 
             // When
-            var actionResult = await _controller.EnrollEventAsync(eventId);
+            var actionResult = await _controller.SignUpForEventAsync(eventId);
 
 
             // Then
@@ -774,7 +774,7 @@ namespace ActiLink.UnitTests.EventTests
             _controller.ControllerContext.HttpContext.User = principal;
 
             // When
-            var actionResult = await _controller.EnrollEventAsync(eventId);
+            var actionResult = await _controller.SignUpForEventAsync(eventId);
 
             // Then
             Assert.IsInstanceOfType<ForbidResult>(actionResult);
