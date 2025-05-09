@@ -220,5 +220,63 @@ namespace ActiLink.Events
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
             }
         }
+
+        /// <summary>
+        /// Enrolls the user in the event with the specified ID.
+        /// </summary>
+        /// <param name="id">The ID of the event to enroll in.</param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="IActionResult"/> of the operation
+        /// with the <see cref="EventDto"/> object or an error response.
+        /// </returns>
+        [HttpPost("{id}/enroll")]
+        [Authorize(Roles = "User")] // Nie działa z claimsasmi, trzeba by użyć user managera do dodawania roli
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> SignUpForEventAsync(Guid id)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId is null)
+                {
+                    _logger.LogWarning("User ID not found in token");
+                    return Unauthorized("User ID not found in token");
+                }
+
+                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+                if (userRole is null)
+                {
+                    _logger.LogWarning("User role not found in token");
+                    return Unauthorized("User role not found in token");
+                }
+
+                if (userRole != "User")
+                {
+                    _logger.LogWarning("User is not authorized to enroll in events");
+                    return Forbid("User is not authorized to enroll in events");
+                }
+
+                var result = await _eventService.SignUpForEventAsync(id, userId);
+                if (!result.Succeeded)
+                {
+                    return result.ErrorCode switch
+                    {
+                        ErrorCode.Forbidden => Forbid(),
+                        ErrorCode.NotFound => NotFound(),
+                        _ => BadRequest(result.Errors),
+                    };
+                }
+
+                return Ok(_mapper.Map<EventDto>(result.Data!));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while enrolling for the event {id}", id);
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
+        }
     }
 }
