@@ -709,5 +709,75 @@ namespace ActiLink.UnitTests.EventTests
             var returnedEventDto = (EventDto)okResult.Value;
             Assert.AreEqual(eventDto, returnedEventDto);
         }
+
+
+        [TestMethod]
+        public async Task EnrollEventByUser_Success_ReturnsOkResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var user = new User("Test User", "testuser@email.com") { Id = userId };
+            var eventToSignUp = new Event(null!, "Test Event", "Description", DateTime.Now, DateTime.Now.AddHours(2), new Location(0, 0), 0m, 1, 10, []);
+            Utils.SetupEventGuid(eventToSignUp, eventId);
+            var expectedEventDto = new EventDto(eventId, "Test Event", "Description", DateTime.Now, DateTime.Now.AddHours(2), new Location(0, 0), 0m, 1, 10, [], null!, []);
+
+            // Mocking the service result
+            _eventServiceMock
+                .Setup(es => es.SignUpForEventAsync(eventId, userId))
+                .ReturnsAsync(GenericServiceResult<Event>.Success(eventToSignUp));
+
+            _mapperMock
+                .Setup(m => m.Map<EventDto>(eventToSignUp))
+                .Returns(expectedEventDto);
+
+            // Setting up the claims
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, userId),
+                new(ClaimTypes.Role, "User")
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+
+            // When
+            var actionResult = await _controller.EnrollEventAsync(eventId);
+
+
+            // Then
+            var okObjectResult = actionResult as OkObjectResult;
+            Assert.IsNotNull(okObjectResult);
+            Assert.AreEqual(StatusCodes.Status200OK, okObjectResult.StatusCode);
+            Assert.IsNotNull(okObjectResult.Value);
+            var enrolledEventDto = okObjectResult.Value as EventDto;
+            Assert.IsNotNull(enrolledEventDto);
+            Assert.AreEqual(expectedEventDto, enrolledEventDto);
+        }
+
+        [TestMethod]
+        public async Task EnrollEventByBusinessClient_Forbidden_Returns()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, userId),
+                new(ClaimTypes.Role, "BusinessClient")
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            // When
+            var actionResult = await _controller.EnrollEventAsync(eventId);
+
+            // Then
+            Assert.IsInstanceOfType<ForbidResult>(actionResult);
+        }
     }
 }
