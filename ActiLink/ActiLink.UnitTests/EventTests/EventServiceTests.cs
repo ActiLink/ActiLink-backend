@@ -688,6 +688,76 @@ namespace ActiLink.UnitTests.EventTests
             _unitOfWorkMock.Verify(u => u.UserRepository.Query(), Times.Once);
         }
 
+        [TestMethod]
+        public async Task UnsignUserFromEvent_Success_ReturnsSuccessResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
+            var user = new User("TestUser", "testuser@email.com") { Id = userId };
+            var eventToUnsign = new Event(null!, "Test Event", "This is a test event.", DateTime.Now, DateTime.Now.AddHours(1),
+                                          new Location(0, 0), 50.0m, 1, 10, []);
+            Utils.SetupEventGuid(eventToUnsign, eventId);
+
+            eventToUnsign.SignUpList.Add(user);
+            user.SignedUpEvents.Add(eventToUnsign);
+
+            _mockEventRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<Event>([eventToUnsign]));
+            _mockUserRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<User>([user]));
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
+            _unitOfWorkMock.Setup(u => u.UserRepository).Returns(_mockUserRepository.Object);
+            _unitOfWorkMock
+                .Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            // When
+            var result = await _eventService.UnsignFromEventAsync(eventId, userId);
+
+            // Then
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsFalse(user.SignedUpEvents.Contains(eventToUnsign));
+            Assert.IsFalse(eventToUnsign.SignUpList.Contains(user));
+            Assert.IsNotNull(result.Data);
+            Assert.AreEqual(eventToUnsign, result.Data);
+            _unitOfWorkMock.Verify(u => u.EventRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.UserRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task UnsignUserFromEvent_UserIsNotSignUp_ReturnsSuccessResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
+            var user = new User("TestUser", "testuser@email.com") { Id = userId };
+            var eventToUnsign = new Event(null!, "Test Event", "This is a test event.", DateTime.Now, DateTime.Now.AddHours(1),
+                                          new Location(0, 0), 50.0m, 1, 10, []);
+            Utils.SetupEventGuid(eventToUnsign, eventId);
+
+            _mockEventRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<Event>([eventToUnsign]));
+            _mockUserRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<User>([user]));
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
+            _unitOfWorkMock.Setup(u => u.UserRepository).Returns(_mockUserRepository.Object);
+
+            // When
+            var result = await _eventService.UnsignFromEventAsync(eventId, userId);
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Errors.Contains("You are not signed up for this event."));
+            _unitOfWorkMock.Verify(u => u.EventRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.UserRepository.Query(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+        }
     }
 
 
