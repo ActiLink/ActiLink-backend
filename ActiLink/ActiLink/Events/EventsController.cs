@@ -275,8 +275,65 @@ namespace ActiLink.Events
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred while enrolling for the event {id}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
             }
-            return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
+        }
+
+        /// <summary>
+        /// Withdraws the user from the event with the specified ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="IActionResult"/> of the operation
+        /// with the <see cref="EventDto"/> object or an error response.
+        /// </returns>
+        [HttpPost("{id}/withdraw")]
+        [Authorize(Roles = "User")] // Nie działa z claimsasmi, trzeba by użyć user managera do dodawania roli
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UnsignFromEventAsync(Guid id)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId is null)
+                {
+                    _logger.LogWarning("User ID not found in token");
+                    return Unauthorized("User ID not found in token");
+                }
+
+                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+                if (userRole is null)
+                {
+                    _logger.LogWarning("User role not found in token");
+                    return Unauthorized("User role not found in token");
+                }
+
+                if (userRole != "User")
+                {
+                    _logger.LogWarning("User is not authorized to enroll in events");
+                    return Forbid("User is not authorized to enroll in events");
+                }
+
+                var result = await _eventService.UnsignFromEventAsync(id, userId);
+                if (!result.Succeeded)
+                {
+                    return result.ErrorCode switch
+                    {
+                        ErrorCode.Forbidden => Forbid(),
+                        ErrorCode.NotFound => NotFound(),
+                        _ => BadRequest(result.Errors),
+                    };
+                }
+                return Ok(_mapper.Map<EventDto>(result.Data!));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while unenrolling from the event {id}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
+            }
         }
     }
 }
