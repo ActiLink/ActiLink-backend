@@ -10,5 +10,6 @@ namespace ActiLink.Events.Service
         public Task<IEnumerable<Event>> GetAllEventsAsync();
         public Task<GenericServiceResult<Event>> UpdateEventAsync(Guid eventId, UpdateEventObject eventToUpdate, string userIdFromToken);
         public Task<ServiceResult> DeleteEventByIdAsync(Guid eventId, string userIdFromToken);
+        public Task<GenericServiceResult<Event>> SignUpForEventAsync(Guid eventId, string userIdFromToken);
     }
 }

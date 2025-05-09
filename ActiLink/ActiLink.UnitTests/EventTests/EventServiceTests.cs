@@ -1,6 +1,8 @@
 ﻿using ActiLink.Events;
+using ActiLink.Events.Infrastructure;
 using ActiLink.Events.Service;
 using ActiLink.Hobbies;
+using ActiLink.Organizers;
 using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.Users;
 using ActiLink.Shared.Model;
@@ -18,6 +20,7 @@ namespace ActiLink.UnitTests.EventTests
         private Mock<IMapper> _mapperMock = null!;
         private Mock<IRepository<Event>> _mockEventRepository = null!;
         private Mock<IRepository<Hobby>> _mockHobbyRepository = null!;
+        private Mock<IRepository<User>> _mockUserRepository = null!;
         private EventService _eventService = null!;
 
         [TestInitialize]
@@ -27,6 +30,7 @@ namespace ActiLink.UnitTests.EventTests
             _mapperMock = new Mock<IMapper>();
             _mockEventRepository = new Mock<IRepository<Event>>();
             _mockHobbyRepository = new Mock<IRepository<Hobby>>();
+            _mockUserRepository = new Mock<IRepository<User>>();
             _eventService = new EventService(_unitOfWorkMock.Object, _mapperMock.Object);
 
         }
@@ -492,6 +496,196 @@ namespace ActiLink.UnitTests.EventTests
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Errors.Contains("Event not found"));
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+        }
+
+
+        [TestMethod]
+        public async Task EnrollEventByUserAsync_Success_ReturnsSuccessResult()
+        {
+            // Given
+            //var organizerId = "TestOrganizerId";
+            var userId = "TestUserId";
+            var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
+            //var organizer = new User("TestOrganizer", "testorganizer@email.com") { Id = organizerId };
+            var user = new User("TestUser", "testuser@email.com") { Id = userId };
+            var eventToSignUp = new Event(null!, "Test Event", "This is a test event.", DateTime.Now, DateTime.Now.AddHours(1),
+                                          new Location(0, 0), 50.0m, 1, 10, []);
+
+            Utils.SetupEventGuid(eventToSignUp, eventId);
+
+            // Setup the event repository to return the event
+            _mockEventRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<Event>([eventToSignUp]));
+
+            _mockUserRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<User>([user]));
+
+            _unitOfWorkMock
+                .Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
+            _unitOfWorkMock.Setup(u => u.UserRepository).Returns(_mockUserRepository.Object);
+
+            // When
+            var result = await _eventService.SignUpForEventAsync(eventId, userId);
+
+            // Then
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(user.SignedUpEvents.Contains(eventToSignUp));
+            Assert.IsTrue(eventToSignUp.SignUpList.Contains(user));
+            Assert.IsNotNull(result.Data);
+            Assert.AreEqual(eventToSignUp, result.Data);
+            _unitOfWorkMock.Verify(u => u.EventRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.UserRepository.Query(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task EnrollEventByUserAsync_EventDoesNotExist_ReturnsFailureResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var user = new User("TestUser", "testuser@email.com") { Id = userId };
+            var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
+
+            _mockEventRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<Event>([]));
+
+            _mockUserRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<User>([user]));
+
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
+            _unitOfWorkMock.Setup(u => u.UserRepository).Returns(_mockUserRepository.Object);
+
+            // When
+            var result = await _eventService.SignUpForEventAsync(eventId, userId);
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Errors.Contains("Event not found"));
+        }
+
+        [TestMethod]
+        public async Task EnrollEventByUserAsync_UserIsAlreadySignedUp_ReturnsFailureResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var user = new User("TestUser", "testuser@email.com") { Id = userId };
+            var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
+
+            var eventToSignUp = new Event(null!, "Test Event", "This is a test event.", DateTime.Now, DateTime.Now.AddHours(1),
+                              new Location(0, 0), 50.0m, 1, 10, []);
+
+            Utils.SetupEventGuid(eventToSignUp, eventId);
+
+            user.SignedUpEvents.Add(eventToSignUp);
+            eventToSignUp.SignUpList.Add(user);
+
+            _mockEventRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<Event>([eventToSignUp]));
+
+            _mockUserRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<User>([user]));
+
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
+            _unitOfWorkMock.Setup(u => u.UserRepository).Returns(_mockUserRepository.Object);
+
+
+            // When
+            var result = await _eventService.SignUpForEventAsync(eventId, userId);
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Errors.Contains("You are already signed up for this event."));
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task EnrollEventByUserAsync_UserLimitAchieved_ReturnsFailureResult()
+        {
+            // Given
+            var user1Id = "TestUserId1";
+            var user1 = new User("TestUser1", "testuser1@email.com") { Id = user1Id };
+            var user2Id = "TestUserId2";
+            var user2 = new User("TestUser2", "testuser2@email.com") { Id = user2Id };
+            var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
+
+            var eventToSignUp = new Event(null!, "Test Event", "This is a test event.", DateTime.Now, DateTime.Now.AddHours(1),
+                              new Location(0, 0), 50.0m, 0, 1, []);
+
+            Utils.SetupEventGuid(eventToSignUp, eventId);
+
+            eventToSignUp.SignUpList.Add(user1);
+            user1.SignedUpEvents.Add(eventToSignUp);
+
+            _mockEventRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<Event>([eventToSignUp]));
+            _mockUserRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<User>([user1, user2]));
+
+
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
+            _unitOfWorkMock.Setup(u => u.UserRepository).Returns(_mockUserRepository.Object);
+
+
+            // When
+            var result = await _eventService.SignUpForEventAsync(eventId, user2Id);
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Errors.Contains("Event is full"));
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task EnrollEventByUserAsync_NoLimit_ReturnsSuccessResult()
+        {
+            // Given
+            var userId = "TestUserId";
+            var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
+            var user = new User("TestUser", "testuser@email.com") { Id = userId };
+            var eventToSignUp = new Event(null!, "Test Event", "This is a test event.", DateTime.Now, DateTime.Now.AddHours(1),
+                                          new Location(0, 0), 50.0m, 1, 0, []);
+
+            Utils.SetupEventGuid(eventToSignUp, eventId);
+
+            // Setup the event repository to return the event
+            _mockEventRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<Event>([eventToSignUp]));
+
+            _mockUserRepository
+                .Setup(r => r.Query())
+                .Returns(new TestAsyncEnumerable<User>([user]));
+
+            _unitOfWorkMock
+                .Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+
+            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
+            _unitOfWorkMock.Setup(u => u.UserRepository).Returns(_mockUserRepository.Object);
+
+            // When
+            var result = await _eventService.SignUpForEventAsync(eventId, userId);
+
+            // Then
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(user.SignedUpEvents.Contains(eventToSignUp));
+            Assert.IsTrue(eventToSignUp.SignUpList.Contains(user));
+            Assert.IsNotNull(result.Data);
+            Assert.AreEqual(eventToSignUp, result.Data);
+            _unitOfWorkMock.Verify(u => u.EventRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.UserRepository.Query(), Times.Once);
         }
 
     }
