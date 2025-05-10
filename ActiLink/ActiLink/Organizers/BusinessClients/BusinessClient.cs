@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using ActiLink.Organizers.Authentication.Roles;
+using ActiLink.Venues;
 
 namespace ActiLink.Organizers.BusinessClients
 {
@@ -12,6 +13,8 @@ namespace ActiLink.Organizers.BusinessClients
 
         [MaxLength(20)]
         public string TaxId { get; set; } = string.Empty;
+
+        public ICollection<Venue> Venues { get; private set; } = [];
         public override void AcceptRoleVisitor(IRoleVisitor visitor)
         {
             visitor.VisitBuisnessClient(this);
