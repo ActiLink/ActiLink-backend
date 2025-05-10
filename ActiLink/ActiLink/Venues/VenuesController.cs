@@ -24,7 +24,7 @@ namespace ActiLink.Venues
         }
 
         [HttpPost]
-        [Authorize(Roles = "BusinessClient")] // Nie działa
+        [Authorize(Roles = "BusinessClient")] 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -38,20 +38,6 @@ namespace ActiLink.Venues
                 {
                     _logger.LogWarning("User ID not found in token.");
                     return Unauthorized();
-                }
-
-                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-                if (userRole is null)
-                {
-                    _logger.LogWarning("User role not found in token.");
-                    return Unauthorized();
-                }
-
-                if (userRole != "BusinessClient")
-                {
-                    _logger.LogWarning("User is not authorized to create a venue.");
-                    return Forbid();
                 }
 
                 var createVenueObject = _mapper.Map<CreateVenueObject>(newVenueDto, opts =>
