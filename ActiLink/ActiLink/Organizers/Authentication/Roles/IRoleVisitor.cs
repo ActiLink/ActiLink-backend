@@ -6,6 +6,6 @@ namespace ActiLink.Organizers.Authentication.Roles
     public interface IRoleVisitor
     {
         void VisitUser(User user);
-        void VisitBuisnessClient(BusinessClient businessClient);
+        void VisitBusinessClient(BusinessClient businessClient);
     }
 }

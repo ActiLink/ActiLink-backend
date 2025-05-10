@@ -14,7 +14,7 @@ namespace ActiLink.Organizers.Authentication.Roles
             _jwtSettings = jwtSettings;
             Claims = claims;
         }
-        public void VisitBuisnessClient(BusinessClient businessClient)
+        public void VisitBusinessClient(BusinessClient businessClient)
         {
             Claims.Add(new Claim(ClaimTypes.Role, _jwtSettings.Roles.BusinessClientRole));
         }
