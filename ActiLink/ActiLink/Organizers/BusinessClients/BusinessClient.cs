@@ -17,7 +17,7 @@ namespace ActiLink.Organizers.BusinessClients
         public ICollection<Venue> Venues { get; private set; } = [];
         public override void AcceptRoleVisitor(IRoleVisitor visitor)
         {
-            visitor.VisitBuisnessClient(this);
+            visitor.VisitBusinessClient(this);
         }
 
     }
