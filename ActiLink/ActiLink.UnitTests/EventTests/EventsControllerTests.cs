@@ -10,9 +10,12 @@ using ActiLink.Organizers.Users;
 using ActiLink.Organizers.Users.DTOs;
 using ActiLink.Shared.Model;
 using ActiLink.Shared.ServiceUtils;
+using ActiLink.Venues.DTOs;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -37,6 +40,30 @@ namespace ActiLink.UnitTests.EventTests
             {
                 HttpContext = new DefaultHttpContext()
             };
+
+            var authOptions = new AuthorizationOptions();
+            authOptions.AddPolicy("User", policy => policy.RequireRole("User"));
+
+            var authServiceMock = new Mock<IAuthorizationService>();
+
+            authServiceMock
+               .Setup(auth => auth.AuthorizeAsync(
+                   It.Is<ClaimsPrincipal>(u => u.IsInRole("User")),
+                   It.IsAny<object>(),
+                   It.Is<string>(p => p == "User")))
+               .ReturnsAsync(AuthorizationResult.Success());
+
+            authServiceMock
+               .Setup(auth => auth.AuthorizeAsync(
+                   It.Is<ClaimsPrincipal>(u => !u.IsInRole("User")),
+                   It.IsAny<object>(),
+                   It.Is<string>(p => p == "User")))
+               .ReturnsAsync(AuthorizationResult.Failed());
+
+            var services = new ServiceCollection();
+            services.AddSingleton(authServiceMock.Object);
+            controllerContext.HttpContext.RequestServices = services.BuildServiceProvider();
+
 
             _controller = new EventsController(_loggerMock.Object, _eventServiceMock.Object, _mapperMock.Object)
             {
@@ -745,9 +772,14 @@ namespace ActiLink.UnitTests.EventTests
             var principal = new ClaimsPrincipal(identity);
             _controller.ControllerContext.HttpContext.User = principal;
 
+            var authService = _controller.ControllerContext.HttpContext.RequestServices
+                .GetRequiredService<IAuthorizationService>();
 
             // When
-            var actionResult = await _controller.SignUpForEventAsync(eventId);
+            var authResult = await authService.AuthorizeAsync(principal, null, "User");
+            var actionResult = authResult.Succeeded ?
+                await _controller.SignUpForEventAsync(eventId) :
+                new ForbidResult();
 
 
             // Then
@@ -776,8 +808,14 @@ namespace ActiLink.UnitTests.EventTests
             var principal = new ClaimsPrincipal(identity);
             _controller.ControllerContext.HttpContext.User = principal;
 
+            var authService = _controller.ControllerContext.HttpContext.RequestServices
+                .GetRequiredService<IAuthorizationService>();
+
             // When
-            var actionResult = await _controller.SignUpForEventAsync(eventId);
+            var authResult = await authService.AuthorizeAsync(principal, null, "User");
+            var actionResult = authResult.Succeeded ?
+                await _controller.SignUpForEventAsync(eventId) :
+                new ForbidResult();
 
             // Then
             Assert.IsInstanceOfType<ForbidResult>(actionResult);
@@ -814,8 +852,14 @@ namespace ActiLink.UnitTests.EventTests
             var principal = new ClaimsPrincipal(identity);
             _controller.ControllerContext.HttpContext.User = principal;
 
+            var authService = _controller.ControllerContext.HttpContext.RequestServices
+                .GetRequiredService<IAuthorizationService>();
+
             // When
-            var actionResult = await _controller.WithdrawFromEventAsync(eventId);
+            var authResult = await authService.AuthorizeAsync(principal, null, "User");
+            var actionResult = authResult.Succeeded ?
+                await _controller.WithdrawFromEventAsync(eventId) :
+                new ForbidResult();
 
             // Then
             var okObjectResult = actionResult as OkObjectResult;
@@ -843,8 +887,14 @@ namespace ActiLink.UnitTests.EventTests
             var principal = new ClaimsPrincipal(identity);
             _controller.ControllerContext.HttpContext.User = principal;
 
+            var authService = _controller.ControllerContext.HttpContext.RequestServices
+                .GetRequiredService<IAuthorizationService>();
+
             // When
-            var actionResult = await _controller.WithdrawFromEventAsync(eventId);
+            var authResult = await authService.AuthorizeAsync(principal, null, "User");
+            var actionResult = authResult.Succeeded ?
+                await _controller.WithdrawFromEventAsync(eventId) :
+                new ForbidResult();
 
             // Then
             Assert.IsInstanceOfType<ForbidResult>(actionResult);
