@@ -9,6 +9,7 @@ using ActiLink.Organizers.Authentication.Tokens;
 using ActiLink.Organizers.BusinessClients.Service;
 using ActiLink.Organizers.Users.Service;
 using ActiLink.Shared.Repositories;
+using ActiLink.Venues.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -56,6 +57,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBusinessClientService, BusinessClientService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IHobbyService, HobbyService>();
+builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
 
