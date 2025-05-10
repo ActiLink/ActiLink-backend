@@ -48,7 +48,7 @@ namespace ActiLink.UnitTests.VenueTests
         }
 
         [TestMethod]
-        public async Task CreateVenueAsyncByUser_ValidRequest_ReturnsCreatedResult()
+        public async Task CreateVenueAsyncByBusinessClient_ValidRequest_ReturnsCreatedResult()
         {
             // Given
             var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
