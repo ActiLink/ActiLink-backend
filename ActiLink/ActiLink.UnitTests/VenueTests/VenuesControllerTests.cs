@@ -7,9 +7,12 @@ using ActiLink.Venues;
 using ActiLink.Venues.DTOs;
 using ActiLink.Venues.Service;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace ActiLink.UnitTests.VenueTests
@@ -40,6 +43,30 @@ namespace ActiLink.UnitTests.VenueTests
             {
                 HttpContext = new DefaultHttpContext()
             };
+
+            var authOptions = new AuthorizationOptions();
+            authOptions.AddPolicy("BusinessClient", policy => policy.RequireRole("BusinessClient"));
+
+            var authServiceMock = new Mock<IAuthorizationService>();
+
+            authServiceMock
+               .Setup(auth => auth.AuthorizeAsync(
+                   It.Is<ClaimsPrincipal>(u => u.IsInRole("BusinessClient")),
+                   It.IsAny<object>(),
+                   It.Is<string>(p => p == "BusinessClient")))
+               .ReturnsAsync(AuthorizationResult.Success());
+
+            authServiceMock
+               .Setup(auth => auth.AuthorizeAsync(
+                   It.Is<ClaimsPrincipal>(u => !u.IsInRole("BusinessClient")),
+                   It.IsAny<object>(),
+                   It.Is<string>(p => p == "BusinessClient")))
+               .ReturnsAsync(AuthorizationResult.Failed());
+
+            var services = new ServiceCollection();
+            services.AddSingleton(authServiceMock.Object);
+            controllerContext.HttpContext.RequestServices = services.BuildServiceProvider();
+
 
             _controller = new VenuesController(_venueServiceMock.Object, _loggerMock.Object, _mapperMock.Object)
             {
@@ -78,8 +105,14 @@ namespace ActiLink.UnitTests.VenueTests
             var principal = new ClaimsPrincipal(identity);
             _controller.ControllerContext.HttpContext.User = principal;
 
+            var authService = _controller.ControllerContext.HttpContext.RequestServices
+                .GetRequiredService<IAuthorizationService>();
+
             // When
-            var result = await _controller.CreateVenueAsync(newVenueDto);
+            var authResult = await authService.AuthorizeAsync(principal, null, "BusinessClient");
+            var result = authResult.Succeeded ?
+                await _controller.CreateVenueAsync(newVenueDto) :
+                new ForbidResult();
 
             // Then
             Assert.IsNotNull(result);
@@ -110,8 +143,14 @@ namespace ActiLink.UnitTests.VenueTests
             var principal = new ClaimsPrincipal(identity);
             _controller.ControllerContext.HttpContext.User = principal;
 
+            var authService = _controller.ControllerContext.HttpContext.RequestServices
+                .GetRequiredService<IAuthorizationService>();
+
             // When
-            var result = await _controller.CreateVenueAsync(newVenueDto);
+            var authResult = await authService.AuthorizeAsync(principal, null, "BusinessClient");
+            var result = authResult.Succeeded ?
+                await _controller.CreateVenueAsync(newVenueDto) :
+                new ForbidResult();
 
             // Then
             Assert.IsNotNull(result);

@@ -230,7 +230,7 @@ namespace ActiLink.Events
         /// with the <see cref="EventDto"/> object or an error response.
         /// </returns>
         [HttpPost("{id}/enroll")]
-        [Authorize(Roles = "User")] // Nie działa z claimsasmi, trzeba by użyć user managera do dodawania roli
+        [Authorize(Roles = "User")] 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -244,19 +244,6 @@ namespace ActiLink.Events
                 {
                     _logger.LogWarning("User ID not found in token");
                     return Unauthorized("User ID not found in token");
-                }
-
-                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-                if (userRole is null)
-                {
-                    _logger.LogWarning("User role not found in token");
-                    return Unauthorized("User role not found in token");
-                }
-
-                if (userRole != "User")
-                {
-                    _logger.LogWarning("User is not authorized to enroll in events");
-                    return Forbid("User is not authorized to enroll in events");
                 }
 
                 var result = await _eventService.SignUpForEventAsync(id, userId);
@@ -288,7 +275,7 @@ namespace ActiLink.Events
         /// with the <see cref="EventDto"/> object or an error response.
         /// </returns>
         [HttpPost("{id}/withdraw")]
-        [Authorize(Roles = "User")] // Nie działa z claimsasmi, trzeba by użyć user managera do dodawania roli
+        [Authorize(Roles = "User")] 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -302,19 +289,6 @@ namespace ActiLink.Events
                 {
                     _logger.LogWarning("User ID not found in token");
                     return Unauthorized("User ID not found in token");
-                }
-
-                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-                if (userRole is null)
-                {
-                    _logger.LogWarning("User role not found in token");
-                    return Unauthorized("User role not found in token");
-                }
-
-                if (userRole != "User")
-                {
-                    _logger.LogWarning("User is not authorized to enroll in events");
-                    return Forbid("User is not authorized to enroll in events");
                 }
 
                 var result = await _eventService.WithdrawFromEventAsync(id, userId);
