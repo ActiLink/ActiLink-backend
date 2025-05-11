@@ -1,4 +1,5 @@
-﻿using ActiLink.Organizers;
+﻿using System.Security.Claims;
+using ActiLink.Organizers;
 using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.BusinessClients.DTOs;
 using ActiLink.Organizers.BusinessClients.Service;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Security.Claims;
 
 namespace ActiLink.UnitTests.BusinessClientTests
 {
@@ -214,235 +214,235 @@ namespace ActiLink.UnitTests.BusinessClientTests
             Assert.IsNotNull(businessClientDtos, "Expected IEnumerable<BusinessClientDto>");
             Assert.AreEqual(0, businessClientDtos.Count());
         }
-		[TestMethod]
-		public async Task UpdateBusinessClient_ValidData_ReturnsOkResult()
-		{
-			// Given
-			var updatedUsername = "updateduser";
-			var updatedEmail = "updated@email.com";
-			var updatedTaxId = "123-45-67-890";
-			var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
-			var updateObject = new UpdateBusinessClientObject(updatedUsername, updatedEmail, updatedTaxId);
-			var businessClient = new BusinessClient(updatedUsername, updatedEmail, updatedTaxId) { Id = id };
-			var expectedDto = new BusinessClientDto(id, updatedUsername, updatedEmail, updatedTaxId);
+        [TestMethod]
+        public async Task UpdateBusinessClient_ValidData_ReturnsOkResult()
+        {
+            // Given
+            var updatedUsername = "updateduser";
+            var updatedEmail = "updated@email.com";
+            var updatedTaxId = "123-45-67-890";
+            var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
+            var updateObject = new UpdateBusinessClientObject(updatedUsername, updatedEmail, updatedTaxId);
+            var businessClient = new BusinessClient(updatedUsername, updatedEmail, updatedTaxId) { Id = id };
+            var expectedDto = new BusinessClientDto(id, updatedUsername, updatedEmail, updatedTaxId);
 
-			// Ustawienie tożsamości użytkownika w kontrolerze
-			var claims = new List<Claim>
-	{
-		new Claim(ClaimTypes.NameIdentifier, id),
-		new Claim(ClaimTypes.Name, username),
-		new Claim(ClaimTypes.Email, email)
-	};
-			var identity = new ClaimsIdentity(claims, "TestAuthType");
-			var claimsPrincipal = new ClaimsPrincipal(identity);
-			_businessClientsController.ControllerContext = new ControllerContext
-			{
-				HttpContext = new DefaultHttpContext { User = claimsPrincipal }
-			};
+            // Ustawienie tożsamości użytkownika w kontrolerze
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, id),
+        new Claim(ClaimTypes.Name, username),
+        new Claim(ClaimTypes.Email, email)
+    };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            _businessClientsController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+            };
 
-			_mockMapper.Setup(m => m.Map<UpdateBusinessClientObject>(updateDto))
-				.Returns(updateObject);
+            _mockMapper.Setup(m => m.Map<UpdateBusinessClientObject>(updateDto))
+                .Returns(updateObject);
 
-			_mockBusinessClientService.Setup(s => s.UpdateBusinessClientAsync(id, updateObject))
-				.ReturnsAsync(GenericServiceResult<BusinessClient>.Success(businessClient));
+            _mockBusinessClientService.Setup(s => s.UpdateBusinessClientAsync(id, updateObject))
+                .ReturnsAsync(GenericServiceResult<BusinessClient>.Success(businessClient));
 
-			_mockMapper.Setup(m => m.Map<BusinessClientDto>(businessClient))
-				.Returns(expectedDto);
+            _mockMapper.Setup(m => m.Map<BusinessClientDto>(businessClient))
+                .Returns(expectedDto);
 
-			// When
-			var result = await _businessClientsController.UpdateBusinessClientAsync(id, updateDto);
+            // When
+            var result = await _businessClientsController.UpdateBusinessClientAsync(id, updateDto);
 
-			// Then
-			var okResult = result as OkObjectResult;
-			Assert.IsNotNull(okResult, "Expected OkObjectResult");
-			Assert.AreEqual(StatusCodes.Status200OK, okResult.StatusCode);
+            // Then
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult, "Expected OkObjectResult");
+            Assert.AreEqual(StatusCodes.Status200OK, okResult.StatusCode);
 
-			var businessClientDto = okResult.Value as BusinessClientDto;
-			Assert.IsNotNull(businessClientDto, "Expected BusinessClientDto");
-			Assert.AreEqual(expectedDto, businessClientDto);
+            var businessClientDto = okResult.Value as BusinessClientDto;
+            Assert.IsNotNull(businessClientDto, "Expected BusinessClientDto");
+            Assert.AreEqual(expectedDto, businessClientDto);
 
-			_mockBusinessClientService.Verify(s => s.UpdateBusinessClientAsync(id, updateObject), Times.Once);
-			_mockMapper.Verify(m => m.Map<BusinessClientDto>(businessClient), Times.Once);
-		}
+            _mockBusinessClientService.Verify(s => s.UpdateBusinessClientAsync(id, updateObject), Times.Once);
+            _mockMapper.Verify(m => m.Map<BusinessClientDto>(businessClient), Times.Once);
+        }
 
-		[TestMethod]
-		public async Task UpdateBusinessClient_NotFound_ReturnsNotFoundResult()
-		{
-			// Given
-			var updatedUsername = "updateduser";
-			var updatedEmail = "updated@email.com";
-			var updatedTaxId = "123-45-67-890";
-			var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
-			var updateObject = new UpdateBusinessClientObject(updatedUsername, updatedEmail, updatedTaxId);
-			var errors = new[] { "Business client not found." };
+        [TestMethod]
+        public async Task UpdateBusinessClient_NotFound_ReturnsNotFoundResult()
+        {
+            // Given
+            var updatedUsername = "updateduser";
+            var updatedEmail = "updated@email.com";
+            var updatedTaxId = "123-45-67-890";
+            var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
+            var updateObject = new UpdateBusinessClientObject(updatedUsername, updatedEmail, updatedTaxId);
+            var errors = new[] { "Business client not found." };
 
-			// Ustawienie tożsamości użytkownika w kontrolerze
-			var claims = new List<Claim>
-	{
-		new Claim(ClaimTypes.NameIdentifier, id),
-		new Claim(ClaimTypes.Name, username),
-		new Claim(ClaimTypes.Email, email)
-	};
-			var identity = new ClaimsIdentity(claims, "TestAuthType");
-			var claimsPrincipal = new ClaimsPrincipal(identity);
-			_businessClientsController.ControllerContext = new ControllerContext
-			{
-				HttpContext = new DefaultHttpContext { User = claimsPrincipal }
-			};
+            // Ustawienie tożsamości użytkownika w kontrolerze
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, id),
+        new Claim(ClaimTypes.Name, username),
+        new Claim(ClaimTypes.Email, email)
+    };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            _businessClientsController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+            };
 
-			_mockMapper.Setup(m => m.Map<UpdateBusinessClientObject>(updateDto))
-				.Returns(updateObject);
+            _mockMapper.Setup(m => m.Map<UpdateBusinessClientObject>(updateDto))
+                .Returns(updateObject);
 
-			_mockBusinessClientService.Setup(s => s.UpdateBusinessClientAsync(id, updateObject))
-				.ReturnsAsync(GenericServiceResult<BusinessClient>.Failure(errors, ErrorCode.NotFound));
+            _mockBusinessClientService.Setup(s => s.UpdateBusinessClientAsync(id, updateObject))
+                .ReturnsAsync(GenericServiceResult<BusinessClient>.Failure(errors, ErrorCode.NotFound));
 
-			// When
-			var result = await _businessClientsController.UpdateBusinessClientAsync(id, updateDto);
+            // When
+            var result = await _businessClientsController.UpdateBusinessClientAsync(id, updateDto);
 
-			// Then
-			var notFoundResult = result as NotFoundObjectResult;
-			Assert.IsNotNull(notFoundResult, "Expected NotFoundObjectResult");
-			Assert.AreEqual(StatusCodes.Status404NotFound, notFoundResult.StatusCode);
-			Assert.AreEqual(errors, notFoundResult.Value);
-		}
+            // Then
+            var notFoundResult = result as NotFoundObjectResult;
+            Assert.IsNotNull(notFoundResult, "Expected NotFoundObjectResult");
+            Assert.AreEqual(StatusCodes.Status404NotFound, notFoundResult.StatusCode);
+            Assert.AreEqual(errors, notFoundResult.Value);
+        }
 
-		[TestMethod]
-		public async Task UpdateBusinessClient_ValidationError_ReturnsBadRequest()
-		{
-			// Given
-			var updatedUsername = "updateduser";
-			var updatedEmail = "invalid-email"; 
-			var updatedTaxId = "123-45-67-890";
-			var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
-			var updateObject = new UpdateBusinessClientObject(updatedUsername, updatedEmail, updatedTaxId);
-			var errors = new[] { "Email format is invalid" };
+        [TestMethod]
+        public async Task UpdateBusinessClient_ValidationError_ReturnsBadRequest()
+        {
+            // Given
+            var updatedUsername = "updateduser";
+            var updatedEmail = "invalid-email";
+            var updatedTaxId = "123-45-67-890";
+            var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
+            var updateObject = new UpdateBusinessClientObject(updatedUsername, updatedEmail, updatedTaxId);
+            var errors = new[] { "Email format is invalid" };
 
-			var claims = new List<Claim>
-			{
-				new Claim(ClaimTypes.NameIdentifier, id),
-				new Claim(ClaimTypes.Name, username),
-				new Claim(ClaimTypes.Email, email)
-			};
-			var identity = new ClaimsIdentity(claims, "TestAuthType");
-			var claimsPrincipal = new ClaimsPrincipal(identity);
-			_businessClientsController.ControllerContext = new ControllerContext
-			{
-				HttpContext = new DefaultHttpContext { User = claimsPrincipal }
-			};
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, id),
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Email, email)
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            _businessClientsController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+            };
 
-			_mockMapper.Setup(m => m.Map<UpdateBusinessClientObject>(updateDto))
-				.Returns(updateObject);
+            _mockMapper.Setup(m => m.Map<UpdateBusinessClientObject>(updateDto))
+                .Returns(updateObject);
 
-			_mockBusinessClientService.Setup(s => s.UpdateBusinessClientAsync(id, updateObject))
-				.ReturnsAsync(GenericServiceResult<BusinessClient>.Failure(errors, ErrorCode.ValidationError));
+            _mockBusinessClientService.Setup(s => s.UpdateBusinessClientAsync(id, updateObject))
+                .ReturnsAsync(GenericServiceResult<BusinessClient>.Failure(errors, ErrorCode.ValidationError));
 
-			// When
-			var result = await _businessClientsController.UpdateBusinessClientAsync(id, updateDto);
+            // When
+            var result = await _businessClientsController.UpdateBusinessClientAsync(id, updateDto);
 
-			// Then
-			var badRequestResult = result as BadRequestObjectResult;
-			Assert.IsNotNull(badRequestResult, "Expected BadRequestObjectResult");
-			Assert.AreEqual(StatusCodes.Status400BadRequest, badRequestResult.StatusCode);
-			Assert.AreEqual(errors, badRequestResult.Value);
-		}
+            // Then
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.IsNotNull(badRequestResult, "Expected BadRequestObjectResult");
+            Assert.AreEqual(StatusCodes.Status400BadRequest, badRequestResult.StatusCode);
+            Assert.AreEqual(errors, badRequestResult.Value);
+        }
 
-		[TestMethod]
-		public async Task UpdateBusinessClient_DifferentUserId_ReturnsForbid()
-		{
-			// Given
-			const string differentId = "A1B2C3D4-E5F6-G7H8-I9J0-K1L2M3N4O5P6";
-			var updatedUsername = "updateduser";
-			var updatedEmail = "updated@email.com";
-			var updatedTaxId = "123-45-67-890";
-			var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
+        [TestMethod]
+        public async Task UpdateBusinessClient_DifferentUserId_ReturnsForbid()
+        {
+            // Given
+            const string differentId = "A1B2C3D4-E5F6-G7H8-I9J0-K1L2M3N4O5P6";
+            var updatedUsername = "updateduser";
+            var updatedEmail = "updated@email.com";
+            var updatedTaxId = "123-45-67-890";
+            var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
 
-			var claims = new List<Claim>
-			{
-				new Claim(ClaimTypes.NameIdentifier, id), 
-				new Claim(ClaimTypes.Name, username),
-				new Claim(ClaimTypes.Email, email)
-			};
-			var identity = new ClaimsIdentity(claims, "TestAuthType");
-			var claimsPrincipal = new ClaimsPrincipal(identity);
-			_businessClientsController.ControllerContext = new ControllerContext
-			{
-				HttpContext = new DefaultHttpContext { User = claimsPrincipal }
-			};
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, id),
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Email, email)
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            _businessClientsController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+            };
 
-			// When
-			var result = await _businessClientsController.UpdateBusinessClientAsync(differentId, updateDto); // Inny ID niż w tokenie
+            // When
+            var result = await _businessClientsController.UpdateBusinessClientAsync(differentId, updateDto); // Inny ID niż w tokenie
 
-			// Then
-			Assert.IsInstanceOfType(result, typeof(ForbidResult));
-		}
+            // Then
+            Assert.IsInstanceOfType(result, typeof(ForbidResult));
+        }
 
-		[TestMethod]
-		public async Task UpdateBusinessClient_MissingUserIdInToken_ReturnsUnauthorized()
-		{
-			// Given
-			var updatedUsername = "updateduser";
-			var updatedEmail = "updated@email.com";
-			var updatedTaxId = "123-45-67-890";
-			var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
+        [TestMethod]
+        public async Task UpdateBusinessClient_MissingUserIdInToken_ReturnsUnauthorized()
+        {
+            // Given
+            var updatedUsername = "updateduser";
+            var updatedEmail = "updated@email.com";
+            var updatedTaxId = "123-45-67-890";
+            var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
 
-			var claims = new List<Claim>
-			{
-				new Claim(ClaimTypes.Name, username),
-				new Claim(ClaimTypes.Email, email)
-			};
-			var identity = new ClaimsIdentity(claims, "TestAuthType");
-			var claimsPrincipal = new ClaimsPrincipal(identity);
-			_businessClientsController.ControllerContext = new ControllerContext
-			{
-				HttpContext = new DefaultHttpContext { User = claimsPrincipal }
-			};
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Email, email)
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            _businessClientsController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+            };
 
-			// When
-			var result = await _businessClientsController.UpdateBusinessClientAsync(id, updateDto);
+            // When
+            var result = await _businessClientsController.UpdateBusinessClientAsync(id, updateDto);
 
-			// Then
-			var unauthorizedResult = result as UnauthorizedObjectResult;
-			Assert.IsNotNull(unauthorizedResult, "Expected UnauthorizedObjectResult");
-			Assert.AreEqual("Business client ID not found in token", unauthorizedResult.Value);
-		}
+            // Then
+            var unauthorizedResult = result as UnauthorizedObjectResult;
+            Assert.IsNotNull(unauthorizedResult, "Expected UnauthorizedObjectResult");
+            Assert.AreEqual("Business client ID not found in token", unauthorizedResult.Value);
+        }
 
-		[TestMethod]
-		public async Task UpdateBusinessClient_ExceptionThrown_ReturnsInternalServerError()
-		{
-			// Given
-			var updatedUsername = "updateduser";
-			var updatedEmail = "updated@email.com";
-			var updatedTaxId = "123-45-67-890";
-			var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
-			var updateObject = new UpdateBusinessClientObject(updatedUsername, updatedEmail, updatedTaxId);
+        [TestMethod]
+        public async Task UpdateBusinessClient_ExceptionThrown_ReturnsInternalServerError()
+        {
+            // Given
+            var updatedUsername = "updateduser";
+            var updatedEmail = "updated@email.com";
+            var updatedTaxId = "123-45-67-890";
+            var updateDto = new UpdateBusinessClientDto(updatedUsername, updatedEmail, updatedTaxId);
+            var updateObject = new UpdateBusinessClientObject(updatedUsername, updatedEmail, updatedTaxId);
 
 
-			var claims = new List<Claim>
-			{
-				new Claim(ClaimTypes.NameIdentifier, id),
-				new Claim(ClaimTypes.Name, username),
-				new Claim(ClaimTypes.Email, email)
-			};
-			var identity = new ClaimsIdentity(claims, "TestAuthType");
-			var claimsPrincipal = new ClaimsPrincipal(identity);
-			_businessClientsController.ControllerContext = new ControllerContext
-			{
-				HttpContext = new DefaultHttpContext { User = claimsPrincipal }
-			};
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, id),
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Email, email)
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            _businessClientsController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+            };
 
-			_mockMapper.Setup(m => m.Map<UpdateBusinessClientObject>(updateDto))
-				.Returns(updateObject);
+            _mockMapper.Setup(m => m.Map<UpdateBusinessClientObject>(updateDto))
+                .Returns(updateObject);
 
-			_mockBusinessClientService.Setup(s => s.UpdateBusinessClientAsync(id, updateObject))
-				.ThrowsAsync(new Exception("Test exception"));
+            _mockBusinessClientService.Setup(s => s.UpdateBusinessClientAsync(id, updateObject))
+                .ThrowsAsync(new Exception("Test exception"));
 
-			// When
-			var result = await _businessClientsController.UpdateBusinessClientAsync(id, updateDto);
+            // When
+            var result = await _businessClientsController.UpdateBusinessClientAsync(id, updateDto);
 
-			// Then
-			var statusCodeResult = result as StatusCodeResult;
-			Assert.IsNotNull(statusCodeResult, "Expected StatusCodeResult");
-			Assert.AreEqual(StatusCodes.Status500InternalServerError, statusCodeResult.StatusCode);
-		}
-	}
+            // Then
+            var statusCodeResult = result as StatusCodeResult;
+            Assert.IsNotNull(statusCodeResult, "Expected StatusCodeResult");
+            Assert.AreEqual(StatusCodes.Status500InternalServerError, statusCodeResult.StatusCode);
+        }
+    }
 }

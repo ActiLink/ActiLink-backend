@@ -4,7 +4,6 @@ using ActiLink.Events.Infrastructure;
 using ActiLink.Events.Service;
 using ActiLink.Hobbies;
 using ActiLink.Hobbies.DTOs;
-using ActiLink.Organizers;
 using ActiLink.Organizers.DTOs;
 using ActiLink.Organizers.Infrastructure;
 using ActiLink.Organizers.Users;

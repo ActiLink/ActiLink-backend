@@ -24,7 +24,7 @@ namespace ActiLink.Venues
         }
 
         [HttpPost]
-        [Authorize(Roles = "BusinessClient")] 
+        [Authorize(Roles = "BusinessClient")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -81,7 +81,35 @@ namespace ActiLink.Venues
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetVenueByIdAsync(Guid id)
         {
-            throw new NotImplementedException("This method is not implemented yet.");
+            _logger.LogInformation("Getting venue by ID: {VenueId}", id);
+            var venue = await _venueService.GetVenueByIdAsync(id);
+            if (venue is null)
+            {
+                _logger.LogWarning("Venue with ID {VenueId} not found.", id);
+                return NotFound();
+            }
+
+            _logger.LogInformation("Venue with ID {VenueId} found.", id);
+            _logger.LogInformation("Returning venue details: {VenueDetails}", venue);
+            return Ok(_mapper.Map<VenueDto>(venue));
+        }
+
+        /// <summary>
+        /// Gets all venues.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing a collection of <see cref="VenueDto"/> objects.
+        /// </returns>
+        [HttpGet]
+        [Authorize]
+        [ProducesResponseType(typeof(IEnumerable<VenueDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetAllVenuesAsync()
+        {
+            _logger.LogInformation("Getting all venues.");
+            var venues = await _venueService.GetAllVenuesAsync();
+            _logger.LogInformation("Found {VenueCount} venues.", venues.Count());
+            return Ok(_mapper.Map<IEnumerable<VenueDto>>(venues));
         }
     }
 }

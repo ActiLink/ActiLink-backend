@@ -1,5 +1,4 @@
 ﻿using ActiLink.Organizers.BusinessClients;
-using ActiLink.Organizers.Users;
 using ActiLink.Venues.DTOs;
 using ActiLink.Venues.Service;
 using AutoMapper;
@@ -13,7 +12,7 @@ namespace ActiLink.Venues.Infrastructure
             CreateMap<NewVenueDto, CreateVenueObject>()
                 .ForMember(dest => dest.OwnerId, opt => opt.MapFrom((src, dest, _, context) =>
                 {
-                    if(!context.Items.TryGetValue("OwnerId", out var ownerId))
+                    if (!context.Items.TryGetValue("OwnerId", out var ownerId))
                         throw new InvalidOperationException("OwnerId must be provided in context items");
 
                     return ownerId as string
@@ -23,7 +22,7 @@ namespace ActiLink.Venues.Infrastructure
             CreateMap<CreateVenueObject, Venue>()
                 .ForMember(dest => dest.Owner, opt => opt.MapFrom((src, dest, _, context) =>
                 {
-                    if(!context.Items.TryGetValue("Owner", out var owner))
+                    if (!context.Items.TryGetValue("Owner", out var owner))
                         throw new InvalidOperationException("Owner must be provided in context items");
 
                     return owner as BusinessClient
