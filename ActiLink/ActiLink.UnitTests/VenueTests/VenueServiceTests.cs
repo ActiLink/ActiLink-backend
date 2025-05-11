@@ -1,6 +1,4 @@
-﻿using ActiLink.Events;
-using ActiLink.Hobbies;
-using ActiLink.Organizers.BusinessClients;
+﻿using ActiLink.Organizers.BusinessClients;
 using ActiLink.Shared.Model;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
