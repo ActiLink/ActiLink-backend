@@ -5,7 +5,7 @@ namespace ActiLink.Venues.Infrastructure
 {
     public static class VenueRepositoryExtensions
     {
-        public static Task<Venue?> GetWholeVenueByIdAsync(this IRepository<Venue> repository, Guid id)
+        public static Task<Venue?> GetVenueByIdAsync(this IRepository<Venue> repository, Guid id)
         {
             return repository
                 .Query()
@@ -14,7 +14,7 @@ namespace ActiLink.Venues.Infrastructure
                 .FirstOrDefaultAsync(v => v.Id == id);
         }
 
-        public static async Task<IEnumerable<Venue>> GetAllWholeVenuesAsync(this IRepository<Venue> repository)
+        public static async Task<IEnumerable<Venue>> GetAllVenuesAsync(this IRepository<Venue> repository)
         {
             return await repository
                 .Query()

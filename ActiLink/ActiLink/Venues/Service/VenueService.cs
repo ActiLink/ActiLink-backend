@@ -69,7 +69,7 @@ namespace ActiLink.Venues.Service
         /// </returns>
         public async Task<Venue?> GetVenueByIdAsync(Guid venueId)
         {
-            return await _unitOfWork.VenueRepository.GetWholeVenueByIdAsync(venueId);
+            return await _unitOfWork.VenueRepository.GetVenueByIdAsync(venueId);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace ActiLink.Venues.Service
         /// </returns>
         public async Task<IEnumerable<Venue>> GetAllVenuesAsync()
         {
-            return await _unitOfWork.VenueRepository.GetAllWholeVenuesAsync();
+            return await _unitOfWork.VenueRepository.GetAllVenuesAsync();
         }
     }
 }
