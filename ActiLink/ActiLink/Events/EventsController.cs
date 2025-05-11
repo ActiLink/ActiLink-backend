@@ -230,7 +230,7 @@ namespace ActiLink.Events
         /// with the <see cref="EventDto"/> object or an error response.
         /// </returns>
         [HttpPost("{id}/enroll")]
-        [Authorize(Roles = "User")] 
+        [Authorize(Roles = "User")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -275,7 +275,7 @@ namespace ActiLink.Events
         /// with the <see cref="EventDto"/> object or an error response.
         /// </returns>
         [HttpPost("{id}/withdraw")]
-        [Authorize(Roles = "User")] 
+        [Authorize(Roles = "User")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

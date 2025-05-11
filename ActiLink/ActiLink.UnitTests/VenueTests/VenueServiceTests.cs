@@ -1,8 +1,8 @@
-﻿using ActiLink.Events;
-using ActiLink.Organizers.BusinessClients;
+﻿using ActiLink.Organizers.BusinessClients;
 using ActiLink.Shared.Model;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
+using ActiLink.UnitTests.EventTests;
 using ActiLink.Venues;
 using ActiLink.Venues.Service;
 using AutoMapper;
@@ -93,6 +93,92 @@ namespace ActiLink.UnitTests.VenueTests
             _unitOfWorkMock.Verify(uow => uow.BusinessClientRepository.GetByIdAsync(businessClientId), Times.Once);
             _unitOfWorkMock.Verify(uow => uow.VenueRepository.AddAsync(It.IsAny<Venue>()), Times.Never);
             _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task GetVenueByIdAsync_Success_ReturnsVenue()
+        {
+            // Given
+            var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
+            var venue = new Venue(owner, venueName, venueDescription, venueLocation, venueAddress);
+            Utils.SetupVenueId(venue, venueId);
+
+            _venueRepositoryMock
+                .Setup(repo => repo.Query())
+                .Returns(new TestAsyncEnumerable<Venue>([venue]));
+
+            // When
+            var result = await _venueService.GetVenueByIdAsync(venueId);
+
+            // Then
+            Assert.IsNotNull(result);
+            Assert.AreEqual(venue, result);
+            Assert.AreEqual(venueId, result.Id);
+            Assert.AreEqual(venueName, result.Name);
+            Assert.AreEqual(venueDescription, result.Description);
+            Assert.AreEqual(venueLocation, result.Location);
+            Assert.AreEqual(venueAddress, result.Address);
+            Assert.AreEqual(owner, result.Owner);
+            Assert.IsTrue(result.Events.Count == 0);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Query(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetVenueByIdAsync_Failure_VenueNotFound()
+        {
+            // Given
+            _venueRepositoryMock
+                .Setup(repo => repo.Query())
+                .Returns(new TestAsyncEnumerable<Venue>([]));
+
+            // When
+            var result = await _venueService.GetVenueByIdAsync(venueId);
+
+            // Then
+            Assert.IsNull(result);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Query(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetAllVenuesAsync_Success_ReturnsListOfVenues()
+        {
+            // Given
+            var venue1Id = venueId;
+            var venue2Id = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB7");
+            var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
+            var venue1 = new Venue(owner, venueName, venueDescription, venueLocation, venueAddress);
+            var venue2 = new Venue(owner, "Another Venue", "Another Description", new Location(3.0, 4.0), "Another Address");
+            Utils.SetupVenueId(venue1, venue1Id);
+            Utils.SetupVenueId(venue2, venue2Id);
+
+            List<Venue> venues = [venue1, venue2];
+            _venueRepositoryMock
+                .Setup(repo => repo.Query())
+                .Returns(new TestAsyncEnumerable<Venue>(venues));
+
+            // When
+            var result = await _venueService.GetAllVenuesAsync();
+            var venuesList = result.ToList();
+
+            // Then
+            CollectionAssert.AreEqual(venues, venuesList);
+        }
+
+        [TestMethod]
+        public async Task GetAllVenuesAsync_Failure_NoVenuesFound()
+        {
+            // Given
+            _venueRepositoryMock
+                .Setup(repo => repo.Query())
+                .Returns(new TestAsyncEnumerable<Venue>([]));
+
+            // When
+            var result = await _venueService.GetAllVenuesAsync();
+            var venuesList = result.ToList();
+
+            // Then
+            Assert.AreEqual(0, venuesList.Count);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Query(), Times.Once);
         }
     }
 }

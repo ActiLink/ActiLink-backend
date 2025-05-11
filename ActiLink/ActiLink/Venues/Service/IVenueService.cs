@@ -6,5 +6,7 @@ namespace ActiLink.Venues.Service
     {
         public Task<GenericServiceResult<Venue>> CreateVenueAsync(CreateVenueObject cvo);
         public Task<ServiceResult> DeleteVenueAsync(Venue venueToDelete);
+        public Task<Venue?> GetVenueByIdAsync(Guid venueId);
+        public Task<IEnumerable<Venue>> GetAllVenuesAsync();
     }
 }

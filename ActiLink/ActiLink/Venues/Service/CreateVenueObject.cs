@@ -15,6 +15,7 @@ namespace ActiLink.Venues.Service
             string.Empty,
             string.Empty,
             new Location(0, 0),
-            string.Empty) { }
+            string.Empty)
+        { }
     }
 }

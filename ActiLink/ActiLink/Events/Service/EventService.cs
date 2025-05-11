@@ -214,7 +214,7 @@ namespace ActiLink.Events.Service
             if (eventToUnsign is null)
                 return GenericServiceResult<Event>.Failure(["Event not found"], ErrorCode.NotFound);
 
-            if(eventToUnsign.SignUpList.All(u => u.Id != userIdFromToken))
+            if (eventToUnsign.SignUpList.All(u => u.Id != userIdFromToken))
                 return GenericServiceResult<Event>.Failure(["You are not signed up for this event."], ErrorCode.ValidationError);
 
             var user = await _unitOfWork.UserRepository.GetUserWithSignedUpEventsByIdAsync(userIdFromToken);
