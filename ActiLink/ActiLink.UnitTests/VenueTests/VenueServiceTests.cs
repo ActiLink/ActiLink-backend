@@ -96,7 +96,7 @@ namespace ActiLink.UnitTests.VenueTests
         }
 
         [TestMethod]
-        public async Task GetVenueById_Success_ReturnsVenue()
+        public async Task GetVenueByIdAsync_Success_ReturnsVenue()
         {
             // Given
             var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
@@ -124,7 +124,7 @@ namespace ActiLink.UnitTests.VenueTests
         }
 
         [TestMethod]
-        public async Task GetVenueById_Failure_VenueNotFound()
+        public async Task GetVenueByIdAsync_Failure_VenueNotFound()
         {
             // Given
             _venueRepositoryMock
@@ -140,7 +140,7 @@ namespace ActiLink.UnitTests.VenueTests
         }
 
         [TestMethod]
-        public async Task GetAllVenues_Success_ReturnsListOfVenues()
+        public async Task GetAllVenuesAsync_Success_ReturnsListOfVenues()
         {
             // Given
             var venue1Id = venueId;
@@ -165,7 +165,7 @@ namespace ActiLink.UnitTests.VenueTests
         }
 
         [TestMethod]
-        public async Task GetAllVenues_Failure_NoVenuesFound()
+        public async Task GetAllVenuesAsync_Failure_NoVenuesFound()
         {
             // Given
             _venueRepositoryMock

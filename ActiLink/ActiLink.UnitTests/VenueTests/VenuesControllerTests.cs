@@ -281,7 +281,7 @@ namespace ActiLink.UnitTests.VenueTests
         }
 
         [TestMethod]
-        public async Task GetAllVenuesAsyns_NoVenuesFound_ReturnsOkResultWithEmptyList()
+        public async Task GetAllVenuesAsync_NoVenuesFound_ReturnsOkResultWithEmptyList()
         {
             // Given
             _venueServiceMock.Setup(vs => vs.GetAllVenuesAsync())
