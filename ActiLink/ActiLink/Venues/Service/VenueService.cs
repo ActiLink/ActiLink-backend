@@ -1,5 +1,6 @@
 ﻿using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
+using ActiLink.Venues.Infrastructure;
 using AutoMapper;
 
 namespace ActiLink.Venues.Service
@@ -57,6 +58,29 @@ namespace ActiLink.Venues.Service
             return result > 0
                 ? ServiceResult.Success()
                 : ServiceResult.Failure(["Failed to delete venue"]);
+        }
+
+        /// <summary>
+        /// Retrieves a venue by its ID.
+        /// </summary>
+        /// <param name="venueId">The ID of the venue to retrieve.</param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="Venue"/> object if found, or null if not found.
+        /// </returns>
+        public async Task<Venue?> GetVenueByIdAsync(Guid venueId)
+        {
+            return await _unitOfWork.VenueRepository.GetWholeVenueByIdAsync(venueId);
+        }
+
+        /// <summary>
+        /// Retrieves all venues.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing an <see cref="IEnumerable{Venue}"/> of all venues.
+        /// </returns>
+        public async Task<IEnumerable<Venue>> GetAllVenuesAsync()
+        {
+            return await _unitOfWork.VenueRepository.GetAllWholeVenuesAsync();
         }
     }
 }
