@@ -5,6 +5,7 @@ using ActiLink.Organizers;
 using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.Users;
 using ActiLink.Shared.Model;
+using ActiLink.Venues;
 using Microsoft.EntityFrameworkCore;
 
 namespace ActiLink
@@ -237,6 +238,9 @@ namespace ActiLink
             SeedSet(hobbies, hobby => x => x.Name == hobby.Name);
             SeedSet(events, @event => x => x.Title == @event.Title);
 
+            context.SaveChanges();
+
+            SeedVenuesAndUpdateEvents(context);
 
             void SeedSet<T>(IEnumerable<T> entities, Func<T, Expression<Func<T, bool>>> matchPredicateFactory) where T : class
             {
@@ -251,7 +255,76 @@ namespace ActiLink
             }
         }
 
+        private static void SeedVenuesAndUpdateEvents(DbContext context)
+        {
+            var claireDubois = GetBusinessClientByUsername(context, "Claire Dubois");
+            var joseMartinez = GetBusinessClientByUsername(context, "José Martínez");
+            var piotrNowak = GetBusinessClientByUsername(context, "Piotr Nowak");
 
+            var artGallery = new Venue(
+                claireDubois,
+                "Art Gallery",
+                "A modern art gallery in the city center.",
+                new Location(52.2395182003831, 21.011823205599995),
+                "123 Art Street"
+            );
+
+            var yogaStudio = new Venue(
+                joseMartinez,
+                "Yoga Studio",
+                "A peaceful yoga studio for relaxation.",
+                new Location(52.250437919836386, 20.979243284658697),
+                "456 Yoga Lane"
+            );
+
+            var mountainResort = new Venue(
+                piotrNowak,
+                "Mountain Resort",
+                "A luxurious resort in the mountains.",
+                new Location(46.98652595915743, 10.02809174417663),
+                "789 Mountain Road"
+            );
+
+            var venueSet = context.Set<Venue>();
+
+            if (!venueSet.AsNoTracking().Any(v => v.Name == artGallery.Name && v.Address == artGallery.Address))
+                venueSet.Add(artGallery);
+
+            if (!venueSet.AsNoTracking().Any(v => v.Name == yogaStudio.Name && v.Address == yogaStudio.Address))
+                venueSet.Add(yogaStudio);
+
+            if (!venueSet.AsNoTracking().Any(v => v.Name == mountainResort.Name && v.Address == mountainResort.Address))
+                venueSet.Add(mountainResort);
+
+            context.SaveChanges();
+
+            var artExhibition = GetEventByTitle(context, "Art Exhibition");
+            var yogaRetreat = GetEventByTitle(context, "Yoga Retreat");
+            var skiingTrip = GetEventByTitle(context, "Skiing Trip");
+
+            if (artExhibition != null)
+                context.Entry(artExhibition).Reference(e => e.Venue).CurrentValue = artGallery;
+
+            if (yogaRetreat != null)
+                context.Entry(yogaRetreat).Reference(e => e.Venue).CurrentValue = yogaStudio;
+
+            if (skiingTrip != null)
+                context.Entry(skiingTrip).Reference(e => e.Venue).CurrentValue = mountainResort;
+
+            context.SaveChanges();
+        }
+
+        private static BusinessClient GetBusinessClientByUsername(DbContext context, string username)
+        {
+            return context.Set<BusinessClient>().FirstOrDefault(bc => bc.UserName == username)
+                ?? throw new InvalidOperationException($"BusinessClient with username {username} not found");
+        }
+
+        private static Event GetEventByTitle(DbContext context, string title)
+        {
+            return context.Set<Event>().FirstOrDefault(e => e.Title == title)
+                ?? throw new InvalidOperationException($"Event with title {title} not found");
+        }
 
         private static IEnumerable<Hobby> GetHobbiesByNames(IEnumerable<Hobby> hobbies, IEnumerable<string> names) => hobbies.Where(h => names.Contains(h.Name));
         private static Event CreateEvent(CreateEventSeedObject seedEvent, Organizer organizer)
