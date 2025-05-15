@@ -257,59 +257,93 @@ namespace ActiLink
 
         private static void SeedVenuesAndUpdateEvents(DbContext context)
         {
-            var claireDubois = GetBusinessClientByUsername(context, "Claire Dubois");
-            var joseMartinez = GetBusinessClientByUsername(context, "José Martínez");
-            var piotrNowak = GetBusinessClientByUsername(context, "Piotr Nowak");
+            var venueDefinitions = new List<(string Name, string OwnerUsername, string Description, Location Location, string Address, string AssociatedEventTitle)>
+            {
+                (
+                    "Art Gallery",
+                    "Claire Dubois",
+                    "A modern art gallery in the city center.",
+                    new Location(52.2395182003831, 21.011823205599995),
+                    "123 Art Street",
+                    "Art Exhibition"
+                ),
+                (
+                    "Yoga Studio",
+                    "José Martínez",
+                    "A peaceful yoga studio for relaxation.",
+                    new Location(52.250437919836386, 20.979243284658697),
+                    "456 Yoga Lane",
+                    "Yoga Retreat"
+                ),
+                (
+                    "Mountain Resort",
+                    "Piotr Nowak",
+                    "A luxurious resort in the mountains.",
+                    new Location(46.98652595915743, 10.02809174417663),
+                    "789 Mountain Road",
+                    "Skiing Trip"
+                )
+            };
 
-            var artGallery = new Venue(
-                claireDubois,
-                "Art Gallery",
-                "A modern art gallery in the city center.",
-                new Location(52.2395182003831, 21.011823205599995),
-                "123 Art Street"
-            );
-
-            var yogaStudio = new Venue(
-                joseMartinez,
-                "Yoga Studio",
-                "A peaceful yoga studio for relaxation.",
-                new Location(52.250437919836386, 20.979243284658697),
-                "456 Yoga Lane"
-            );
-
-            var mountainResort = new Venue(
-                piotrNowak,
-                "Mountain Resort",
-                "A luxurious resort in the mountains.",
-                new Location(46.98652595915743, 10.02809174417663),
-                "789 Mountain Road"
-            );
-
+            var createdVenues = new Dictionary<string, Venue>();
             var venueSet = context.Set<Venue>();
 
-            if (!venueSet.AsNoTracking().Any(v => v.Name == artGallery.Name && v.Address == artGallery.Address))
-                venueSet.Add(artGallery);
+            foreach (var venueDef in venueDefinitions)
+            {
+                var existingVenue = venueSet.AsNoTracking()
+                    .FirstOrDefault(v => v.Name == venueDef.Name && v.Address == venueDef.Address);
 
-            if (!venueSet.AsNoTracking().Any(v => v.Name == yogaStudio.Name && v.Address == yogaStudio.Address))
-                venueSet.Add(yogaStudio);
+                if (existingVenue == null)
+                {
+                    try
+                    {
+                        var owner = GetBusinessClientByUsername(context, venueDef.OwnerUsername);
 
-            if (!venueSet.AsNoTracking().Any(v => v.Name == mountainResort.Name && v.Address == mountainResort.Address))
-                venueSet.Add(mountainResort);
+                        var venue = new Venue(
+                            owner,
+                            venueDef.Name,
+                            venueDef.Description,
+                            venueDef.Location,
+                            venueDef.Address
+                        );
+
+                        venueSet.Add(venue);
+                        createdVenues[venueDef.Name] = venue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Błąd podczas tworzenia venue {venueDef.Name}: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    createdVenues[venueDef.Name] = existingVenue;
+                }
+            }
 
             context.SaveChanges();
 
-            var artExhibition = GetEventByTitle(context, "Art Exhibition");
-            var yogaRetreat = GetEventByTitle(context, "Yoga Retreat");
-            var skiingTrip = GetEventByTitle(context, "Skiing Trip");
+            foreach (var venueDef in venueDefinitions)
+            {
+                if (createdVenues.ContainsKey(venueDef.Name) && !string.IsNullOrEmpty(venueDef.AssociatedEventTitle))
+                {
+                    try
+                    {
+                        var venue = createdVenues[venueDef.Name];
+                        var eventToUpdate = GetEventByTitle(context, venueDef.AssociatedEventTitle);
 
-            if (artExhibition != null)
-                context.Entry(artExhibition).Reference(e => e.Venue).CurrentValue = artGallery;
-
-            if (yogaRetreat != null)
-                context.Entry(yogaRetreat).Reference(e => e.Venue).CurrentValue = yogaStudio;
-
-            if (skiingTrip != null)
-                context.Entry(skiingTrip).Reference(e => e.Venue).CurrentValue = mountainResort;
+                        if (eventToUpdate != null)
+                        {
+                            context.Entry(eventToUpdate).State = EntityState.Modified;
+                            context.Entry(eventToUpdate).Reference(e => e.Venue).CurrentValue = venue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Błąd podczas aktualizacji eventu {venueDef.AssociatedEventTitle}: {ex.Message}");
+                    }
+                }
+            }
 
             context.SaveChanges();
         }
