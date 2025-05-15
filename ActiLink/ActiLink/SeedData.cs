@@ -5,6 +5,7 @@ using ActiLink.Organizers;
 using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.Users;
 using ActiLink.Shared.Model;
+using ActiLink.Venues;
 using Microsoft.EntityFrameworkCore;
 
 namespace ActiLink
@@ -237,6 +238,9 @@ namespace ActiLink
             SeedSet(hobbies, hobby => x => x.Name == hobby.Name);
             SeedSet(events, @event => x => x.Title == @event.Title);
 
+            context.SaveChanges();
+
+            SeedVenuesAndUpdateEvents(context);
 
             void SeedSet<T>(IEnumerable<T> entities, Func<T, Expression<Func<T, bool>>> matchPredicateFactory) where T : class
             {
@@ -251,7 +255,110 @@ namespace ActiLink
             }
         }
 
+        private static void SeedVenuesAndUpdateEvents(DbContext context)
+        {
+            var venueDefinitions = new List<(string Name, string OwnerUsername, string Description, Location Location, string Address, string AssociatedEventTitle)>
+            {
+                (
+                    "Art Gallery",
+                    "Claire Dubois",
+                    "A modern art gallery in the city center.",
+                    new Location(52.2395182003831, 21.011823205599995),
+                    "123 Art Street",
+                    "Art Exhibition"
+                ),
+                (
+                    "Yoga Studio",
+                    "José Martínez",
+                    "A peaceful yoga studio for relaxation.",
+                    new Location(52.250437919836386, 20.979243284658697),
+                    "456 Yoga Lane",
+                    "Yoga Retreat"
+                ),
+                (
+                    "Mountain Resort",
+                    "Piotr Nowak",
+                    "A luxurious resort in the mountains.",
+                    new Location(46.98652595915743, 10.02809174417663),
+                    "789 Mountain Road",
+                    "Skiing Trip"
+                )
+            };
 
+            var createdVenues = new Dictionary<string, Venue>();
+            var venueSet = context.Set<Venue>();
+
+            foreach (var venueDef in venueDefinitions)
+            {
+                var existingVenue = venueSet.AsNoTracking()
+                    .FirstOrDefault(v => v.Name == venueDef.Name && v.Address == venueDef.Address);
+
+                if (existingVenue == null)
+                {
+                    try
+                    {
+                        var owner = GetBusinessClientByUsername(context, venueDef.OwnerUsername);
+
+                        var venue = new Venue(
+                            owner,
+                            venueDef.Name,
+                            venueDef.Description,
+                            venueDef.Location,
+                            venueDef.Address
+                        );
+
+                        venueSet.Add(venue);
+                        createdVenues[venueDef.Name] = venue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Błąd podczas tworzenia venue {venueDef.Name}: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    createdVenues[venueDef.Name] = existingVenue;
+                }
+            }
+
+            context.SaveChanges();
+
+            foreach (var venueDef in venueDefinitions)
+            {
+                if (createdVenues.ContainsKey(venueDef.Name) && !string.IsNullOrEmpty(venueDef.AssociatedEventTitle))
+                {
+                    try
+                    {
+                        var venue = createdVenues[venueDef.Name];
+                        var eventToUpdate = GetEventByTitle(context, venueDef.AssociatedEventTitle);
+
+                        if (eventToUpdate != null)
+                        {
+                            context.Entry(eventToUpdate).State = EntityState.Modified;
+                            context.Entry(eventToUpdate).Reference(e => e.Venue).CurrentValue = venue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Błąd podczas aktualizacji eventu {venueDef.AssociatedEventTitle}: {ex.Message}");
+                    }
+                }
+            }
+
+            context.SaveChanges();
+        }
+
+        private static BusinessClient GetBusinessClientByUsername(DbContext context, string username)
+        {
+            return context.Set<BusinessClient>().FirstOrDefault(bc => bc.UserName == username)
+                ?? throw new InvalidOperationException($"BusinessClient with username {username} not found");
+        }
+
+        private static Event GetEventByTitle(DbContext context, string title)
+        {
+            return context.Set<Event>().FirstOrDefault(e => e.Title == title)
+                ?? throw new InvalidOperationException($"Event with title {title} not found");
+        }
 
         private static IEnumerable<Hobby> GetHobbiesByNames(IEnumerable<Hobby> hobbies, IEnumerable<string> names) => hobbies.Where(h => names.Contains(h.Name));
         private static Event CreateEvent(CreateEventSeedObject seedEvent, Organizer organizer)
