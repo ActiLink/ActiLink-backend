@@ -234,7 +234,7 @@ namespace ActiLink.UnitTests.VenueTests
         }
 
         [TestMethod]
-        public async Task UpdateVenue_Failure_NotAuthorized()
+        public async Task UpdateVenue_Failure_Forbidden()
         {
             // Given
             var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
@@ -304,7 +304,7 @@ namespace ActiLink.UnitTests.VenueTests
         }
 
         [TestMethod]
-        public async Task DeleteVenue_Failure_NotAuthorized()
+        public async Task DeleteVenue_Failure_Forbidden()
         {
             // Given
             var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
