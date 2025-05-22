@@ -1,4 +1,6 @@
-﻿using ActiLink.Organizers.BusinessClients;
+﻿using ActiLink.Events;
+using ActiLink.Events.Service;
+using ActiLink.Organizers.BusinessClients;
 using ActiLink.Shared.Model;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
@@ -180,5 +182,170 @@ namespace ActiLink.UnitTests.VenueTests
             Assert.AreEqual(0, venuesList.Count);
             _unitOfWorkMock.Verify(uow => uow.VenueRepository.Query(), Times.Once);
         }
+
+        [TestMethod]
+        public async Task UpdateVenue_Success_ReturnsUpdatedVenue()
+        {
+            // Given
+            var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
+            var venue = new Venue(owner, venueName, venueDescription, venueLocation, venueAddress);
+            Utils.SetupVenueId(venue, venueId);
+            var updatedTitle = "Updated Venue";
+            var updatedDescription = "Updated Description";
+            var updatedLocation = new Location(5.0, 6.0);
+            var updatedAddress = "Updated Address";
+            var updateVenueObject = new UpdateVenueObject(updatedTitle, updatedDescription, updatedLocation, updatedAddress);
+            
+            _venueRepositoryMock
+                .Setup(repo => repo.Query())
+                .Returns(new TestAsyncEnumerable<Venue>([venue]));
+
+            _unitOfWorkMock
+                .Setup(uow => uow.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            _mapperMock
+                .Setup(m => m.Map(updateVenueObject, It.IsAny<Venue>()))
+                .Callback<UpdateVenueObject, Venue>((src, dest) =>
+                {
+                    typeof(Venue).GetProperty(nameof(Venue.Name))!.SetValue(dest, src.Name);
+                    typeof(Venue).GetProperty(nameof(Venue.Description))!.SetValue(dest, src.Description);
+                    typeof(Venue).GetProperty(nameof(Venue.Location))!.SetValue(dest, src.Location);
+                    typeof(Venue).GetProperty(nameof(Venue.Address))!.SetValue(dest, src.Address);
+                });
+
+            // When
+            var result = await _venueService.UpdateVenueAsync(venueId, updateVenueObject, businessClientId);
+
+            // Then
+            Assert.IsTrue(result.Succeeded);
+            var updatedVenue = result.Data;
+            Assert.IsNotNull(updatedVenue);
+            Assert.AreEqual(venueId, updatedVenue.Id);
+            Assert.AreEqual(updatedTitle, updatedVenue.Name);
+            Assert.AreEqual(updatedDescription, updatedVenue.Description);
+            Assert.AreEqual(updatedLocation, updatedVenue.Location);
+            Assert.AreEqual(updatedAddress, updatedVenue.Address);
+            Assert.AreEqual(owner, updatedVenue.Owner);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Update(It.IsAny<Venue>()), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(), Times.Once);
+            _mapperMock.Verify(m => m.Map(updateVenueObject, It.IsAny<Venue>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task UpdateVenue_Failure_NotAuthorized()
+        {
+            // Given
+            var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
+            var venue = new Venue(owner, venueName, venueDescription, venueLocation, venueAddress);
+            Utils.SetupVenueId(venue, venueId);
+            UpdateVenueObject updateVenueObject = new UpdateVenueObject("Updated Venue", "Updated Description", new Location(5.0, 6.0), "Updated Address");
+
+            _venueRepositoryMock
+                .Setup(repo => repo.Query())
+                .Returns(new TestAsyncEnumerable<Venue>([venue]));
+
+            // When
+            var result = await _venueService.UpdateVenueAsync(venueId, updateVenueObject, "UnauthorizedUserId");
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(ErrorCode.Forbidden, result.ErrorCode);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Update(It.IsAny<Venue>()), Times.Never);
+            _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task UpdateVenue_Failure_VenueNotFound()
+        {
+            // Given
+            var updateVenueObject = new UpdateVenueObject("Updated Venue", "Updated Description", new Location(5.0, 6.0), "Updated Address");
+            var nonExistentVenueId = Guid.NewGuid();
+            _venueRepositoryMock
+                .Setup(repo => repo.Query())
+                .Returns(new TestAsyncEnumerable<Venue>([]));
+
+            // When
+            var result = await _venueService.UpdateVenueAsync(nonExistentVenueId, updateVenueObject, businessClientId);
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(ErrorCode.NotFound, result.ErrorCode);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Update(It.IsAny<Venue>()), Times.Never);
+            _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task DeleteVenue_Success_ReturnsSucccess()
+        {
+            var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
+            var venueToDelete = new Venue(owner, venueName, venueDescription, venueLocation, venueAddress);
+            Utils.SetupVenueId(venueToDelete, venueId);
+
+            _venueRepositoryMock
+                .Setup(repo => repo.Query())
+                .Returns(new TestAsyncEnumerable<Venue>([venueToDelete]));
+
+            _unitOfWorkMock
+                .Setup(uow => uow.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            // When
+            var result = await _venueService.DeleteVenueByIdAsync(venueId, businessClientId);
+
+            // Then
+            Assert.IsTrue(result.Succeeded);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Delete(It.IsAny<Venue>()), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task DeleteVenue_Failure_NotAuthorized()
+        {
+            // Given
+            var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
+            var venueToDelete = new Venue(owner, venueName, venueDescription, venueLocation, venueAddress);
+            Utils.SetupVenueId(venueToDelete, venueId);
+
+            _venueRepositoryMock
+                .Setup(repo => repo.Query())
+                .Returns(new TestAsyncEnumerable<Venue>([venueToDelete]));
+
+            // When
+            var result = await _venueService.DeleteVenueByIdAsync(venueId, "UnauthorizedUserId");
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(ErrorCode.Forbidden, result.ErrorCode);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Delete(It.IsAny<Venue>()), Times.Never);
+            _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(), Times.Never);
+        }
+
+
+        [TestMethod]
+        public async Task DeleteVenue_Failure_VenueNotFound()
+        {
+            // Given
+            _venueRepositoryMock
+                .Setup(repo => repo.Query())
+                .Returns(new TestAsyncEnumerable<Venue>([]));
+
+            // When
+            var result = await _venueService.DeleteVenueByIdAsync(venueId, businessClientId);
+
+            // Then
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(ErrorCode.NotFound, result.ErrorCode);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Query(), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.VenueRepository.Delete(It.IsAny<Venue>()), Times.Never);
+            _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(), Times.Never);
+        }
+
+
     }
 }
