@@ -303,5 +303,190 @@ namespace ActiLink.UnitTests.VenueTests
             Assert.IsNotNull(venueDtos);
             Assert.AreEqual(0, venueDtos.Count());
         }
+
+        [TestMethod]
+        public async Task UpdateVenueAsync_Success_ReturnsOkWithUpdatedVenue()
+        {
+            // Given
+            var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
+            var updatedName = "Updated Venue Name";
+            var updatedDescription = "Updated Description";
+            var updatedLocation = new Location(3.0, 4.0);
+            var updatedAddress = "Updated Address";
+            var updatedVenue = new Venue(owner, updatedName, updatedDescription, updatedLocation, updatedAddress);
+            Utils.SetupVenueId(updatedVenue, venueId);
+            var updateVenueDto = new UpdateVenueDto(updatedName, updatedDescription, updatedLocation, updatedAddress);
+            var updateVenueObject = new UpdateVenueObject(updatedName, updatedDescription, updatedLocation, updatedAddress);
+            var updatedVenueDto = new VenueDto(venueId, updatedName, updatedDescription, updatedLocation, updatedAddress, new VenueOwnerDto(owner.Id, owner.UserName!), []);
+
+            _venueServiceMock
+                .Setup(vs => vs.UpdateVenueAsync(venueId, updateVenueObject, businessClientId))
+                .ReturnsAsync(GenericServiceResult<Venue>.Success(updatedVenue));
+
+            _mapperMock
+                .Setup(m => m.Map<UpdateVenueObject>(updateVenueDto))
+                .Returns(updateVenueObject);
+
+            _mapperMock
+                .Setup(m => m.Map<VenueDto>(updatedVenue))
+                .Returns(updatedVenueDto);
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, businessClientId),
+                new(ClaimTypes.Role, "BusinessClient")
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            var authService = _controller.ControllerContext.HttpContext.RequestServices
+                .GetRequiredService<IAuthorizationService>();
+
+            // When
+            var authResult = await authService.AuthorizeAsync(principal, null, "BusinessClient");
+            var result = authResult.Succeeded ?
+                await _controller.UpdateVenueAsync(venueId, updateVenueDto) :
+                new ForbidResult();
+
+            // Then
+            Assert.IsNotNull(result);
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(StatusCodes.Status200OK, okResult.StatusCode);
+            Assert.IsNotNull(okResult.Value);
+            Assert.IsInstanceOfType<VenueDto>(okResult.Value);
+            Assert.AreEqual(updatedVenueDto, okResult.Value);
+
+            _venueServiceMock.Verify(vs => vs.UpdateVenueAsync(venueId, updateVenueObject, businessClientId), Times.Once);
+            _mapperMock.Verify(m => m.Map<UpdateVenueObject>(updateVenueDto), Times.Once);
+            _mapperMock.Verify(m => m.Map<VenueDto>(updatedVenue), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task UpdateVenueAsync_NotOwner_ReturnsForbid()
+        {
+            // Given
+            var updatedName = "Updated Venue Name";
+            var updatedDescription = "Updated Description";
+            var updatedLocation = new Location(3.0, 4.0);
+            var updatedAddress = "Updated Address";
+            var updateVenueDto = new UpdateVenueDto(updatedName, updatedDescription, updatedLocation, updatedAddress);
+            var updateVenueObject = new UpdateVenueObject(updatedName, updatedDescription, updatedLocation, updatedAddress);
+            var notOwnerId = "Not owner id";
+
+            _venueServiceMock
+                .Setup(vs => vs.UpdateVenueAsync(venueId, updateVenueObject, notOwnerId))
+                .ReturnsAsync(GenericServiceResult<Venue>.Failure(["Not owner"], ErrorCode.Forbidden));
+
+            _mapperMock
+                .Setup(m => m.Map<UpdateVenueObject>(updateVenueDto))
+                .Returns(updateVenueObject);
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, notOwnerId),
+                new(ClaimTypes.Role, "BusinessClient")
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            var authService = _controller.ControllerContext.HttpContext.RequestServices
+                .GetRequiredService<IAuthorizationService>();
+
+            // When
+            var authResult = await authService.AuthorizeAsync(principal, null, "BusinessClient");
+            var result = authResult.Succeeded ?
+                await _controller.UpdateVenueAsync(venueId, updateVenueDto) :
+                new ForbidResult();
+
+            // Then
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType<ForbidResult>(result);
+            _venueServiceMock.Verify(vs => vs.UpdateVenueAsync(venueId, updateVenueObject, notOwnerId), Times.Once);
+            _mapperMock.Verify(m => m.Map<UpdateVenueObject>(updateVenueDto), Times.Once);
+            _mapperMock.Verify(m => m.Map<VenueDto>(It.IsAny<Venue>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task DeleteVenue_Success_ReturnsNoContent()
+        {
+            // Given
+            var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
+            var venue = new Venue(owner, venueName, venueDescription, venueLocation, venueAddress);
+            Utils.SetupVenueId(venue, venueId);
+
+            _venueServiceMock
+                .Setup(vs => vs.DeleteVenueByIdAsync(venueId, businessClientId))
+                .ReturnsAsync(ServiceResult.Success());
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, businessClientId),
+                new(ClaimTypes.Role, "BusinessClient")
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            var authService = _controller.ControllerContext.HttpContext.RequestServices
+                .GetRequiredService<IAuthorizationService>();
+
+            // When
+            var authResult = await authService.AuthorizeAsync(principal, null, "BusinessClient");
+            var result = authResult.Succeeded ?
+                await _controller.DeleteVenueByIdAsync(venueId) :
+                new ForbidResult();
+
+            // Then
+            Assert.IsNotNull(result);
+            var noContentResult = result as NoContentResult;
+            Assert.IsNotNull(noContentResult);
+            Assert.AreEqual(StatusCodes.Status204NoContent, noContentResult.StatusCode);
+            _venueServiceMock.Verify(vs => vs.DeleteVenueByIdAsync(venueId, businessClientId), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task DeleteVenue_NotOwner_ReturnsForbid()
+        {
+            // Given
+            var owner = new BusinessClient("Test Owner", "testowner@email.com", "PL1234567890") { Id = businessClientId };
+            var venue = new Venue(owner, venueName, venueDescription, venueLocation, venueAddress);
+            Utils.SetupVenueId(venue, venueId);
+
+            var notOwnerId = "Not owner id";
+
+            _venueServiceMock
+                .Setup(vs => vs.DeleteVenueByIdAsync(venueId, notOwnerId))
+                .ReturnsAsync(ServiceResult.Failure(["Not owner"], ErrorCode.Forbidden));
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, notOwnerId),
+                new(ClaimTypes.Role, "BusinessClient")
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext.HttpContext.User = principal;
+
+            var authService = _controller.ControllerContext.HttpContext.RequestServices
+                .GetRequiredService<IAuthorizationService>();
+
+            // When
+            var authResult = await authService.AuthorizeAsync(principal, null, "BusinessClient");
+            var result = authResult.Succeeded ?
+                await _controller.DeleteVenueByIdAsync(venueId) :
+                new ForbidResult();
+
+            // Then
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType<ForbidResult>(result);
+            _venueServiceMock.Verify(vs => vs.DeleteVenueByIdAsync(venueId, notOwnerId), Times.Once);
+        }
     }
 }
