@@ -155,6 +155,7 @@ namespace ActiLink.Venues
         /// with the updated venue details.
         /// </returns>
         [HttpPut("{id}")]
+        [Authorize(Roles = "BusinessClient")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
