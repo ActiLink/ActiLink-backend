@@ -44,6 +44,34 @@ namespace ActiLink.Venues.Service
         }
 
         /// <summary>
+        /// Updates the specified venue.
+        /// </summary>
+        /// <param name="venueId">The ID of the venue to update.</param>
+        /// <param name="uvo">The UpdateVenueObject containing the updated details of the venue.</param>
+        /// <param name="requestingUserId">The ID of the user making the request.</param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing a <see cref="GenericServiceResult{Venue}"/> indicating the success or failure of the operation.
+        /// </returns>
+        public async Task<GenericServiceResult<Venue>> UpdateVenueAsync(Guid venueId, UpdateVenueObject uvo, string requestingUserId)
+        {
+            var venue = await _unitOfWork.VenueRepository.GetVenueByIdAsync(venueId);
+            if (venue is null)
+                return GenericServiceResult<Venue>.Failure(["Venue not found"], ErrorCode.NotFound);
+
+            if(venue.Owner.Id != requestingUserId)
+                return GenericServiceResult<Venue>.Failure(["You are not authorized to update this venue"], ErrorCode.Forbidden);
+
+            _mapper.Map(uvo, venue);
+
+            _unitOfWork.VenueRepository.Update(venue);
+            var result = await _unitOfWork.SaveChangesAsync();
+
+            return result > 0
+                ? GenericServiceResult<Venue>.Success(venue)
+                : GenericServiceResult<Venue>.Failure(["Failed to update venue"]);
+        }
+
+        /// <summary>
         /// Deletes the specified venue.
         /// </summary>
         /// <param name="venueToDelete"></param>
@@ -52,6 +80,24 @@ namespace ActiLink.Venues.Service
         /// </returns>
         public async Task<ServiceResult> DeleteVenueAsync(Venue venueToDelete)
         {
+            _unitOfWork.VenueRepository.Delete(venueToDelete);
+            int result = await _unitOfWork.SaveChangesAsync();
+
+            return result > 0
+                ? ServiceResult.Success()
+                : ServiceResult.Failure(["Failed to delete venue"]);
+        }
+
+        public async Task<ServiceResult> DeleteVenueByIdAsync(Guid venueId, string requestingUserId)
+        {
+            var venueToDelete = await _unitOfWork.VenueRepository.GetVenueByIdAsync(venueId);
+
+            if (venueToDelete is null)
+                return ServiceResult.Failure(["Venue not found"], ErrorCode.NotFound);
+
+            if (venueToDelete.Owner.Id != requestingUserId)
+                return ServiceResult.Failure(["You are not authorized to delete this venue"], ErrorCode.Forbidden);
+
             _unitOfWork.VenueRepository.Delete(venueToDelete);
             int result = await _unitOfWork.SaveChangesAsync();
 
