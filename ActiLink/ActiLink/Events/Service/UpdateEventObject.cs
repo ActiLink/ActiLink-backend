@@ -11,8 +11,9 @@ namespace ActiLink.Events.Service
         decimal Price,
         int MinUsers,
         int MaxUsers,
-        IEnumerable<string> RelatedHobbyNames
-    )
+        IEnumerable<string> RelatedHobbyNames,
+		string VenueId
+	)
     {
         private UpdateEventObject() : this(
             default!,
@@ -23,6 +24,7 @@ namespace ActiLink.Events.Service
             default,
             default,
             default,
+            default!,
             default!)
         {
         }

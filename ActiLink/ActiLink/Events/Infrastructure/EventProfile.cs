@@ -3,6 +3,7 @@ using ActiLink.Events.Service;
 using ActiLink.Hobbies;
 using ActiLink.Organizers;
 using ActiLink.Organizers.Users;
+using ActiLink.Venues;
 using AutoMapper;
 
 namespace ActiLink.Events.Infrastructure
@@ -34,14 +35,15 @@ namespace ActiLink.Events.Infrastructure
                         src.Price,
                         src.MinUsers,
                         src.MaxUsers,
-                        src.RelatedHobbies.Select(h => h.Name));
+                        src.RelatedHobbies.Select(h => h.Name),
+                        src.VenueId);
                 });
 
             // Map CreateEventObject to Event
             CreateMap<CreateEventObject, Event>()
                 .ForMember(dest => dest.SignUpList, opt => opt.MapFrom(_ => new List<User>()))
                 .ForMember(dest => dest.RelatedHobbies, opt => opt.MapFrom(_ => new List<Hobby>()))
-                .AfterMap((src, dest, context) =>
+				.AfterMap((src, dest, context) =>
                 {
                     // Organizer
                     if (context.Items.TryGetValue("Organizer", out var organizerObj) &&
@@ -60,7 +62,16 @@ namespace ActiLink.Events.Infrastructure
                         foreach (var hobby in hobbies)
                             dest.RelatedHobbies.Add(hobby);
                     }
-                });
+					// Venue
+					if (context.Items.TryGetValue("Venue", out var venueObj) &&
+						venueObj is Venue venue)
+					{
+						typeof(Event)
+							.GetProperty(nameof(Event.Venue))?
+							.SetValue(dest, venue);
+					}
+
+				});
 
             // Map UpdateEventDto to UpdateEventObject 
             CreateMap<UpdateEventDto, UpdateEventObject>()
@@ -81,7 +92,15 @@ namespace ActiLink.Events.Infrastructure
                          foreach (var hobby in hobbies)
                              dest.RelatedHobbies.Add(hobby);
                      }
-                 });
+					 // Venue
+					 if (context.Items.TryGetValue("Venue", out var venueObj) &&
+						 venueObj is Venue venue)
+					 {
+						 typeof(Event)
+							 .GetProperty(nameof(Event.Venue))?
+							 .SetValue(dest, venue);
+					 }
+				 });
 
             CreateMap<Event, ReducedEventDto>();
         }
