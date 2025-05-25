@@ -107,7 +107,7 @@ namespace ActiLink.Events.Service
 			}
 
 			// Map UpdateEventObject to Event
-			var newEvent = _mapper.Map<Event>(eventToUpdate, opts =>
+			_mapper.Map(eventToUpdate, existingEvent, opts =>
 			{
 				opts.Items["Hobbies"] = hobbies;
 				if (venue is not null)
