@@ -422,7 +422,7 @@ namespace ActiLink.UnitTests.EventTests
             var hobbyNames = new List<string>();
 
             var updateEventObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime,
-                                                        location, price, minUsers, maxUsers, hobbyNames, "");
+                                                        location, price, minUsers, maxUsers, hobbyNames, null);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
             var existingEvent = new Event(organizer, "Old Title", "Old Description", new DateTime(2024, 2, 6), new DateTime(2024, 2, 6).AddHours(3),
                                          new Location(0, 0), 50.0m, 1, 10, []);
@@ -483,7 +483,7 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
             var updateEventObject = new UpdateEventObject("Updated Title", "Updated Description", DateTime.Now, DateTime.Now.AddHours(1),
-                                                          new Location(0, 0), 50.0m, 1, 10, [], "");
+                                                          new Location(0, 0), 50.0m, 1, 10, [], null);
             _mockEventRepository
                 .Setup(r => r.Query())
                 .Returns(new TestAsyncEnumerable<Event>([]));

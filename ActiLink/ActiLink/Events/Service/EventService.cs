@@ -44,12 +44,9 @@ namespace ActiLink.Events.Service
                 return GenericServiceResult<Event>.Failure(["Some hobbies not found"], ErrorCode.ValidationError);
 
             Venue? venue = null;
-			if (!string.IsNullOrEmpty(ceo.VenueId))
+			if (ceo.VenueId is not null)
 			{
-				if (!Guid.TryParse(ceo.VenueId, out var venueGuid))
-					return GenericServiceResult<Event>.Failure(["Invalid VenueId format"], ErrorCode.ValidationError);
-
-				venue = await _unitOfWork.VenueRepository.GetByIdAsync(venueGuid);
+				venue = await _unitOfWork.VenueRepository.GetByIdAsync(ceo.VenueId);
 				if (venue is null)
 					return GenericServiceResult<Event>.Failure(["Venue not found"], ErrorCode.ValidationError);
 			}
@@ -59,8 +56,7 @@ namespace ActiLink.Events.Service
             {
                 opts.Items["Organizer"] = organizer;
                 opts.Items["Hobbies"] = hobbies;
-                if(venue is not null)
-					opts.Items["Venue"] = venue;
+                opts.Items["Venue"] = venue;
 			});
 
             // Add entity to the repository
@@ -96,12 +92,9 @@ namespace ActiLink.Events.Service
                 return GenericServiceResult<Event>.Failure(["Some hobbies not found"], ErrorCode.ValidationError);
 
 			Venue? venue = null;
-			if (!string.IsNullOrEmpty(eventToUpdate.VenueId))
+			if (eventToUpdate.VenueId is not null)
 			{
-				if (!Guid.TryParse(eventToUpdate.VenueId, out var venueGuid))
-					return GenericServiceResult<Event>.Failure(["Invalid VenueId format"], ErrorCode.ValidationError);
-
-				venue = await _unitOfWork.VenueRepository.GetByIdAsync(venueGuid);
+				venue = await _unitOfWork.VenueRepository.GetByIdAsync(eventToUpdate.VenueId);
 				if (venue is null)
 					return GenericServiceResult<Event>.Failure(["Venue not found"], ErrorCode.ValidationError);
 			}
@@ -110,8 +103,7 @@ namespace ActiLink.Events.Service
 			_mapper.Map(eventToUpdate, existingEvent, opts =>
 			{
 				opts.Items["Hobbies"] = hobbies;
-				if (venue is not null)
-					opts.Items["Venue"] = venue;
+				opts.Items["Venue"] = venue;
 			});
 
 

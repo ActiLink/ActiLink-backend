@@ -61,7 +61,7 @@ namespace ActiLink.UnitTests.EventTests
 			var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var hobbyNames = new List<string>();
 
-			var ceoToMap = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, _venueId);
+			var ceoToMap = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, Guid.Parse(_venueId));
 			var expectedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], _testVenue);
 
 			// When
@@ -111,7 +111,7 @@ namespace ActiLink.UnitTests.EventTests
             var hobbies = hobbyNames.Select(n => new HobbyDto(n));
 
 			var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, _venueId);
-			var expectedCeo = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, _venueId);
+			var expectedCeo = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, Guid.Parse(_venueId));
 
 
 			// When
@@ -188,7 +188,7 @@ namespace ActiLink.UnitTests.EventTests
             var hobbies = hobbyNames.Select(n => new HobbyDto(n));
 
 			var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, _venueId);
-			var expectedUpdateObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, _venueId);
+			var expectedUpdateObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, Guid.Parse(_venueId));
 
 			// When
 			var mappedUpdateObject = _mapper.Map<UpdateEventObject>(updateEventDto, opts => opts.Items["EventId"] = eventId);

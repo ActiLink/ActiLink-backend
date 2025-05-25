@@ -25,7 +25,13 @@ namespace ActiLink.Events.Infrastructure
                     var organizerId = context.Items["OrganizerId"] as string
                         ?? throw new InvalidOperationException("OrganizerId must be provided in context items");
 
-                    return new CreateEventObject(
+					Guid? venueId = null;
+					if (!string.IsNullOrEmpty(src.VenueId) && Guid.TryParse(src.VenueId, out Guid parsedId))
+					{
+						venueId = parsedId;
+					}
+
+					return new CreateEventObject(
                         organizerId,
                         src.Title,
                         src.Description,
@@ -36,7 +42,7 @@ namespace ActiLink.Events.Infrastructure
                         src.MinUsers,
                         src.MaxUsers,
                         src.RelatedHobbies.Select(h => h.Name),
-                        src.VenueId);
+                        venueId);
                 });
 
             // Map CreateEventObject to Event
@@ -76,10 +82,12 @@ namespace ActiLink.Events.Infrastructure
             // Map UpdateEventDto to UpdateEventObject 
             CreateMap<UpdateEventDto, UpdateEventObject>()
                 .ForMember(dest => dest.RelatedHobbyNames,
-                opt => opt.MapFrom(src => src.RelatedHobbies.Select(h => h.Name).ToList()));
+                opt => opt.MapFrom(src => src.RelatedHobbies.Select(h => h.Name).ToList()))
+                .ForMember(dest => dest.VenueId,
+                opt => opt.MapFrom(src => ParseGuid(src.VenueId)));
 
-            // Map UpdateEventObject to Event
-            CreateMap<UpdateEventObject, Event>()
+			// Map UpdateEventObject to Event
+			CreateMap<UpdateEventObject, Event>()
                 .ForMember(dest => dest.Organizer, opt => opt.Ignore())
                 .ForMember(dest => dest.RelatedHobbies, opt => opt.Ignore())
                  .AfterMap((src, dest, context) =>
@@ -92,17 +100,28 @@ namespace ActiLink.Events.Infrastructure
                          foreach (var hobby in hobbies)
                              dest.RelatedHobbies.Add(hobby);
                      }
-					 // Venue
-					 if (context.Items.TryGetValue("Venue", out var venueObj) &&
-						 venueObj is Venue venue)
-					 {
-						 typeof(Event)
-							 .GetProperty(nameof(Event.Venue))?
-							 .SetValue(dest, venue);
-					 }
+                     // Venue
+                     if (context.Items.TryGetValue("Venue", out var venueObj) &&
+                         venueObj is Venue venue)
+                     {
+                         typeof(Event)
+                             .GetProperty(nameof(Event.Venue))?
+                             .SetValue(dest, venue);
+                     }
+                     else
+                     {
+                         typeof(Event)
+                             .GetProperty(nameof(Event.Venue))?
+                             .SetValue(dest, null);
+                     }
 				 });
 
             CreateMap<Event, ReducedEventDto>();
         }
-    }
+		private static Guid? ParseGuid(string? id)
+		{
+			if (string.IsNullOrEmpty(id)) return null;
+			return Guid.TryParse(id, out var guid) ? guid : null;
+		}
+	}
 }

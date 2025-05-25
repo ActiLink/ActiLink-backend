@@ -13,6 +13,6 @@ namespace ActiLink.Events.Service
         int MinUsers,
         int MaxUsers,
         IEnumerable<string> RelatedHobbyNames,
-        string VenueId
+        Guid? VenueId
     );
 }
