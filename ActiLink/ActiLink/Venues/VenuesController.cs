@@ -120,7 +120,7 @@ namespace ActiLink.Venues
         /// <returns>
         /// The <see cref="Task"/> that represents the asynchronous operation, containing an <see cref="IActionResult"/> indicating the success or failure of the operation.
         /// </returns>
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [Authorize(Roles = "BusinessClient")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
