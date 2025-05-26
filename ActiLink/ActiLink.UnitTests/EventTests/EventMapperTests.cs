@@ -110,8 +110,8 @@ namespace ActiLink.UnitTests.EventTests
             var hobbyNames = new List<string>();
             var hobbies = hobbyNames.Select(n => new HobbyDto(n));
 
-			var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, _venueId);
-			var expectedCeo = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, Guid.Parse(_venueId));
+			var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, _venueGuid);
+			var expectedCeo = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, _venueGuid);
 
 
 			// When
@@ -187,8 +187,8 @@ namespace ActiLink.UnitTests.EventTests
             var hobbyNames = new List<string> { new("Hobby1") };
             var hobbies = hobbyNames.Select(n => new HobbyDto(n));
 
-			var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, _venueId);
-			var expectedUpdateObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, Guid.Parse(_venueId));
+			var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, _venueGuid);
+			var expectedUpdateObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, _venueGuid);
 
 			// When
 			var mappedUpdateObject = _mapper.Map<UpdateEventObject>(updateEventDto, opts => opts.Items["EventId"] = eventId);

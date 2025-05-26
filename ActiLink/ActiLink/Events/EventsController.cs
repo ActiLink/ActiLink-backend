@@ -48,10 +48,6 @@ namespace ActiLink.Events
                     _logger.LogWarning("User ID not found in token");
                     return Unauthorized("User ID not found in token");
                 }
-				if (!string.IsNullOrEmpty(newEventDto.VenueId) && !Guid.TryParse(newEventDto.VenueId, out _))
-				{
-					return BadRequest("VenueId must be a valid GUID.");
-				}
 
 				var createEventObject = _mapper.Map<CreateEventObject>(
                     newEventDto,
@@ -101,11 +97,6 @@ namespace ActiLink.Events
                     _logger.LogWarning("User ID not found in token");
                     return Unauthorized("User ID not found in token");
                 }
-
-				if (!string.IsNullOrEmpty(updateEventDto.VenueId) && !Guid.TryParse(updateEventDto.VenueId, out _))
-				{
-					return BadRequest("VenueId must be a valid GUID.");
-				}
 
 				var result = await _eventService.UpdateEventAsync(id,
                     _mapper.Map<UpdateEventObject>(updateEventDto),

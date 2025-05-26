@@ -25,6 +25,6 @@ namespace ActiLink.Events.DTOs
         int MinUsers,
         int MaxUsers,
         IEnumerable<HobbyDto> RelatedHobbies,
-        string? VenueId = null
+        Guid? VenueId = null
     );
 }
