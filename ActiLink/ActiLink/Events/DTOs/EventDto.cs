@@ -35,7 +35,7 @@ namespace ActiLink.Events.DTOs
         List<HobbyDto> Hobbies,
         OrganizerDto Organizer,
         List<UserDto> Participants,
-		VenueDto? Venue = null
+		ReducedVenueDto? Venue = null
 	)
     {
         private EventDto()
