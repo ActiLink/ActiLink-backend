@@ -49,7 +49,7 @@ namespace ActiLink.UnitTests.EventTests
             var hobbyNames = new List<string>() { "Tenis, Piłka nożna" };
             var hobbies = hobbyNames.Select(name => new Hobby(name));
 
-            var createEventObject = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+            var createEventObject = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, null);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
 
@@ -221,7 +221,7 @@ namespace ActiLink.UnitTests.EventTests
             var hobbyNames = new List<string>();
 
             var updateEventObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime,
-                                                        location, price, minUsers, maxUsers, hobbyNames);
+                                                        location, price, minUsers, maxUsers, hobbyNames, null);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var existingEvent = new Event(organizer, "Old Title", "Old Description", new DateTime(2024, 2, 6), new DateTime(2024, 2, 6).AddHours(3),
                                          new Location(0, 0), 50.0m, 1, 10, []);
@@ -281,7 +281,7 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
             var updateEventObject = new UpdateEventObject("Updated Title", "Updated Description", DateTime.Now, DateTime.Now.AddHours(1),
-                                                          new Location(0, 0), 50.0m, 1, 10, []);
+                                                          new Location(0, 0), 50.0m, 1, 10, [], null);
 
             _mockEventRepository
                 .Setup(r => r.Query())
@@ -367,7 +367,7 @@ namespace ActiLink.UnitTests.EventTests
             var hobbyNames = new List<string>() { "Tenis, Piłka nożna" };
             var hobbies = hobbyNames.Select(name => new Hobby(name));
 
-            var createEventObject = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+            var createEventObject = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, null);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
 
@@ -422,35 +422,35 @@ namespace ActiLink.UnitTests.EventTests
             var hobbyNames = new List<string>();
 
             var updateEventObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime,
-                                                        location, price, minUsers, maxUsers, hobbyNames);
+                                                        location, price, minUsers, maxUsers, hobbyNames, null);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
             var existingEvent = new Event(organizer, "Old Title", "Old Description", new DateTime(2024, 2, 6), new DateTime(2024, 2, 6).AddHours(3),
                                          new Location(0, 0), 50.0m, 1, 10, []);
-            Utils.SetupEventGuid(existingEvent, eventId);
+			Utils.SetupEventGuid(existingEvent, eventId);
 
-            _mockEventRepository
-                .Setup(r => r.Query())
-                .Returns(new TestAsyncEnumerable<Event>([existingEvent]));
+			_mockEventRepository
+				.Setup(r => r.Query())
+				.Returns(new TestAsyncEnumerable<Event>([existingEvent]));
 
-            _unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
-            _unitOfWorkMock
-                .Setup(u => u.OrganizerRepository.GetByIdAsync(userId))
-                .ReturnsAsync(organizer);
+			_unitOfWorkMock.Setup(u => u.EventRepository).Returns(_mockEventRepository.Object);
+			_unitOfWorkMock
+				.Setup(u => u.OrganizerRepository.GetByIdAsync(userId))
+				.ReturnsAsync(organizer);
 
-            _mockHobbyRepository
-                .Setup(r => r.Query())
-                .Returns(new TestAsyncEnumerable<Hobby>([]));
-            _unitOfWorkMock.Setup(u => u.HobbyRepository).Returns(_mockHobbyRepository.Object);
+			_mockHobbyRepository
+				.Setup(r => r.Query())
+				.Returns(new TestAsyncEnumerable<Hobby>([]));
+			_unitOfWorkMock.Setup(u => u.HobbyRepository).Returns(_mockHobbyRepository.Object);
 
-            _unitOfWorkMock
-                .Setup(u => u.SaveChangesAsync())
-                .ReturnsAsync(1);
+			_unitOfWorkMock
+				.Setup(u => u.SaveChangesAsync())
+				.ReturnsAsync(1);
 
 
-            _mapperMock
-                 .Setup(m => m.Map<UpdateEventObject, Event>(It.IsAny<UpdateEventObject>(), It.IsAny<Event>(), It.IsAny<Action<IMappingOperationOptions<UpdateEventObject, Event>>>()))
-                 .Callback<UpdateEventObject, Event, Action<IMappingOperationOptions<UpdateEventObject, Event>>>((src, dest, opt) =>
-                 {
+			_mapperMock
+				 .Setup(m => m.Map<UpdateEventObject, Event>(It.IsAny<UpdateEventObject>(), It.IsAny<Event>(), It.IsAny<Action<IMappingOperationOptions<UpdateEventObject, Event>>>()))
+				 .Callback<UpdateEventObject, Event, Action<IMappingOperationOptions<UpdateEventObject, Event>>>((src, dest, opt) =>
+				 {
                      typeof(Event).GetProperty(nameof(Event.Title))!.SetValue(dest, src.Title);
                      typeof(Event).GetProperty(nameof(Event.Description))!.SetValue(dest, src.Description);
                      typeof(Event).GetProperty(nameof(Event.StartTime))!.SetValue(dest, src.StartTime);
@@ -459,11 +459,11 @@ namespace ActiLink.UnitTests.EventTests
                      typeof(Event).GetProperty(nameof(Event.Price))!.SetValue(dest, src.Price);
                      typeof(Event).GetProperty(nameof(Event.MinUsers))!.SetValue(dest, src.MinUsers);
                      typeof(Event).GetProperty(nameof(Event.MaxUsers))!.SetValue(dest, src.MaxUsers);
-                 });
+				 }).Returns(existingEvent);
 
 
-            // When
-            var result = await _eventService.UpdateEventAsync(eventId, updateEventObject, userId);
+			// When
+			var result = await _eventService.UpdateEventAsync(eventId, updateEventObject, userId);
 
             // Then
             Assert.IsTrue(result.Succeeded);
@@ -483,7 +483,7 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("44494479-076b-47e1-8004-399a5aa58156");
             var updateEventObject = new UpdateEventObject("Updated Title", "Updated Description", DateTime.Now, DateTime.Now.AddHours(1),
-                                                          new Location(0, 0), 50.0m, 1, 10, []);
+                                                          new Location(0, 0), 50.0m, 1, 10, [], null);
             _mockEventRepository
                 .Setup(r => r.Query())
                 .Returns(new TestAsyncEnumerable<Event>([]));

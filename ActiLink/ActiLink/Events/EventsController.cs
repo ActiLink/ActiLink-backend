@@ -49,7 +49,7 @@ namespace ActiLink.Events
                     return Unauthorized("User ID not found in token");
                 }
 
-                var createEventObject = _mapper.Map<CreateEventObject>(
+				var createEventObject = _mapper.Map<CreateEventObject>(
                     newEventDto,
                     opts => opts.Items["OrganizerId"] = userIdFromToken);
                 _logger.LogInformation("Creating event with details: {EventDetails}", createEventObject);
@@ -98,9 +98,9 @@ namespace ActiLink.Events
                     return Unauthorized("User ID not found in token");
                 }
 
-                var result = await _eventService.UpdateEventAsync(id,
-                                                                  _mapper.Map<UpdateEventObject>(updateEventDto),
-                                                                  userIdFromToken);
+				var result = await _eventService.UpdateEventAsync(id,
+                    _mapper.Map<UpdateEventObject>(updateEventDto),
+                    userIdFromToken);
 
                 if (!result.Succeeded)
                 {

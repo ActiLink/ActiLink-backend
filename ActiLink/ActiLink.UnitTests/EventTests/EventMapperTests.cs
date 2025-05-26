@@ -6,29 +6,46 @@ using ActiLink.Hobbies;
 using ActiLink.Hobbies.DTOs;
 using ActiLink.Organizers.DTOs;
 using ActiLink.Organizers.Infrastructure;
+using ActiLink.Organizers.BusinessClients;
 using ActiLink.Organizers.Users;
+using ActiLink.Venues;
 using ActiLink.Shared.Model;
 using AutoMapper;
+using ActiLink.Venues.DTOs;
+using ActiLink.Organizers.BusinessClients.DTOs;
 
 namespace ActiLink.UnitTests.EventTests
 {
     [TestClass]
     public class EventMapperTests
     {
-        private Mapper _mapper = null!;
+		private Mapper _mapper = null!;
+		private BusinessClient _venueOwner = null!;
+		private Venue _testVenue = null!;
+		private Guid _venueGuid = new Guid("3F2504E0-4F89-41D3-9A0C-0305E82C3301");
+		private string _venueId = "3F2504E0-4F89-41D3-9A0C-0305E82C3301";
 
-        [TestInitialize]
+
+		[TestInitialize]
         public void Setup()
         {
             _mapper = new Mapper(new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile(new EventProfile());
                 cfg.AddProfile(new OrganizerProfile());
-            }
-                ));
-        }
+				cfg.CreateMap<Venue, VenueDto>()
+			        .ForMember(dest => dest.Events, opt => opt.Ignore());
 
-        [TestMethod]
+				cfg.CreateMap<BusinessClient, VenueOwnerDto>();
+			}
+			));
+			_venueOwner = new BusinessClient("VenueOwner", "venue@example.com","123456789") { Id = "VenueOwnerId" };
+			_testVenue = new Venue(_venueOwner, "Test Venue", "Test venue description", new Location(50.0, 20.0), "123 Test Street");
+			typeof(Venue).GetProperty("Id")?.SetValue(_testVenue, _venueGuid);
+
+		}
+
+		[TestMethod]
         public void MapCreateEventObjectToEvent_ShouldMapCorrectly()
         {
             // Given
@@ -41,18 +58,21 @@ namespace ActiLink.UnitTests.EventTests
             var price = 100.00m;
             var minUsers = 5;
             var maxUsers = 10;
-            var organizer = new User("TestUser", "test@example.com") { Id = userId };
+			var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var hobbyNames = new List<string>();
 
-            var ceoToMap = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
-            var expectedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
+			var ceoToMap = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, Guid.Parse(_venueId));
+			var expectedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, [], _testVenue);
 
+			// When
+			var mappedEvent = _mapper.Map<Event>(ceoToMap, opts =>
+			{
+				opts.Items["Organizer"] = organizer;
+				opts.Items["Venue"] = _testVenue;
+			});
 
-            // When
-            var mappedEvent = _mapper.Map<Event>(ceoToMap, opts => opts.Items["Organizer"] = organizer);
-
-            // Then
-            Assert.IsNotNull(mappedEvent);
+			// Then
+			Assert.IsNotNull(mappedEvent);
 #pragma warning disable MSTEST0032 // Assertion condition is always true
             Assert.IsNotNull(mappedEvent.Organizer);
 #pragma warning restore MSTEST0032 // Assertion condition is always true
@@ -63,9 +83,18 @@ namespace ActiLink.UnitTests.EventTests
             Assert.AreEqual(expectedEvent.Price, mappedEvent.Price);
             Assert.AreEqual(expectedEvent.MinUsers, mappedEvent.MinUsers);
             Assert.AreEqual(expectedEvent.MaxUsers, mappedEvent.MaxUsers);
-        }
 
-        [TestMethod]
+			Assert.IsNotNull(mappedEvent.Venue);
+			Assert.AreEqual(_venueGuid, mappedEvent.Venue.Id);
+			Assert.AreEqual(_testVenue.Name, mappedEvent.Venue.Name);
+			Assert.AreEqual(_testVenue.Description, mappedEvent.Venue.Description);
+			Assert.AreEqual(_testVenue.Address, mappedEvent.Venue.Address);
+			Assert.AreEqual(_testVenue.Location.Latitude, mappedEvent.Venue.Location.Latitude);
+			Assert.AreEqual(_testVenue.Location.Longitude, mappedEvent.Venue.Location.Longitude);
+
+		}
+
+		[TestMethod]
         public void MapNewEventDtoToCreateEventObject_ShouldMapCorrectly()
         {
             // Given
@@ -81,15 +110,15 @@ namespace ActiLink.UnitTests.EventTests
             var hobbyNames = new List<string>();
             var hobbies = hobbyNames.Select(n => new HobbyDto(n));
 
-            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
-            var expectedCeo = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+			var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, _venueGuid);
+			var expectedCeo = new CreateEventObject(userId, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, _venueGuid);
 
 
-            // When
-            var mappedCeo = _mapper.Map<CreateEventObject>(newEventDto, opts => opts.Items["OrganizerId"] = userId);
+			// When
+			var mappedCeo = _mapper.Map<CreateEventObject>(newEventDto, opts => opts.Items["OrganizerId"] = userId);
 
-            // Then
-            Assert.IsNotNull(mappedCeo);
+			// Then
+			Assert.IsNotNull(mappedCeo);
             Assert.AreEqual(expectedCeo.OrganizerId, mappedCeo.OrganizerId);
             Assert.AreEqual(expectedCeo.StartTime, mappedCeo.StartTime);
             Assert.AreEqual(expectedCeo.EndTime, mappedCeo.EndTime);
@@ -158,11 +187,11 @@ namespace ActiLink.UnitTests.EventTests
             var hobbyNames = new List<string> { new("Hobby1") };
             var hobbies = hobbyNames.Select(n => new HobbyDto(n));
 
-            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
-            var expectedUpdateObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+			var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, _venueGuid);
+			var expectedUpdateObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, _venueGuid);
 
-            // When
-            var mappedUpdateObject = _mapper.Map<UpdateEventObject>(updateEventDto, opts => opts.Items["EventId"] = eventId);
+			// When
+			var mappedUpdateObject = _mapper.Map<UpdateEventObject>(updateEventDto, opts => opts.Items["EventId"] = eventId);
 
             // Then
             Assert.IsNotNull(mappedUpdateObject);
@@ -202,7 +231,7 @@ namespace ActiLink.UnitTests.EventTests
                                          new Location(0, 0), 50.0m, 2, 8, []);
             Utils.SetupEventGuid(existingEvent, eventId);
 
-            var updateEventObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames);
+            var updateEventObject = new UpdateEventObject(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbyNames, null);
 
             // When
             _mapper.Map(updateEventObject, existingEvent, opts => opts.Items["Hobbies"] = hobbies);

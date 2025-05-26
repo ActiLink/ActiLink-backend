@@ -85,7 +85,7 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 30_000;
             var hobbies = new List<HobbyDto>();
 
-            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, null);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
@@ -143,7 +143,7 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 30_000;
             var hobbies = new List<HobbyDto>();
 
-            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, null);
 
             var errors = new List<string> { "Failed to create event" };
             var serviceResult = GenericServiceResult<Event>.Failure(errors);
@@ -345,7 +345,7 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 50;
             var hobbies = new List<HobbyDto>();
 
-            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
+            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, null);
             var organizer = new User("TestUser", "test@example.com") { Id = userId };
             var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var updatedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
@@ -392,7 +392,7 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
-                new Location(0, 0), 50m, 1, 10, []);
+                new Location(0, 0), 50m, 1, 10, [], null);
 
             var errors = new List<string> { "You are not authorized to update this event." };
             var serviceResult = GenericServiceResult<Event>.Failure(errors, ErrorCode.Forbidden);
@@ -424,7 +424,7 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
-                new Location(0, 0), 50m, 1, 10, []);
+                new Location(0, 0), 50m, 1, 10, [], null);
 
             var errors = new List<string> { "Event not found" };
             var serviceResult = GenericServiceResult<Event>.Failure(errors, ErrorCode.NotFound);
@@ -456,7 +456,7 @@ namespace ActiLink.UnitTests.EventTests
             var userId = "TestUserId";
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
-                new Location(0, 0), 50m, 1, 10, []);
+                new Location(0, 0), 50m, 1, 10, [], null);
 
             var errors = new List<string> { "Validation error" };
             var serviceResult = GenericServiceResult<Event>.Failure(errors);
@@ -605,7 +605,7 @@ namespace ActiLink.UnitTests.EventTests
             // Given
             var eventId = new Guid("030B4A82-1B7C-11CF-9D53-00AA003C9CB6");
             var updateEventDto = new UpdateEventDto("Title", "Description", DateTime.Now, DateTime.Now.AddHours(2),
-                new Location(0, 0), 50m, 1, 10, []);
+                new Location(0, 0), 50m, 1, 10, [], null);
 
             // Setting up empty claims (no user ID)
             var claims = new List<Claim>();
@@ -638,7 +638,7 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 30_000;
             var hobbies = new List<HobbyDto>();
 
-            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
+            var newEventDto = new NewEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, null);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
             var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var createdEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);
@@ -696,7 +696,7 @@ namespace ActiLink.UnitTests.EventTests
             var maxUsers = 50;
             var hobbies = new List<HobbyDto>();
 
-            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies);
+            var updateEventDto = new UpdateEventDto(eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, hobbies, null);
             var organizer = new BusinessClient("TestUser", "test@example.com", "PL123456789") { Id = userId };
             var organizerDto = new OrganizerDto(organizer.Id, organizer.UserName!);
             var updatedEvent = new Event(organizer, eventTitle, eventDescription, startTime, endTime, location, price, minUsers, maxUsers, []);

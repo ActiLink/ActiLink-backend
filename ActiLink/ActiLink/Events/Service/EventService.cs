@@ -1,10 +1,13 @@
 ﻿using ActiLink.Events.Infrastructure;
 using ActiLink.Hobbies.Infrastructure;
+using ActiLink.Organizers;
 using ActiLink.Organizers.Users.Infrastructure;
 using ActiLink.Shared.Repositories;
 using ActiLink.Shared.ServiceUtils;
+using ActiLink.Venues;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.ConstrainedExecution;
 
 
 namespace ActiLink.Events.Service
@@ -40,12 +43,21 @@ namespace ActiLink.Events.Service
             if (hobbies.Count != ceo.RelatedHobbyNames.Count())
                 return GenericServiceResult<Event>.Failure(["Some hobbies not found"], ErrorCode.ValidationError);
 
-            // Map CreateEventObject to Event
-            var newEvent = _mapper.Map<Event>(ceo, opts =>
+            Venue? venue = null;
+			if (ceo.VenueId is not null)
+			{
+				venue = await _unitOfWork.VenueRepository.GetByIdAsync(ceo.VenueId);
+				if (venue is null)
+					return GenericServiceResult<Event>.Failure(["Venue not found"], ErrorCode.ValidationError);
+			}
+
+			// Map CreateEventObject to Event
+			var newEvent = _mapper.Map<Event>(ceo, opts =>
             {
                 opts.Items["Organizer"] = organizer;
                 opts.Items["Hobbies"] = hobbies;
-            });
+                opts.Items["Venue"] = venue;
+			});
 
             // Add entity to the repository
             await _unitOfWork.EventRepository.AddAsync(newEvent);
@@ -79,18 +91,24 @@ namespace ActiLink.Events.Service
             if (hobbies.Count != eventToUpdate.RelatedHobbyNames.Count())
                 return GenericServiceResult<Event>.Failure(["Some hobbies not found"], ErrorCode.ValidationError);
 
-            // Map updated properties
-            _mapper.Map(
-               eventToUpdate,
-               existingEvent,
-               opts =>
-               {
-                   opts.Items["Hobbies"] = hobbies;
-               });
+			Venue? venue = null;
+			if (eventToUpdate.VenueId is not null)
+			{
+				venue = await _unitOfWork.VenueRepository.GetByIdAsync(eventToUpdate.VenueId);
+				if (venue is null)
+					return GenericServiceResult<Event>.Failure(["Venue not found"], ErrorCode.ValidationError);
+			}
+
+			// Map UpdateEventObject to Event
+			_mapper.Map(eventToUpdate, existingEvent, opts =>
+			{
+				opts.Items["Hobbies"] = hobbies;
+				opts.Items["Venue"] = venue;
+			});
 
 
-            // Update entity in the repository
-            _unitOfWork.EventRepository.Update(existingEvent);
+			// Update entity in the repository
+			_unitOfWork.EventRepository.Update(existingEvent);
             var result = await _unitOfWork.SaveChangesAsync();
 
             // Check if the event was updated successfully

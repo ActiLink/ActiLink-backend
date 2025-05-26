@@ -31,6 +31,7 @@ namespace ActiLink.Venues.Infrastructure
                 .ForMember(dest => dest.Events, opt => opt.Ignore());
 
             CreateMap<Venue, VenueDto>();
+            CreateMap<Venue, ReducedVenueDto>();
 
             CreateMap<UpdateVenueDto, UpdateVenueObject>();
             CreateMap<UpdateVenueObject, Venue>()
