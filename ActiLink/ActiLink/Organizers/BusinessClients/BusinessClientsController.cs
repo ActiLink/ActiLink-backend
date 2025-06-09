@@ -2,6 +2,7 @@
 using ActiLink.Organizers.BusinessClients.DTOs;
 using ActiLink.Organizers.BusinessClients.Service;
 using ActiLink.Organizers.DTOs;
+using ActiLink.Organizers.Users.DTOs;
 using ActiLink.Shared.ServiceUtils;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -200,6 +201,28 @@ namespace ActiLink.Organizers.BusinessClients
                 _logger.LogError(ex, "An unexpected error occurred while updating the business client");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
+        }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMeAsync()
+        {
+            var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdFromToken is null)
+            {
+                _logger.LogWarning("User ID not found in token");
+                return Unauthorized("User ID not found in token");
+            }
+
+            var user = await _businessClientService.GetBusinessClientByIdAsync(userIdFromToken);
+
+            if (user is null)
+            {
+                _logger.LogWarning("BusinessClient with ID {UserId} not found", userIdFromToken);
+                return NotFound();
+            }
+
+            _logger.LogInformation("BusinessClient with ID {UserId} found", userIdFromToken);
+            return Ok(_mapper.Map<BusinessClientDto>(user));
         }
 
     }

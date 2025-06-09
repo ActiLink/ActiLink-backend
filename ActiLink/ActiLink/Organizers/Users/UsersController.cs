@@ -213,5 +213,26 @@ namespace ActiLink.Organizers.Users
             }
         }
 
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMeAsync()
+        {
+            var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdFromToken is null)
+            {
+                _logger.LogWarning("User ID not found in token");
+                return Unauthorized("User ID not found in token");
+            }
+
+            var user = await _userService.GetUserByIdAsync(userIdFromToken);
+
+            if (user is null)
+            {
+                _logger.LogWarning("User with ID {UserId} not found", userIdFromToken);
+                return NotFound();
+            }
+
+            _logger.LogInformation("User with ID {UserId} found", userIdFromToken);
+            return Ok(_mapper.Map<UserDetailsDto>(user));
+        }
     }
 }
